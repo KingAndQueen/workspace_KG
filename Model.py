@@ -63,7 +63,7 @@ class seq2seq():
 
         def speaker_atten(encoder_state, attention_states, ans_emb,speaker_embedding,model_type='train'):
             with tf.variable_scope('speaker'):
-                num_heads = 3
+                num_heads = 1
                 batch_size = ans_emb[0].get_shape()[0]
                 attn_length = attention_states.get_shape()[1].value
                 attn_size = attention_states.get_shape()[2].value
