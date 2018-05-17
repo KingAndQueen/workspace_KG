@@ -4,7 +4,7 @@ import nltk
 import re
 import pdb
 unlegal='[^A-Za-z0-9\ \']'
-
+NAME_MAP_ID = {'Chandler': 0, 'Joey': 1, 'Monica': 2, 'Phoebe': 3, 'Rachel': 4, 'Ross': 5, 'others': 6, 'pad': 7}
 class Vocab():
     def __init__(self, word2vec=None, embed_size=0):
         self.word2idx = {'<eos>': 0, '<go>': 1, '<pad>': 2, '<unk>': 3}
@@ -66,7 +66,8 @@ def read_file(data_path, vocabulary, sentence_size):
         # lines = lines.strip()[2:-5]
         if len(lines) > 2:
             name = lines[:lines.index(':')]
-
+            if name not in ['Chandler', 'Joey', 'Monica', 'Phoebe', 'Rachel', 'Ross']:
+                name = 'others'
             sentence = lines[lines.index(':') + 1:]
             sentence = re.sub(unlegal, ' ', sentence)
             sentence = sentence.lower()
@@ -99,6 +100,7 @@ def read_file(data_path, vocabulary, sentence_size):
                 else:
                     weight.append(1.0)
             scene['weight'] = weight
+            scene['speaker']=NAME_MAP_ID[answer]
             scenes.append(scene)
             scene = {}
 
