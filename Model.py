@@ -148,7 +148,7 @@ class seq2seq():
                                                      shape=[self._embedding_size / 2],
                                                      initializer=tf.zeros_initializer)
                         inp = tf.nn.xw_plus_b(inp, weights_emb, biases_emb)
-
+                        inp = tf.concat([inp, speaker_embedding], 1)
                         inp = linear([inp] + attns, self._embedding_size, True)
                         output, state = cell_de(inp, state)
                         # pdb.set_trace()
