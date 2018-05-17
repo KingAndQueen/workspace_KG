@@ -52,7 +52,7 @@ def train_model(sess, model, train_data, valid_data):
 
 
             for eval_data in data_input_eval:
-                eval_loss_, _, summary_eval = model.step(sess, eval_data)
+                eval_loss_, _ = model.step(sess, eval_data)
                 eval_losses.append(eval_loss_)
             eval_loss=float(sum(eval_losses)) / len(eval_losses)
 
