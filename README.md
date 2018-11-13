@@ -1,3 +1,4 @@
 # workspace_KG
-Dialogue with Image
+Dialogue with Image.
+
 This project is under processing.
