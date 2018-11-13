@@ -98,7 +98,7 @@ def map_time(times, sentences,video_file_path,output_path):
 
 
 if __name__ == "__main__":
-    video_file_path = '/Users/young/Research/workspace_KG/data/video/S01E01.mp4'
+    video_file_path = './data/video/S01E01.mp4'
     # pic_video(video_file_path, 32)
     # pdb.set_trace()
     srt_file_path='./data/subtitle/Friends.S01E01.The.One.Where.Monica.Gets.A.New.Roommate.DVDRip.AC3.3.2ch.JOG.srt'
