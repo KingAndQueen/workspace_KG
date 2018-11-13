@@ -8,6 +8,9 @@ from datetime import datetime
 # unlegal='[^A-Za-z\ \']'
 
 def pic_video(file_path, time_ss):
+    if not os.path.exists(file_path):
+        print ('data_dir is not exist!')
+        return None
     a, b, c = os.popen3("ffmpeg -i " + file_path)
     # pdb.set_trace()
     out = c.read()
@@ -72,6 +75,7 @@ def read_srt(data_dir):
                 sentence=lines[no+1].strip()
                 sentences.append(sentence)
     if len(times)==len(sentences):
+        print('length of frames:',len(times))
         return times,sentences
     else:
         pdb.set_trace()
