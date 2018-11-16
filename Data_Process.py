@@ -2,10 +2,12 @@ import os, sys
 from PIL import Image
 import pdb
 # open a pipe from a command
-import re
+import tensorflow as tf
 import time
+import numpy as np
 from datetime import datetime
 # unlegal='[^A-Za-z\ \']'
+import pickle
 
 def pic_video(file_path, time_ss):
     if not os.path.exists(file_path):
@@ -108,3 +110,101 @@ if __name__ == "__main__":
     srt_file_path='./data/subtitle/Friends.S01E01.The.One.Where.Monica.Gets.A.New.Roommate.DVDRip.AC3.3.2ch.JOG.srt'
     times,sentences=read_srt(srt_file_path)
     map_time(times,sentences,video_file_path,'./data/frame/S01E01.txt')
+
+
+
+class Vocab():
+    def __init__(self, word2vec=None, embed_size=0):
+        self.word2idx = {'<eos>': 0, '<go>': 1, '<pad>': 2, '<unk>': 3}
+        self.idx2word = {0: '<eos>', 1: '<go>', 2: '<pad>', 3: '<unk>'}
+        self.embed_size = embed_size
+
+    def add_vocab(self, words):
+        if isinstance(words, (list, np.ndarray)):
+            for word in words:
+                if word not in self.word2idx:
+                    index = len(self.word2idx)
+                    self.word2idx[word] = index
+                    self.idx2word[index] = word
+        else:
+            if words not in self.word2idx:
+                # print('adding new word',words)
+                index = len(self.word2idx)
+                self.word2idx[words] = index
+                self.idx2word[index] = words
+
+    def word_to_index(self, word):
+
+        self.add_vocab(word)
+        return self.word2idx[word]
+        # for rl
+        # if word in self.word2idx:
+        #     return self.word2idx[word]
+        # else:
+        #     return self.word2idx['<unk>']
+
+    def index_to_word(self, index):
+        if index in self.idx2word:
+            return self.idx2word[index]
+        else:
+            return '<unk>'
+
+    @property
+    def vocab_size(self):
+        return len(self.idx2word)
+
+
+def read_txt_file_1E(data_path, vocabulary, sentence_size):
+    f = open(data_path, 'r')
+    sents=f.readlines()
+    f.close()
+    return sents
+
+def read_pic_file_1E(data_path):
+    files_name = os.listdir(data_path)
+    files = [os.path.join(data_path, f) for f in files_name]
+    sec_map_pic={}
+    for no,file in enumerate(files):
+        image_raw = tf.gfile.FastGFile(file, 'rb').read()
+        img = tf.image.decode_jpeg(image_raw)
+        file_name=files_name[no]
+        sec=file_name[file_name.rindex('_'):file_name.rindex('.')]
+        sec_map_pic[sec]=img
+    return sec_map_pic
+
+
+def get_input_output_data(data_path, vocabulary,sentence_size,batch_size):
+    files_name = os.listdir(data_path)
+    data_path_txt=[file_name for file_name in files_name if 'txt' in file_name ]
+    txt=read_txt_file_1E(data_path,vocabulary,sentence_size)
+    pic=read_pic_file_1E(data_path_txt)
+    input_data_txt=txt
+    _=input_data_txt.pop()
+    output_data_txt = txt
+    _=output_data_txt.pop(0)
+    pic.keys()
+    input_data_pic=pic
+    key1=max(input_data_pic.keys())
+    _ = input_data_pic.pop(key1)
+    output_data_pic=pic
+    key_1=min(input_data_pic.keys())
+    _ = output_data_pic.pop(key_1)
+    return txt,pic
+
+def store_vocab(vocab, data_path):
+    data_path = data_path + 'vocab.pkl'
+    f = open(data_path, 'wb')
+    pickle.dump(vocab, f)
+    f.close()
+
+
+def get_vocab(data_path):
+    data_path = data_path + 'vocab.pkl'
+    if os.path.exists(data_path):
+        f = open(data_path, 'rb')
+        vocab = pickle.load(f)
+        f.close()
+    else:
+        print('<<<<<<< vocab is not exist >>>>>>>')
+        vocab = None
+    return vocab
