@@ -158,7 +158,14 @@ def read_txt_file_1E(data_path, vocabulary, sentence_size):
     f = open(data_path, 'r')
     sents=f.readlines()
     f.close()
-    return sents
+    sents_idx=[]
+    for sent in sents:
+        sent_idx=[]
+        for word in sent:
+            idx=vocabulary.word_to_index(word)
+            sent_idx.append(idx)
+        sents_idx.append(sent_idx)
+    return sents_idx
 
 def read_pic_file_1E(data_path):
     files_name = os.listdir(data_path)
@@ -173,7 +180,7 @@ def read_pic_file_1E(data_path):
     return sec_map_pic
 
 
-def get_input_output_data(data_path, vocabulary,sentence_size,batch_size):
+def get_input_output_data(data_path, vocabulary,sentence_size):
     files_name = os.listdir(data_path)
     data_path_txt=[file_name for file_name in files_name if 'txt' in file_name ]
     txt=read_txt_file_1E(data_path,vocabulary,sentence_size)
@@ -189,7 +196,17 @@ def get_input_output_data(data_path, vocabulary,sentence_size,batch_size):
     output_data_pic=pic
     key_1=min(input_data_pic.keys())
     _ = output_data_pic.pop(key_1)
-    return txt,pic
+    return input_data_txt,output_data_txt,input_data_pic,output_data_pic
+
+def vectorize(input_data_txt,output_data_txt,input_data_pic,output_data_pic,vocab,batch_size):
+    batches_data=[]
+    for _ in range(0, len(input_data_txt), batch_size):
+        input_batch_txt=input_data_txt[_:_+batch_size]
+        output_batch_txt=output_data_txt[_:_+batch_size]
+        input_batch_pic=input_data_pic[_:_+batch_size]
+        output_batch_pic=output_data_pic[_:_+batch_size]
+        batches_data.append([input_batch_txt,output_batch_txt,input_batch_pic,output_batch_pic])
+    return batches_data
 
 def store_vocab(vocab, data_path):
     data_path = data_path + 'vocab.pkl'

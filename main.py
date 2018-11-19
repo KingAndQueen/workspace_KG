@@ -3,11 +3,11 @@ import Model
 import tensorflow as tf
 import numpy as np
 import pdb
-import Data_Utilize
+import Data_Process
 import Model
 import random
 from math import exp
-tf.flags.DEFINE_float("learn_rate", 0.0001, "Learning rate for SGD.")
+tf.flags.DEFINE_float("learn_rate", 0.001, "Learning rate for SGD.")
 # tf.flags.DEFINE_float("anneal_rate", 25, "Number of epochs between halving the learnign rate.")
 # tf.flags.DEFINE_float("anneal_stop_epoch", 50, "Epoch number to end annealed lr schedule.")
 # tf.flags.DEFINE_float("learning_rate_decay_factor", 0.5, 'if loss not decrease, multiple the lr with factor')
@@ -32,8 +32,6 @@ config = tf.flags.FLAGS
 def train_model(sess, model, train_data, valid_data):
     # train_data, eval_data = model_selection.train_test_split(train_data, test_size=0.2)
     current_step = 1
-    data_input_train = model.get_batch(train_data)
-    data_input_eval = model.get_batch(valid_data)
     train_losses = []
 
     epoch=config.epochs
@@ -41,8 +39,8 @@ def train_model(sess, model, train_data, valid_data):
     eval_losses_all = []
     while current_step <= epoch:
         #  print ('current_step:',current_step)
-        for i in range(len(data_input_train)):
-            train_loss_, _ = model.step(sess, random.choice(data_input_train),step_type='train')
+        for i in range(len(train_data)):
+            train_loss_, _ = model.step(sess, random.choice(train_data),step_type='train')
 
         if current_step % config.check_epoch == 0:
             eval_losses = []
@@ -52,15 +50,9 @@ def train_model(sess, model, train_data, valid_data):
             print('training loss:', train_loss_)
 
 
-            for eval_data in data_input_eval:
-                eval_loss_, _ = model.step(sess, eval_data)
-                eval_losses.append(eval_loss_)
-            eval_loss=float(sum(eval_losses)) / len(eval_losses)
 
+            eval_loss, _ = model.step(sess, valid_data)
             print('evaluation loss:', eval_loss)
-            if eval_loss<300 and train_loss_ <300:
-                print('train perplex:',exp(train_loss_))
-                print('evaluation perplex:',exp(eval_loss))
 
             # model.saver.save(sess, checkpoint_path, global_step=current_step)
             # if len(eval_losses_all) > 0 and eval_loss > eval_losses_all[-1]:
@@ -75,33 +67,32 @@ def train_model(sess, model, train_data, valid_data):
     print(' current step %d finished' % current_step)
 
 def test_model(sess, model, test_data, vocab):
-    data_input_test = model.get_batch(test_data)
     test_loss = 0.0
     predicts = []
 
-    for batch_id, data_test in enumerate(data_input_test):
+    for batch_id, data_test in enumerate(test_data):
         loss, predict = model.step(sess, data_test, step_type='test')
         test_loss += loss
         predicts.append(predict)
 
-    test_loss=test_loss / len(data_input_test)
+    test_loss=test_loss / len(test_data)
     print('test total loss:', test_loss)
-    if test_loss<300:
-        print ('test perplex:',exp(test_loss))
+
 
 
 def main(_):
-    vocab = Data_Utilize.Vocab()
-    train_data, valid_data, test_data = Data_Utilize.get_data(config.data_dir, vocab, config.sentence_size)
+    vocab = Data_Process.Vocab()
+    input_data_txt, output_data_txt, input_data_pic, output_data_pic = Data_Process.get_input_output_data(config.data_dir, vocab, config.sentence_size)
     # initiall model from new parameters or checkpoints
+    batches_data=Data_Process.vectorize(input_data_txt,output_data_txt,input_data_pic,output_data_pic,vocab,config.batch_size)
     print('data processed,vocab size:', vocab.vocab_size)
+    train_data,valid_test_data=model_selection.train_test_split(batches_data,0.2)
+    valid_data,test_data=model_selection.train_test_split(valid_test_data,0.5)
+
     sess = tf.Session()
-    print(' train data set %d, valid data set %d, test data set %d' % (
-          len(train_data), len(valid_data), len(test_data)))
 
     if config.model_type == 'train':
         print('establish the model...')
-
         model = Model.seq2seq(config, vocab)
         sess.run(tf.global_variables_initializer())
         train_model(sess, model, train_data, valid_data)
