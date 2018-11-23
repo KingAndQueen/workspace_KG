@@ -169,33 +169,36 @@ def read_txt_file_1E(data_path, vocabulary, sentence_size):
 
 def read_pic_file_1E(data_path):
     files_name = os.listdir(data_path)
-    files = [os.path.join(data_path, f) for f in files_name]
+    files = [os.path.join(data_path, f) for f in files_name if 'txt' not in f]
     sec_map_pic={}
+    pic_output=[]
     for no,file in enumerate(files):
         image_raw = tf.gfile.FastGFile(file, 'rb').read()
-        img = tf.image.decode_jpeg(image_raw)
-        file_name=files_name[no]
-        sec=file_name[file_name.rindex('_'):file_name.rindex('.')]
+        img = tf.image.decode_jpeg(image_raw,channels=3)
+        # pdb.set_trace()
+        file_name=os.path.basename(file)
+        sec=int(file_name[file_name.rindex('_')+1:file_name.rindex('.')])
         sec_map_pic[sec]=img
-    return sec_map_pic
+    for key in sorted(sec_map_pic.keys()):
+        pic_output.append(sec_map_pic[key])
+    return pic_output
 
 
 def get_input_output_data(data_path, vocabulary,sentence_size):
     files_name = os.listdir(data_path)
     data_path_txt=[file_name for file_name in files_name if 'txt' in file_name ]
-    txt=read_txt_file_1E(data_path,vocabulary,sentence_size)
-    pic=read_pic_file_1E(data_path_txt)
+    txt=read_txt_file_1E(data_path+data_path_txt[0],vocabulary,sentence_size)
+    pic=read_pic_file_1E(data_path)
     input_data_txt=txt
     _=input_data_txt.pop()
     output_data_txt = txt
     _=output_data_txt.pop(0)
-    pic.keys()
+
     input_data_pic=pic
-    key1=max(input_data_pic.keys())
-    _ = input_data_pic.pop(key1)
+    _=input_data_pic.pop()
     output_data_pic=pic
-    key_1=min(input_data_pic.keys())
-    _ = output_data_pic.pop(key_1)
+    _=output_data_pic.pop(0)
+
     return input_data_txt,output_data_txt,input_data_pic,output_data_pic
 
 def vectorize(input_data_txt,output_data_txt,input_data_pic,output_data_pic,vocab,batch_size):

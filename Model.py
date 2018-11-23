@@ -9,7 +9,7 @@ from tensorflow.python.util import nest
 import pdb
 import convolution
 
-class seq2seq():
+class seq_pic2seq_pic():
     def __init__(self, config, vocab):
         self._vocab = vocab
         self._batch_size = config.batch_size
@@ -19,15 +19,15 @@ class seq2seq():
         # self._opt = tf.train.GradientDescentOptimizer(learning_rate=self._learn_rate)
         self._opt = tf.train.AdamOptimizer(learning_rate=self._learn_rate)
 
-        self._embedding_size = config.neurons
+        self._embedding_size = config.recurrent_dim
         self._layers = config.layers
         self.img_size_x=config.img_size_x
         self.img_size_y=config.img_size_y
-        self._gf_dim=config._gf_dim
+        # self._gf_dim=config.gf_dim
         self._max_grad_norm = config.max_grad_norm
         self._cov_size=config.convolution_dim
+        self._noise_dim = config.noise_dim
         self._build_inputs()
-        self.noise_dim=config.noise_dim
 
         self.g_bn0 = convolution.batch_norm(name='g_bn0')
         self.g_bn1 = convolution.batch_norm(name='g_bn1')
@@ -36,7 +36,7 @@ class seq2seq():
 
         with tf.variable_scope('embedding'):
             self._word_embedding = tf.get_variable(name='embedding_word',
-                                                   shape=[self._vocab.vocab_size, config.neurons])
+                                                   shape=[self._vocab.vocab_size, config.recurrent_dim])
             _Question = tf.unstack(self._question, axis=1)
             question_emb = [tf.nn.embedding_lookup(self._word_embedding, word) for word in _Question]
             _Response = tf.unstack(self._response, axis=1)
@@ -45,7 +45,7 @@ class seq2seq():
         def _encoding_txt_sentence(person_emb, name='', GPU_id=0):
             # with tf.device('/device:GPU:%d' %GPU_id):
             with tf.variable_scope('encoding_role_' + name):
-                encoding_single_layer = tf.nn.rnn_cell.GRUCell(config.neurons, reuse=tf.get_variable_scope().reuse)
+                encoding_single_layer = tf.nn.rnn_cell.GRUCell(config.recurrent_dim, reuse=tf.get_variable_scope().reuse)
                 encoding_cell = tf.nn.rnn_cell.MultiRNNCell([encoding_single_layer] * config.layers)
                 encoding_cell = tf.contrib.rnn.DropoutWrapper(encoding_cell, 0.8, 0.8, 0.8)
                 # for future test
@@ -221,13 +221,13 @@ class seq2seq():
             h0 = tf.reshape(z_, [-1, s16, s16, self._cov_size * 8])
             h0 = tf.nn.relu(self.g_bn0(h0))
 
-            h1 = deconv2d(h0, [self._batch_size, s8, s8, self._gf_dim * 4], name='g_h1')
+            h1 = deconv2d(h0, [self._batch_size, s8, s8, self._cov_size * 4], name='g_h1')
             h1 = tf.nn.relu(self.g_bn1(h1))
 
-            h2 = deconv2d(h1, [self._batch_size, s4, s4, self._gf_dim * 2], name='g_h2')
+            h2 = deconv2d(h1, [self._batch_size, s4, s4, self._cov_size * 2], name='g_h2')
             h2 = tf.nn.relu(self.g_bn2(h2))
 
-            h3 = deconv2d(h2, [self._batch_size, s2, s2, self._gf_dim * 1], name='g_h3')
+            h3 = deconv2d(h2, [self._batch_size, s2, s2, self._cov_size * 1], name='g_h3')
             h3 = tf.nn.relu(self.g_bn3(h3))
 
             h4 = deconv2d(h3, [self._batch_size, s, s, 3], name='g_h4')
@@ -286,7 +286,7 @@ class seq2seq():
         self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
         self._input_pic= tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,3], name='frame_input')
         self._output_pic=tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,3], name='frame_output')
-        self._random_z=tf.placeholder(tf.float32,[self._batch_size,self.noise_dim],name='noise')
+        self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
     def get_batch(self, data_raw):
         # return a list of batches
