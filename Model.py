@@ -7,7 +7,7 @@ from tensorflow.python.ops import rnn
 from tensorflow.python.ops import rnn_cell_impl
 from tensorflow.python.util import nest
 import pdb
-
+import convolution
 
 class seq2seq():
     def __init__(self, config, vocab):
@@ -21,25 +21,28 @@ class seq2seq():
 
         self._embedding_size = config.neurons
         self._layers = config.layers
-        self.model_type = config.model_type
-
+        self.img_size_x=config.img_size_x
+        self.img_size_y=config.img_size_y
+        self._gf_dim=config._gf_dim
         self._max_grad_norm = config.max_grad_norm
+        self._cov_size=config.convolution_dim
         self._build_inputs()
+        self.noise_dim=config.noise_dim
 
+        self.g_bn0 = convolution.batch_norm(name='g_bn0')
+        self.g_bn1 = convolution.batch_norm(name='g_bn1')
+        self.g_bn2 = convolution.batch_norm(name='g_bn2')
+        self.g_bn3 = convolution.batch_norm(name='g_bn3')
 
         with tf.variable_scope('embedding'):
             self._word_embedding = tf.get_variable(name='embedding_word',
                                                    shape=[self._vocab.vocab_size, config.neurons])
-            self._name_embedding = tf.get_variable(name='embedding_name',
-                                                   shape=[7 + 1, 0.5*config.neurons])
-
-            speaker_embedding=embedding_ops.embedding_lookup(self._name_embedding, self._speaker)
             _Question = tf.unstack(self._question, axis=1)
-            Question_emb = [tf.nn.embedding_lookup(self._word_embedding, word) for word in _Question]
+            question_emb = [tf.nn.embedding_lookup(self._word_embedding, word) for word in _Question]
             _Response = tf.unstack(self._response, axis=1)
             response_emb = [tf.nn.embedding_lookup(self._word_embedding, word) for word in _Response]
 
-        def _encoding_roles(person_emb, name='', GPU_id=0):
+        def _encoding_txt_sentence(person_emb, name='', GPU_id=0):
             # with tf.device('/device:GPU:%d' %GPU_id):
             with tf.variable_scope('encoding_role_' + name):
                 encoding_single_layer = tf.nn.rnn_cell.GRUCell(config.neurons, reuse=tf.get_variable_scope().reuse)
@@ -58,10 +61,17 @@ class seq2seq():
                 attention_states = array_ops.concat(top_output, 1)
                 return  attention_states,state_fw
 
-        question_output, question_state = _encoding_roles(Question_emb,'question_bi-encode')  # monica_sate.shape=layers*[batch_size,neurons]
+        question_output, question_state = _encoding_txt_sentence(question_emb,'question_bi-encode')  # monica_sate.shape=layers*[batch_size,neurons]
 
+        def _encoding_pic_frame(frame,name='',GPU_id=0):
+            with tf.variable_scope('encoding_frame_' + name):
+                #resident net
+                resnet_output=convolution.resnet_v2_50(frame)
+                return resnet_output
 
-        def speaker_atten(encoder_state, attention_states, ans_emb,speaker_embedding,model_type='train'):
+        encoder_output=_encoding_pic_frame(self._input_pic)
+
+        def decoder_txt_atten(encoder_state, attention_states, ans_emb,model_type='train'):
             with tf.variable_scope('speaker'):
                 num_heads = 1
                 batch_size = ans_emb[0].get_shape()[0]
@@ -148,7 +158,7 @@ class seq2seq():
                                                      shape=[self._embedding_size / 2],
                                                      initializer=tf.zeros_initializer)
                         inp = tf.nn.xw_plus_b(inp, weights_emb, biases_emb)
-                        inp = tf.concat([inp, speaker_embedding], 1)
+                        #inp = tf.concat([inp, speaker_embedding], 1)
                         inp = linear([inp] + attns, self._embedding_size, True)
                         output, state = cell_de(inp, state)
                         # pdb.set_trace()
@@ -164,17 +174,81 @@ class seq2seq():
                 return outputs
         # pdb.set_trace()
 
-        response = speaker_atten(question_state, question_output, response_emb,speaker_embedding,self.model_type)
+        response_txt = decoder_txt_atten(question_state, question_output, response_emb,self.model_type)
 
-        with tf.variable_scope('loss_function'):
+
+        def deconv2d(input_, output_shape,k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02,name="deconv2d", with_w=False):
+            with tf.variable_scope(name):
+                # filter : [height, width, output_channels, in_channels]
+                w = tf.get_variable('w', [k_h, k_w, output_shape[-1], input_.get_shape()[-1]],
+                                    initializer=tf.random_normal_initializer(stddev=stddev))
+
+
+                deconv = tf.nn.conv2d_transpose(input_, w, output_shape=output_shape,
+                                                    strides=[1, d_h, d_w, 1])
+
+                biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
+                deconv = tf.reshape(tf.nn.bias_add(deconv, biases), deconv.get_shape())
+
+                if with_w:
+                    return deconv, w, biases
+                else:
+                    return deconv
+
+        def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
+            shape = input_.get_shape().as_list()
+
+            with tf.variable_scope(scope or "Linear"):
+                matrix = tf.get_variable("Matrix", [shape[1], output_size], tf.float32,
+                                         tf.random_normal_initializer(stddev=stddev))
+                bias = tf.get_variable("bias", [output_size],
+                                       initializer=tf.constant_initializer(bias_start))
+                if with_w:
+                    return tf.matmul(input_, matrix) + bias, matrix, bias
+                else:
+                    return tf.matmul(input_, matrix) + bias
+
+        def lrelu(x,leak=0.2, name="lrelu"):
+            return tf.maximum(x, leak * x)
+
+        with tf.variable_scope('decoder_pic'):
+            s = self.img_size_x
+            s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
+
+            reduced_text_embedding = lrelu(linear(question_output, self._embedding_size, 'g_embedding'))
+            z_concat = tf.concat(1, [self._random_z, reduced_text_embedding])
+            z_ = linear(z_concat, self._cov_size * 8 * s16 * s16, 'g_h0_lin')
+            h0 = tf.reshape(z_, [-1, s16, s16, self._cov_size * 8])
+            h0 = tf.nn.relu(self.g_bn0(h0))
+
+            h1 = deconv2d(h0, [self._batch_size, s8, s8, self._gf_dim * 4], name='g_h1')
+            h1 = tf.nn.relu(self.g_bn1(h1))
+
+            h2 = deconv2d(h1, [self._batch_size, s4, s4, self._gf_dim * 2], name='g_h2')
+            h2 = tf.nn.relu(self.g_bn2(h2))
+
+            h3 = deconv2d(h2, [self._batch_size, s2, s2, self._gf_dim * 1], name='g_h3')
+            h3 = tf.nn.relu(self.g_bn3(h3))
+
+            h4 = deconv2d(h3, [self._batch_size, s, s, 3], name='g_h4')
+
+            output_pic=tf.tanh(h4) / 2. + 0.5
+
+
+        with tf.variable_scope('loss_function_pic'):
+            cov_input=convolution.conv2d_same(self._output_pic)
+            cov_output=convolution.conv2d_same(output_pic)
+            pic_loss=tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(cov_input,cov_output),name='loss_compute')))
+
+        with tf.variable_scope('loss_function_txt'):
             # with tf.device('/device:GPU:1'):
             # Our targets are decoder inputs shifted by one.
             # targets = [self.decoder_inputs[i + 1]
             #           for i in xrange(len(self.decoder_inputs) - 1)]
-            _, labels = tf.split(self._response, [1, -1], 1)
-            labels = tf.concat([labels, _], axis=1)
+            _, labels = tf.split(self._response, [1, -1], 1) # sign 'go' for train decoder
+            labels = tf.concat([labels, _], axis=1) # remove 'go' to compute loss
 
-            cross_entropy_sentence = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=response,
+            cross_entropy_sentence = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=response_txt,
                                                                                     labels=labels,
                                                                                     name="cross_entropy_sents")
             cross_entropy_sentence = tf.multiply(cross_entropy_sentence, self._weight)  # batch_size * sents_size
@@ -182,16 +256,20 @@ class seq2seq():
             cross_entropy_sentence = tf.reduce_sum(cross_entropy_sentence, axis=1)
             weight_sum = tf.reduce_sum(self._weight, axis=1)
             cross_entropy_sentence = cross_entropy_sentence / weight_sum
-            cross_entropy_sentence_sum = tf.reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
-            self.loss=cross_entropy_sentence_sum
+            txt_loss = tf.reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
 
-        grads_and_vars=self._opt.compute_gradients(cross_entropy_sentence_sum)
+        all_loss=pic_loss + txt_loss
+        self.loss=all_loss
+        grads_and_vars=self._opt.compute_gradients(all_loss)
         # pdb.set_trace()
         grads_and_vars = [(tf.clip_by_norm(g, self._max_grad_norm), v) for g, v in grads_and_vars]
         grads_and_vars = [(self.add_gradient_noise(g), v) for g, v in grads_and_vars]
 
         self.train_op = self._opt.apply_gradients(grads_and_vars=grads_and_vars, name='train_op')
-        self.response = tf.argmax(response, axis=2)
+        with tf.variable_scope('output_information'):
+            self.predict_pic = output_pic
+            self.predict_txt = tf.argmax(response_txt, axis=2)
+
 
     def add_gradient_noise(self,t, stddev=1e-3, name=None):
         """
@@ -206,7 +284,10 @@ class seq2seq():
         self._question = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Question')
         self._response = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Response')
         self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
-        self._speaker= tf.placeholder(tf.int32, [self._batch_size], name='true_speaker')
+        self._input_pic= tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,3], name='frame_input')
+        self._output_pic=tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,3], name='frame_output')
+        self._random_z=tf.placeholder(tf.float32,[self._batch_size,self.noise_dim],name='noise')
+
     def get_batch(self, data_raw):
         # return a list of batches
         list_all_batch = []
@@ -223,12 +304,14 @@ class seq2seq():
             list_all_batch.append({'Question': Question,'Response':Response,'weight': weight,'Speaker':Speaker})
         return list_all_batch
 
-    def step(self, sess, data_dict, step_type='train'):
+    def step(self, sess, data_dict,noise, step_type='train'):
         self.model_type = step_type
+
         feed_dict = {self._response: data_dict['Response'],
                      self._question: data_dict['Question'],
                      self._weight:data_dict['weight'],
-                     self._speaker:data_dict['Speaker']}
+                     self._input_pic:data_dict['pic_input'],
+                     self._output_pic:data_dict['pic_output']}
         if step_type == 'train':
             output_list = [self.loss, self.train_op]
             try:
@@ -238,12 +321,12 @@ class seq2seq():
             return loss, _
 
         if step_type == 'test':
-            output_list = [self.loss, self.response]
+            output_list = [self.loss, self.predict_pic,self.predict_txt]
             try:
-                loss, response = sess.run(output_list, feed_dict=feed_dict)
+                loss, pic,txt = sess.run(output_list, feed_dict=feed_dict)
             except:
                 pdb.set_trace()
-            return loss, response
+            return loss, pic,txt
 
         print('step_type is wrong!>>>')
         return None

@@ -40,7 +40,9 @@ def train_model(sess, model, train_data, valid_data):
     while current_step <= epoch:
         #  print ('current_step:',current_step)
         for i in range(len(train_data)):
-            train_loss_, _ = model.step(sess, random.choice(train_data),step_type='train')
+            z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
+
+            train_loss_, _ = model.step(sess, random.choice(train_data),z_noise,step_type='train')
 
         if current_step % config.check_epoch == 0:
             eval_losses = []
@@ -83,7 +85,9 @@ def test_model(sess, model, test_data, vocab):
 def main(_):
     vocab = Data_Process.Vocab()
     input_data_txt, output_data_txt, input_data_pic, output_data_pic = Data_Process.get_input_output_data(config.data_dir, vocab, config.sentence_size)
-    # initiall model from new parameters or checkpoints
+    config.img_size_x=input_data_pic[0][0]
+    config.img_size_y=input_data_pic[0][1]
+
     batches_data=Data_Process.vectorize(input_data_txt,output_data_txt,input_data_pic,output_data_pic,vocab,config.batch_size)
     print('data processed,vocab size:', vocab.vocab_size)
     train_data,valid_test_data=model_selection.train_test_split(batches_data,0.2)
