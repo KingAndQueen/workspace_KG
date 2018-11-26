@@ -27,6 +27,7 @@ class seq_pic2seq_pic():
         self._max_grad_norm = config.max_grad_norm
         self._cov_size=config.convolution_dim
         self._noise_dim = config.noise_dim
+        self.model_type=config.model_type
         self._build_inputs()
 
         self.g_bn0 = convolution.batch_norm(name='g_bn0')
@@ -57,19 +58,20 @@ class seq_pic2seq_pic():
                 #                                          dtype=tf.float32, trainable=True))
 
                 top_output = [array_ops.reshape(o, [-1, 1, encoding_single_layer.output_size]) for o in output]
-                #pdb.set_trace()
+                # pdb.set_trace()
                 attention_states = array_ops.concat(top_output, 1)
                 return  attention_states,state_fw
 
-        question_output, question_state = _encoding_txt_sentence(question_emb,'question_bi-encode')  # monica_sate.shape=layers*[batch_size,neurons]
-
+        encoder_txt_output, question_state = _encoding_txt_sentence(question_emb,'question_bi-encode')  # monica_sate.shape=layers*[batch_size,neurons]
+        # pdb.set_trace()
         def _encoding_pic_frame(frame,name='',GPU_id=0):
             with tf.variable_scope('encoding_frame_' + name):
                 #resident net
-                resnet_output=convolution.resnet_v2_50(frame)
+                resnet_output,end_points=convolution.resnet_v2_50(frame)
+                # resnet_output=end_points['resnet_v2_50' + '/block4'] # test2 to check the full connections effect
                 return resnet_output
 
-        encoder_output=_encoding_pic_frame(self._input_pic)
+        encoder_pic_output=_encoding_pic_frame(self._input_pic)
 
         def decoder_txt_atten(encoder_state, attention_states, ans_emb,model_type='train'):
             with tf.variable_scope('speaker'):
@@ -174,7 +176,7 @@ class seq_pic2seq_pic():
                 return outputs
         # pdb.set_trace()
 
-        response_txt = decoder_txt_atten(question_state, question_output, response_emb,self.model_type)
+        response_txt = decoder_txt_atten(question_state, encoder_txt_output, response_emb,self.model_type)
 
 
         def deconv2d(input_, output_shape,k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02,name="deconv2d", with_w=False):
@@ -213,33 +215,42 @@ class seq_pic2seq_pic():
 
         with tf.variable_scope('decoder_pic'):
             s = self.img_size_x
+            y=self.img_size_y
             s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
-
-            reduced_text_embedding = lrelu(linear(question_output, self._embedding_size, 'g_embedding'))
-            z_concat = tf.concat(1, [self._random_z, reduced_text_embedding])
-            z_ = linear(z_concat, self._cov_size * 8 * s16 * s16, 'g_h0_lin')
-            h0 = tf.reshape(z_, [-1, s16, s16, self._cov_size * 8])
+            y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
+            encoder_pic_output_reshape=tf.reshape(encoder_pic_output,[self._batch_size,-1])
+            response_txt_reshape=tf.reshape(response_txt,[self._batch_size,-1])
+            encoder_txt_output_reshape=tf.reshape(encoder_txt_output,[self._batch_size,-1])
+            all_infor=tf.concat([encoder_pic_output_reshape,response_txt_reshape,encoder_txt_output_reshape],1)
+            #try more input method to replace all_infor # test1
+            # pdb.set_trace()
+            reduced_text_embedding = lrelu(linear(all_infor, self._embedding_size, 'g_embedding'))
+            z_concat = tf.concat([self._random_z, reduced_text_embedding],1)
+            z_ = linear(z_concat, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
+            h0 = tf.reshape(z_, [-1, s16, y16, self._cov_size * 8])
             h0 = tf.nn.relu(self.g_bn0(h0))
 
-            h1 = deconv2d(h0, [self._batch_size, s8, s8, self._cov_size * 4], name='g_h1')
+            h1 = deconv2d(h0, [self._batch_size, s8, y8, self._cov_size * 4], name='g_h1')
             h1 = tf.nn.relu(self.g_bn1(h1))
 
-            h2 = deconv2d(h1, [self._batch_size, s4, s4, self._cov_size * 2], name='g_h2')
+            h2 = deconv2d(h1, [self._batch_size, s4, y4, self._cov_size * 2], name='g_h2')
             h2 = tf.nn.relu(self.g_bn2(h2))
 
-            h3 = deconv2d(h2, [self._batch_size, s2, s2, self._cov_size * 1], name='g_h3')
+            h3 = deconv2d(h2, [self._batch_size, s2, y2, self._cov_size * 1], name='g_h3')
             h3 = tf.nn.relu(self.g_bn3(h3))
 
-            h4 = deconv2d(h3, [self._batch_size, s, s, 3], name='g_h4')
+            h4 = deconv2d(h3, [self._batch_size, s, y, 3], name='g_h4')
 
-            output_pic=tf.tanh(h4) / 2. + 0.5
+            predict_pic=tf.tanh(h4) / 2. + 0.5
 
 
         with tf.variable_scope('loss_function_pic'):
-            cov_input=convolution.conv2d_same(self._output_pic)
-            cov_output=convolution.conv2d_same(output_pic)
-            pic_loss=tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(cov_input,cov_output),name='loss_compute')))
+            # pdb.set_trace()
+            # cov_input=convolution.deeplab_v3(predict_pic)
+            # cov_output=convolution.deeplab_v3(self._output_pic)
 
+            pic_loss=tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._output_pic,predict_pic),name='pic_loss'),[1,2,3]))
+            pic_loss=tf.reduce_mean(pic_loss,name='l2_mean_loss_pic')
         with tf.variable_scope('loss_function_txt'):
             # with tf.device('/device:GPU:1'):
             # Our targets are decoder inputs shifted by one.
@@ -260,6 +271,7 @@ class seq_pic2seq_pic():
 
         all_loss=pic_loss + txt_loss
         self.loss=all_loss
+        pdb.set_trace()
         grads_and_vars=self._opt.compute_gradients(all_loss)
         # pdb.set_trace()
         grads_and_vars = [(tf.clip_by_norm(g, self._max_grad_norm), v) for g, v in grads_and_vars]
@@ -267,7 +279,7 @@ class seq_pic2seq_pic():
 
         self.train_op = self._opt.apply_gradients(grads_and_vars=grads_and_vars, name='train_op')
         with tf.variable_scope('output_information'):
-            self.predict_pic = output_pic
+            self.predict_pic = predict_pic
             self.predict_txt = tf.argmax(response_txt, axis=2)
 
 

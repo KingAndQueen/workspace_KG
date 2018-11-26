@@ -428,7 +428,7 @@ def resnet_v2(inputs,
             return net, end_points
 
 
-resnet_v2.default_image_size = 224
+resnet_v2.default_image_size = 480
 
 
 def resnet_v2_block(scope, base_depth, num_units, stride):
@@ -556,3 +556,61 @@ def resnet_v2_200(inputs,
 
 
 resnet_v2_200.default_image_size = resnet_v2.default_image_size
+
+
+@slim.add_arg_scope
+def atrous_spatial_pyramid_pooling(net, scope, depth=256, reuse=None):
+
+    with tf.variable_scope(scope, reuse=reuse):
+        feature_map_size = tf.shape(net)
+
+        image_level_features = tf.reduce_mean(net, [1, 2], name='image_level_global_pool', keep_dims=True)
+        image_level_features = slim.conv2d(image_level_features, depth, [1, 1], scope="image_level_conv_1x1",
+                                           activation_fn=None)
+        image_level_features = tf.image.resize_bilinear(image_level_features, (feature_map_size[1], feature_map_size[2]))
+
+        at_pool1x1 = slim.conv2d(net, depth, [1, 1], scope="conv_1x1_0", activation_fn=None)
+
+        at_pool3x3_1 = slim.conv2d(net, depth, [3, 3], scope="conv_3x3_1", rate=6, activation_fn=None)
+
+        at_pool3x3_2 = slim.conv2d(net, depth, [3, 3], scope="conv_3x3_2", rate=12, activation_fn=None)
+
+        at_pool3x3_3 = slim.conv2d(net, depth, [3, 3], scope="conv_3x3_3", rate=18, activation_fn=None)
+
+        net = tf.concat((image_level_features, at_pool1x1, at_pool3x3_1, at_pool3x3_2, at_pool3x3_3), axis=3,
+                        name="concat")
+        net = slim.conv2d(net, depth, [1, 1], scope="conv_1x1_output", activation_fn=None)
+        return net
+
+
+def deeplab_v3(inputs, class_num, is_training, reuse):
+
+    inputs = inputs / 255.0
+
+    with slim.arg_scope(resnet_arg_scope(0.01, is_training,
+                                                      0.9997,
+                                                      1e-5,
+                                                      use_batch_norm=True)):
+        resnet = getattr(resnet_v2, 'resnet_v2_50')
+        _, end_points = resnet(inputs,
+                               class_num,
+                               is_training=is_training,
+                               global_pool=False,
+                               spatial_squeeze=False,
+                               output_stride=16,
+                               reuse=reuse)
+
+        with tf.variable_scope("DeepLab_v3", reuse=reuse):
+
+            # get block 4 feature outputs
+            net = end_points['resnet_v2_50' + '/block4']
+
+            net = atrous_spatial_pyramid_pooling(net, "ASPP_layer", depth=256, reuse=reuse)
+
+            net = slim.conv2d(net, class_num, [1, 1], activation_fn=None,
+                              normalizer_fn=None, scope='logits')
+
+            size = tf.shape(inputs)[1:3]
+
+            net = tf.image.resize_bilinear(net, size)
+            return net
