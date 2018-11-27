@@ -16,7 +16,7 @@ tf.flags.DEFINE_float("max_grad_norm", 5.0, "Clip gradients to this norm.")
 tf.flags.DEFINE_integer("evaluation_interval", 10, "Evaluate and print results every x epochs")
 tf.flags.DEFINE_integer("batch_size", 2, "Batch size for training.")  # should consider the size of validation set
 tf.flags.DEFINE_integer("head", 3, "head number of attention")
-tf.flags.DEFINE_integer("epochs", 2000, "Number of epochs to train for.")
+tf.flags.DEFINE_integer("epochs", 200, "Number of epochs to train for.")
 tf.flags.DEFINE_integer('check_epoch',20, 'evaluation times')
 tf.flags.DEFINE_integer("layers", 3, "the num layers of RNN.")
 tf.flags.DEFINE_integer("recurrent_dim", 100, "Embedding size for neural networks.")
@@ -55,10 +55,10 @@ def train_model(sess, model, train_data, valid_data):
             print('-------------------------------')
             print('current_step:', current_step)
             print('training loss:', train_loss_)
-
+            z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
 
             for i in range(len(valid_data)):
-                eval_loss, _ = model.steps(sess, random.choice(valid_data))
+                eval_loss, _ ,_= model.steps(sess, random.choice(valid_data), z_noise,step_type='test')
                 eval_losses+=eval_loss
 
             print('evaluation loss:', eval_losses/len(valid_data))
