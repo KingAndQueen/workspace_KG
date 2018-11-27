@@ -40,7 +40,7 @@ def train_model(sess, model, train_data, valid_data):
 
     epoch=config.epochs
     print('training....')
-    checkpoint_path = os.path.join(config.checkpoints_path, 'visual_dialog.ckpt')
+    checkpoint_path = os.path.join(config.checkpoint_path, 'visual_dialog.ckpt')
     while current_step <= epoch:
         #  print ('current_step:',current_step)
 
