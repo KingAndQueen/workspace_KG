@@ -1,5 +1,5 @@
 from sklearn import model_selection
-import Model
+import os
 import tensorflow as tf
 import numpy as np
 import pdb
@@ -40,7 +40,6 @@ def train_model(sess, model, train_data, valid_data):
 
     epoch=config.epochs
     print('training....')
-    eval_losses_all = []
     checkpoint_path = os.path.join(config.checkpoints_path, 'visual_dialog.ckpt')
     while current_step <= epoch:
         #  print ('current_step:',current_step)
@@ -64,7 +63,7 @@ def train_model(sess, model, train_data, valid_data):
 
             print('evaluation loss:', eval_losses/len(valid_data))
 
-            model.saver.save(sess, config.checkpoint_path, global_step=current_step)
+            model.saver.save(sess, checkpoint_path, global_step=current_step)
             # if len(eval_losses_all) > 0 and eval_loss > eval_losses_all[-1]:
             #     print('decay learning rate....')
             #     sess.run(model.learning_rate_decay_op)
