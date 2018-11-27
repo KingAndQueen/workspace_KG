@@ -8,7 +8,8 @@ import numpy as np
 from datetime import datetime
 # unlegal='[^A-Za-z\ \']'
 import pickle
-
+import copy
+from PIL import Image
 def pic_video(file_path, time_ss):
     if not os.path.exists(file_path):
         print ('data_dir is not exist!')
@@ -159,13 +160,26 @@ def read_txt_file_1E(data_path, vocabulary, sentence_size):
     sents=f.readlines()
     f.close()
     sents_idx=[]
+    weights=[]
     for sent in sents:
         sent_idx=[]
+        weight=[]
+        sent=sent.strip()
+        sent=sent[:sentence_size-1]
         for word in sent:
             idx=vocabulary.word_to_index(word)
+            weight.append(1)
             sent_idx.append(idx)
-        sents_idx.append(sent_idx)
-    return sents_idx
+        sent_idx.append(vocabulary.word_to_index('<eos>'))
+        weight.append(0)
+        padding_len = max(sentence_size - len(sent_idx), 0)
+        for i in range(padding_len):
+            weight.append(0)
+            sent_idx.append(vocabulary.word_to_index('<pad>'))
+
+        sents_idx.append(copy.copy(sent_idx))
+        weights.append(copy.copy(weight))
+    return sents_idx,weights
 
 def read_pic_file_1E(data_path):
     files_name = os.listdir(data_path)
@@ -173,42 +187,54 @@ def read_pic_file_1E(data_path):
     sec_map_pic={}
     pic_output=[]
     for no,file in enumerate(files):
-        image_raw = tf.gfile.FastGFile(file, 'rb').read()
-        img = tf.image.decode_jpeg(image_raw,channels=3)
+        # image_raw = tf.gfile.FastGFile(file, 'rb').read()
+        # img = tf.image.decode_jpeg(image_raw,channels=3)
+        img=np.asarray(Image.open(file))
+        # print(img.shape)
         # pdb.set_trace()
         file_name=os.path.basename(file)
         sec=int(file_name[file_name.rindex('_')+1:file_name.rindex('.')])
         sec_map_pic[sec]=img
+
     for key in sorted(sec_map_pic.keys()):
         pic_output.append(sec_map_pic[key])
-    return pic_output
+    # pdb.set_trace()
+    return pic_output,sorted(sec_map_pic.keys())
 
 
 def get_input_output_data(data_path, vocabulary,sentence_size):
     files_name = os.listdir(data_path)
     data_path_txt=[file_name for file_name in files_name if 'txt' in file_name ]
-    txt=read_txt_file_1E(data_path+data_path_txt[0],vocabulary,sentence_size)
-    pic=read_pic_file_1E(data_path)
-    input_data_txt=txt
+    txt,weights=read_txt_file_1E(data_path+data_path_txt[0],vocabulary,sentence_size)
+    pic,times=read_pic_file_1E(data_path)
+    input_data_txt=copy.copy(txt)
     _=input_data_txt.pop()
-    output_data_txt = txt
+    output_data_txt = copy.copy(txt)
     _=output_data_txt.pop(0)
 
-    input_data_pic=pic
+    output_weights=copy.copy(weights)
+    output_weights.pop(0)
+
+    input_data_pic=copy.copy(pic)
     _=input_data_pic.pop()
-    output_data_pic=pic
+    output_data_pic=copy.copy(pic)
     _=output_data_pic.pop(0)
+    # pdb.set_trace()
+    assert len(output_weights)==len(output_data_txt)
+    assert len(output_data_pic)==len(input_data_pic)
+    assert len(input_data_txt)==len(output_data_txt)
 
-    return input_data_txt,output_data_txt,input_data_pic,output_data_pic
+    return input_data_txt,output_data_txt,input_data_pic,output_data_pic, output_weights,times
 
-def vectorize(input_data_txt,output_data_txt,input_data_pic,output_data_pic,vocab,batch_size):
+def vectorize_batch(input_data_txt,output_data_txt,input_data_pic,output_data_pic,weights,batch_size):
     batches_data=[]
     for _ in range(0, len(input_data_txt), batch_size):
         input_batch_txt=input_data_txt[_:_+batch_size]
         output_batch_txt=output_data_txt[_:_+batch_size]
         input_batch_pic=input_data_pic[_:_+batch_size]
         output_batch_pic=output_data_pic[_:_+batch_size]
-        batches_data.append([input_batch_txt,output_batch_txt,input_batch_pic,output_batch_pic])
+        weight_batch_txt=weights[_:_+batch_size]
+        batches_data.append([input_batch_txt,output_batch_txt,input_batch_pic,output_batch_pic,weight_batch_txt])
     return batches_data
 
 def store_vocab(vocab, data_path):

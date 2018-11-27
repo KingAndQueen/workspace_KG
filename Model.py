@@ -34,7 +34,7 @@ class seq_pic2seq_pic():
         self.g_bn1 = convolution.batch_norm(name='g_bn1')
         self.g_bn2 = convolution.batch_norm(name='g_bn2')
         self.g_bn3 = convolution.batch_norm(name='g_bn3')
-
+        self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
         with tf.variable_scope('embedding'):
             self._word_embedding = tf.get_variable(name='embedding_word',
                                                    shape=[self._vocab.vocab_size, config.recurrent_dim])
@@ -271,7 +271,7 @@ class seq_pic2seq_pic():
 
         all_loss=pic_loss + txt_loss
         self.loss=all_loss
-        pdb.set_trace()
+        # pdb.set_trace()
         grads_and_vars=self._opt.compute_gradients(all_loss)
         # pdb.set_trace()
         grads_and_vars = [(tf.clip_by_norm(g, self._max_grad_norm), v) for g, v in grads_and_vars]
@@ -300,30 +300,22 @@ class seq_pic2seq_pic():
         self._output_pic=tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,3], name='frame_output')
         self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
-    def get_batch(self, data_raw):
-        # return a list of batches
-        list_all_batch = []
-        #    pdb.set_trace()
-        for _ in range(0, len(data_raw), self._batch_size):
-            if _ + self._batch_size > len(data_raw): continue
-            data_batch = data_raw[_:_ + self._batch_size]
-            Question,Response,weight,Speaker = [], [],[],[]
-            for i in data_batch:
-                Question.append(i.get('question'))
-                Response.append(i.get('answer'))
-                weight.append(i.get('weight'))
-                Speaker.append(i.get('speaker'))
-            list_all_batch.append({'Question': Question,'Response':Response,'weight': weight,'Speaker':Speaker})
-        return list_all_batch
 
-    def step(self, sess, data_dict,noise, step_type='train'):
+    def steps(self, sess, data_dict,noise, step_type='train'):
         self.model_type = step_type
+        input_batch_txt=data_dict[0]
+        output_batch_txt=data_dict[1]
+        input_batch_pic=data_dict[2]
+        output_batch_pic=data_dict[3]
+        weight_batch_txt=data_dict[4]
+        # pdb.set_trace()
+        feed_dict = {self._response: output_batch_txt,
+                     self._question: input_batch_txt,
+                     self._weight:weight_batch_txt,
+                     self._input_pic:input_batch_pic,
+                     self._output_pic:output_batch_pic,
+                     self._random_z:noise}
 
-        feed_dict = {self._response: data_dict['Response'],
-                     self._question: data_dict['Question'],
-                     self._weight:data_dict['weight'],
-                     self._input_pic:data_dict['pic_input'],
-                     self._output_pic:data_dict['pic_output']}
         if step_type == 'train':
             output_list = [self.loss, self.train_op]
             try:
