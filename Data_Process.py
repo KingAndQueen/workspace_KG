@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*
-
+#encoding=utf8
 import os, sys
 import codecs
 # from PIL import Image
+
 import pdb
 # open a pipe from a command
 # import tensorflow as tf
@@ -69,7 +69,6 @@ def read_srt(data_dir):
                 if '（' in lines[no+1] or '<i>♪' in lines[no+1]:
                     # pdb.set_trace()
                     continue
-
                 time_begin=line[:line.index(' --> ')]
                 time_end=line[line.index(' --> ')+5:]
                 # pdb.set_trace()
@@ -111,7 +110,7 @@ def map_time(times, sentences,video_file_path,output_path):
         output_time_sents = str(time_) + '\t'+str(time_s)+'\t'+ sentences[no]+'\n'
         output.write(output_time_sents)
     output.close()
-    pdb.set_trace()
+    # pdb.set_trace()
     for no,time_ in enumerate(times):
         time_orig = datetime.strptime('00:00:00,0', TIME_FORMAT)
         relate_time = time_ - time_orig

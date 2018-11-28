@@ -1,352 +1,358 @@
-1900-01-01 00:00:04.395000	4	The Pilot
-1900-01-01 00:00:51.363000	51	There's nothing to tell. It's just some guy I work with.
-1900-01-01 00:00:54.053000	54	Come on. You're going out with a guy.
-1900-01-01 00:00:56.576500	56	There's gotta be something wrong with him.
-1900-01-01 00:00:59.933000	59	So does he have a hump and a hair piece?
-1900-01-01 00:01:03.771000	63	Wait. Does he eat chalk?
-1900-01-01 00:01:06.628000	66	I don't want her to go through what I went through with Carl. Oh.
-1900-01-01 00:01:09.839500	69	Okay, everybody relax. This is not even a date.
-1900-01-01 00:01:12.926000	72	It's just two people going out to dinner and not having sex.
-1900-01-01 00:01:16.158000	76	Sounds like a date to me.
-1900-01-01 00:01:20.454500	80	I'm back in high school, in the middle of the cafeteria...
-1900-01-01 00:01:23.749500	83	...and I realize I'm totally naked.
-1900-01-01 00:01:27.169000	87	Oh, yeah.  I've had that dream.
-1900-01-01 00:01:29.421500	89	Then I look down and I realize there is a phone...
-1900-01-01 00:01:34.009000	94	...there.
-1900-01-01 00:01:36.845000	96	Instead of...  That's right!
-1900-01-01 00:01:38.555000	98	That one, I've never had. PHOEBE: No.
-1900-01-01 00:01:40.787000	100	All of a sudden, the phone starts to ring.
-1900-01-01 00:01:44.812000	104	And it turns out it's my mother.
-1900-01-01 00:01:48.711500	108	Which is very, very weird because she never calls me.
-1900-01-01 00:01:57.783000	117	Hi.
-1900-01-01 00:02:00.369500	120	This guy says "hello," I wanna kill myself.
-1900-01-01 00:02:03.413000	123	Are you okay, sweetie?
-1900-01-01 00:02:06	126	I feel like someone grabbed my small intestine, pulled it out of my mouth...
-1900-01-01 00:02:09.941500	129	...and tied it around my neck.  Cookie?
-1900-01-01 00:02:14.883000	134	Carol moved her stuff out today.
-1900-01-01 00:02:16.135000	136	Oh.
-1900-01-01 00:02:18.095000	138	Let me get you some coffee.  Thanks.
-1900-01-01 00:02:22.808000	142	Ew. Unh.
-1900-01-01 00:02:24.956500	144	No. No, don't! Stop cleansing my aura.
-1900-01-01 00:02:28.501500	148	Just leave my aura alone, okay?
-1900-01-01 00:02:33.214500	153	I'll be fine. All right? Really. I hope she'll be very happy.
-1900-01-01 00:02:36.155000	156	No, you don't.  No, I don't.
-1900-01-01 00:02:38.157000	158	To hell with her. She left me!
-1900-01-01 00:02:41.160000	161	And you never knew she was a lesbian.
-1900-01-01 00:02:46.290000	166	No! Okay?
-1900-01-01 00:02:48.938500	168	Why does everyone keep fixating on that?
-1900-01-01 00:02:53.359500	173	She didn't know. How should I know?
-1900-01-01 00:02:57.927000	177	Sometimes I wish I was a lesbian.
-1900-01-01 00:03:01.889500	181	Did I say that out loud?
-1900-01-01 00:03:06.852500	186	All right, Ross. Look, you're feeling a lot of pain right now.
-1900-01-01 00:03:10.272000	190	You're angry. You're hurting.
-1900-01-01 00:03:12.837500	192	Can I tell you what the answer is?
-1900-01-01 00:03:15.444000	195	Strip joints!
-1900-01-01 00:03:18.781000	198	Come on, you're single. Have some hormones.
-1900-01-01 00:03:21.304500	201	See, but I don't want to be single, okay?
-1900-01-01 00:03:24.244500	204	I just wanna be married again.
-1900-01-01 00:03:31.522500	211	And I just want a million dollars!
-1900-01-01 00:03:35.297000	215	Rachel?
-1900-01-01 00:03:36.820000	216	Oh, God, Monica! Hi! Thank God!
-1900-01-01 00:03:39.927000	219	I went to your building and this guy with a hammer said...
-1900-01-01 00:03:42.784000	222	...that you might be here, and you are.
-1900-01-01 00:03:45.891500	225	Can I get you some coffee?  Decaf.
-1900-01-01 00:03:50.208500	230	Okay, everybody, this is Rachel, another Lincoln High survivor.
-1900-01-01 00:03:53.670000	233	This is everybody. This is Chandler and Phoebe...
-1900-01-01 00:03:56.235000	236	...and Joey. And remember my brother, Ross?
-1900-01-01 00:03:58.654000	238	Sure!  Hey.
-1900-01-01 00:04:00.739000	240	Hi.  Oh, God.
-1900-01-01 00:04:10.332000	250	So you wanna tell us now, or are we waiting for four wet bridesmaids?
-1900-01-01 00:04:16.860000	256	Oh, God! Well, it started about a halfhour before the wedding.
-1900-01-01 00:04:20.718000	260	I was in this room with all the presents...
-1900-01-01 00:04:23.929000	263	...and I was looking at this gravy boat.
-1900-01-01 00:04:25.847500	265	This really gorgeous Limoges gravy boat.
-1900-01-01 00:04:29.559000	269	When all of a sudden... Sweet 'N Low?
-1900-01-01 00:04:30.790000	270	I realized...
-1900-01-01 00:04:33.981000	273	...I was more turned on by this gravy boat than by Barry.
-1900-01-01 00:04:37.630500	277	Then I got really freaked out, and that's when it hit me
-1900-01-01 00:04:40.717000	280	How much Barry looks like Mr. Potato Head.
-1900-01-01 00:04:44.158000	284	You know, I mean, I always knew he looked familiar, but...
-1900-01-01 00:04:49.622000	289	Anyway, I just had to get out of there, and I started wondering
-1900-01-01 00:04:53.334000	293	"Why am I doing this?" And "Who am I doing this for?"
-1900-01-01 00:04:57.484000	297	Anyway, I just didn't know where to go, and I know you and I have drifted apart...
-1900-01-01 00:05:01.300000	301	...but you're the only person I know in the city.
-1900-01-01 00:05:04.594000	304	Who wasn't invited to the wedding.
-1900-01-01 00:05:06.430000	306	Oh, I was kind of hoping that wouldn't be an issue.
-1900-01-01 00:05:23.322000	323	I'm guessing he bought her the big pipe organ...
-1900-01-01 00:05:25.970500	325	...and she's really not happy about it.
-1900-01-01 00:05:29.974500	329	Daddy, I just... I can't marry him.
-1900-01-01 00:05:33.332000	333	I'm sorry.
-1900-01-01 00:05:34.937500	334	I just don't love him.
-1900-01-01 00:05:38.170000	338	Well, it matters to me.
-1900-01-01 00:05:43.196000	343	She should not be wearing those pants.
-1900-01-01 00:05:47.554000	347	I say push her down the stairs.
-1900-01-01 00:05:49.369000	349	Push her down the stairs! Push her down the stairs!
-1900-01-01 00:05:56.229500	356	Come on, Daddy, listen to me!
-1900-01-01 00:05:59.712500	359	It's like all of my life, everyone's always told me, "You're a shoe!
-1900-01-01 00:06:03.195000	363	You're a shoe! You're a shoe! You're a shoe!"
-1900-01-01 00:06:06.031500	366	Then today I stopped and said, "What if I don't wanna be a shoe?
-1900-01-01 00:06:09.409500	369	What if I wanna be a purse? You know?
-1900-01-01 00:06:12.954000	372	Or a hat?"
-1900-01-01 00:06:15.144500	375	I don't want you to buy me a hat, I am a hat.
-1900-01-01 00:06:17.689000	377	It's a metaphor, Daddy!
-1900-01-01 00:06:22.381000	382	You can see where he'd have trouble.
-1900-01-01 00:06:27.511000	387	Look, Daddy, it's my life.
-1900-01-01 00:06:30.076000	390	Well, maybe I'll just stay here with Monica.
-1900-01-01 00:06:35.561000	395	I guess we've established she's staying with Monica.
-1900-01-01 00:06:40.294500	400	Well, maybe that's my decision.
-1900-01-01 00:06:43.402000	403	Well, maybe I don't need your money.
-1900-01-01 00:06:45.821000	405	Wait! Wait! I said maybe!
-1900-01-01 00:06:55.018000	415	Okay. Just breathe, that's it.
-1900-01-01 00:06:57.562000	417	Just try to think of nice, calm things.
-1900-01-01 00:07:00.940000	420	Raindrops on roses And whiskers on kittens
-1900-01-01 00:07:05.236500	425	Doorbells and sleigh bells And something with mittens
-1900-01-01 00:07:09.657500	429	La la la something With string
-1900-01-01 00:07:13.390000	433	I'm all better now.
-1900-01-01 00:07:16.184500	436	I helped.
-1900-01-01 00:07:20.022000	440	Look, this is probably for the best, you know?
-1900-01-01 00:07:22.795500	442	Independence. Taking control of your life.
-1900-01-01 00:07:26.445000	446	And, hey, if you need anything, you can always come to Joey.
-1900-01-01 00:07:30.490500	450	Me and Chandler live right across the hall. And he's away a lot.
-1900-01-01 00:07:35.349500	455	Joey, stop hitting on her. It's her wedding day.
-1900-01-01 00:07:38.790000	458	What? Like there's a rule or something?
-1900-01-01 00:07:43.107500	463	Please don't do that again. It's a horrible sound.
-1900-01-01 00:07:46.256500	466	Uh, it's Paul.  Buzz him in.
-1900-01-01 00:07:48.904500	468	Who's Paul?  Paul, the wine guy, Paul?
-1900-01-01 00:07:51.303000	471	Maybe.
-1900-01-01 00:07:53.159000	473	Wait a minute. Your "not a real date" is with Paul, the wine guy?
-1900-01-01 00:07:56.808000	476	He finally asked you out?  Yes.
-1900-01-01 00:07:58.768000	478	Ooh. This is a "Dear Diary" moment.
-1900-01-01 00:08:01.813000	481	Rach, wait, I can cancel.
-1900-01-01 00:08:03.857000	483	Please, no. Go, I'll be fine.
-1900-01-01 00:08:05.880500	485	Ross, are you okay? I mean, do you want me to stay?
-1900-01-01 00:08:09.676000	489	That'd be good.
-1900-01-01 00:08:12.991500	492	Really?  No, go on! It's Paul, the wine guy.
-1900-01-01 00:08:19.915000	499	Hi, come in. Paul, this is...
-1900-01-01 00:08:23.272500	503	...everybody. Everybody, this is Paul.
-1900-01-01 00:08:26.046000	506	Paul, the wine guy.
-1900-01-01 00:08:28.173000	508	Wine guy.  I didn't catch your name. Paul, was it?
-1900-01-01 00:08:31.781500	511	Okay. Sit down. Two seconds.  Okay.
-1900-01-01 00:08:38.767500	518	Ooh, I just pulled out four eyelashes. That can't be good.
-1900-01-01 00:08:44.731000	524	So, Rachel, what are you up to tonight?
-1900-01-01 00:08:47.192000	527	Well, I was supposed to be headed for Aruba on my honeymoon...
-1900-01-01 00:08:50.320000	530	...so, nothing.
-1900-01-01 00:08:53.845000	533	Right. You're not even getting your honeymoon.
-1900-01-01 00:08:57.223500	537	God. No, no. Although, Aruba. Heh. This time of year? Eh.
-1900-01-01 00:09:00.664500	540	Talk about your...
-1900-01-01 00:09:03.166000	543	...big lizards.
-1900-01-01 00:09:09.319000	549	Anyway, if you don't feel like being alone tonight...
-1900-01-01 00:09:12.300500	552	...Joey and Chandler are helping me with my furniture.
-1900-01-01 00:09:15.470500	555	Yes, and we're very excited about it.
-1900-01-01 00:09:18.891000	558	Actually, thanks, but I'm just gonna hang out here tonight.
-1900-01-01 00:09:21.747500	561	It's been a long day.  Oh, sure. Okay. Sure.
-1900-01-01 00:09:24.271000	564	Hey, Pheebs, you wanna help?
-1900-01-01 00:09:26.648000	566	Oh, I wish I could, but I don't want to.
-1900-01-01 00:09:37.075500	577	I'm supposed to attach a brackety thing to the side things...
-1900-01-01 00:09:40.850000	580	...using a bunch of these little worm guys.
-1900-01-01 00:09:45.792500	585	I have no brackety thing, I see no worm guys whatsoever...
-1900-01-01 00:09:49.880000	589	...and I cannot feel my legs.
-1900-01-01 00:09:54.050000	594	What's this?
-1900-01-01 00:09:55.761000	595	I have no idea.
-1900-01-01 00:10:00.349000	600	Done with the bookcase.  All finished.
-1900-01-01 00:10:06.938000	606	This was Carol's favorite beer.
-1900-01-01 00:10:10.359000	610	She always drank it out of the can. I should have known.
-1900-01-01 00:10:13.466000	613	Hey. Ross, let me ask you a question.
-1900-01-01 00:10:17.345000	617	She got the furniture, the stereo, the good TV.
-1900-01-01 00:10:20.660000	620	What did you get?
-1900-01-01 00:10:22.037000	622	You guys.
-1900-01-01 00:10:23.246500	623	Oh, God. Oh, my God.  You got screwed.
-1900-01-01 00:10:26.645500	626	Oh, my God.  I know, I know. I'm such an idiot.
-1900-01-01 00:10:31.609500	631	I should've caught on when she went to the dentist four and five times a week.
-1900-01-01 00:10:35.154500	635	I mean, how clean can teeth get?
-1900-01-01 00:10:37.636000	637	My brother's going through that. He's such a mess.
-1900-01-01 00:10:40.680000	640	How did you get through it?
-1900-01-01 00:10:42.641000	642	He might try accidentally breaking something valuable of hers.
-1900-01-01 00:10:46.144000	646	Say her...  Leg?
-1900-01-01 00:10:48.229000	648	Heh. That's one way of going through it, yeah.
-1900-01-01 00:10:50.315000	650	Me, I went for the watch.
-1900-01-01 00:10:52.651000	652	You actually broke her watch?  Mm.
-1900-01-01 00:10:54.820000	654	Barry, I'm sorry. I am so sorry.
-1900-01-01 00:10:59.074000	659	You probably think it's about making love with your socks on, but it isn't.
-1900-01-01 00:11:03.119500	663	It isn't, it's about me. And I...
-1900-01-01 00:11:13.109000	673	Hi. Machine cut me off again. Anyway...
-1900-01-01 00:11:18.468500	678	You know what's scary? What if there's only one woman for everybody?
-1900-01-01 00:11:22.389000	682	I mean, what if you get one woman, and that's it?
-1900-01-01 00:11:26.664500	686	Unfortunately, in my case, there was only one woman for her.
-1900-01-01 00:11:31.189500	691	What are you talking about? One woman.
-1900-01-01 00:11:35.214500	695	That's like saying there's only one flavor of ice cream for you.
-1900-01-01 00:11:39.072500	699	Let me tell you something, Ross. There's lots of flavors out there.
-1900-01-01 00:11:43.347500	703	There's rocky road and cookie dough and bing cherry vanilla.
-1900-01-01 00:11:48.457000	708	You can get them with jimmies or nuts or whipped cream.
-1900-01-01 00:11:52.294000	712	This is the best thing that ever happened to you.
-1900-01-01 00:11:55.234500	715	You got married. You were like, what, 8?
-1900-01-01 00:12:00.635500	720	Welcome back to the world. Grab a spoon.
-1900-01-01 00:12:04.076500	724	I honestly don't know if I'm hungry or horny.
-1900-01-01 00:12:07.183000	727	Then stay out of my freezer.
-1900-01-01 00:12:12.647500	732	Ever since she walked out on me, I...
-1900-01-01 00:12:16.651000	736	What? What?
-1900-01-01 00:12:18.653000	738	You wanna spell it out with noodles?
-1900-01-01 00:12:20.656000	740	No, it's more of a fifth date kind of revelation.
-1900-01-01 00:12:24.764000	744	Oh, so there's gonna be a fifth date?
-1900-01-01 00:12:29.497000	749	Isn't there?
-1900-01-01 00:12:30.791000	750	Yeah, yeah. I think there is.
-1900-01-01 00:12:35.420000	755	What were you gonna say?
-1900-01-01 00:12:38.110500	758	Well... Er, uh...
-1900-01-01 00:12:41.447000	761	Ever since she left me, um...
-1900-01-01 00:12:45.326000	765	...I haven't been able to perform...
-1900-01-01 00:12:48.433000	768	...sexually.
-1900-01-01 00:12:52.812000	772	Oh, God! Oh, God! I am so...
-1900-01-01 00:12:54.230000	774	I'm so sorry.  It's okay.
-1900-01-01 00:12:56.149500	776	Being spit on is probably not what you need right now.
-1900-01-01 00:12:59.736000	779	Um...
-1900-01-01 00:13:01.196000	781	How long?
-1900-01-01 00:13:02.822000	782	Two years.
-1900-01-01 00:13:05.283000	785	Wow!
-1900-01-01 00:13:06.931000	786	I'm glad you smashed her watch.
-1900-01-01 00:13:12.082000	792	So you still think you might want that fifth date?
-1900-01-01 00:13:18.338000	798	Yeah.
-1900-01-01 00:13:20.340000	800	Yeah, I do.
-1900-01-01 00:13:23.218000	803	I, Joanie, take you, Charles, as my lawful husband.
-1900-01-01 00:13:26.847000	806	Do you take Joanie...?  Oh! See.
-1900-01-01 00:13:31.247000	811	But Joanie loved Chachi. That's the difference.
-1900-01-01 00:13:36.773000	816	"Grab a spoon."
-1900-01-01 00:13:38.358000	818	Do you know long it's been since I grabbed a spoon?
-1900-01-01 00:13:41.528000	821	Do the words, "Billy, don't be a hero," mean anything to you?
-1900-01-01 00:13:47.450500	827	You know, here's the thing. Even if I could get it together enough...
-1900-01-01 00:13:51.141500	831	...to ask a woman out...
-1900-01-01 00:13:54.082000	834	...who am I gonna ask?
-1900-01-01 00:14:17.981000	857	Isn't this amazing?
-1900-01-01 00:14:19.315500	859	I mean, I have never made coffee before in my life.
-1900-01-01 00:14:21.901500	861	That is amazing.  Congratulations.
-1900-01-01 00:14:25.718000	865	While you're on a roll, if you feel like you gotta make a Western omelet or something...
-1900-01-01 00:14:32.725000	872	Although, actually I'm really not that hungry this morning.
-1900-01-01 00:14:36.708000	876	Good morning.
-1900-01-01 00:14:38.501000	878	Morning.
-1900-01-01 00:14:40.504000	880	Morning, Paul.
-1900-01-01 00:14:43.360500	883	Hello, Paul.  Hi. Paul, is it?
-1900-01-01 00:14:50.472000	890	I had a really great time last night.
-1900-01-01 00:14:53.892000	893	Thank you. Thank you so much.
-1900-01-01 00:14:56.040000	896	We'll talk later, okay?  Yeah.
-1900-01-01 00:15:03.985000	903	Thank you.
-1900-01-01 00:15:11.222000	911	That wasn't a real date.
-1900-01-01 00:15:14.746500	914	What the hell do you do on a real date?
-1900-01-01 00:15:18.771000	918	Okay.
-1900-01-01 00:15:22.545000	922	All right, kids, I gotta get to work.
-1900-01-01 00:15:25.507000	925	If I don't input those numbers, it doesn't make much of a difference.
-1900-01-01 00:15:32.368000	932	So, like, you guys all have jobs?
-1900-01-01 00:15:35.892000	935	Yeah, we all have jobs.
-1900-01-01 00:15:37.414500	937	See, that's how we buy stuff.
-1900-01-01 00:15:41.648000	941	Yeah, I'm an actor.
-1900-01-01 00:15:42.962000	942	Wow. Would I have seen you in anything?
-1900-01-01 00:15:45.443500	945	Oh, I doubt it. Mostly regional work.
-1900-01-01 00:15:48.613000	948	Unless you happened to catch the Wee One's production of Pinocchio.
-1900-01-01 00:15:51.929500	951	"Look, Geppeto. I'm a real live boy."
-1900-01-01 00:15:57.747000	957	I will not take this abuse.
-1900-01-01 00:15:59.916000	959	You're right. I'm sorry.
-1900-01-01 00:16:01.689000	961	Once I was a wooden boy A little wooden boy
-1900-01-01 00:16:08.299500	968	So how are you doing today? Did you sleep okay?
-1900-01-01 00:16:11.344500	971	Did you talk to Barry? I can't stop smiling.
-1900-01-01 00:16:15.745000	975	I can see that. You look like you slept with a hanger in your mouth.
-1900-01-01 00:16:24.670500	984	I know. He's just so...
-1900-01-01 00:16:28.111000	988	Remember you and Tony De Marco?
-1900-01-01 00:16:30.321500	990	Oh, yeah.  Well, it's like that. With feelings.
-1900-01-01 00:16:34.867000	994	Oh, wow, are you in trouble!
-1900-01-01 00:16:37.433000	997	Okay, okay. I am just going to get up, go to work...
-1900-01-01 00:16:40.853000	1000	...and not think about him all day.
-1900-01-01 00:16:43.856000	1003	Or else I'm just gonna get up and go to work.
-1900-01-01 00:16:47.130000	1007	Oh, wish me luck!  What for?
-1900-01-01 00:16:48.986000	1008	I'm gonna go get one of those job things.
-1900-01-01 00:16:59.913500	1019	Hey, Monica.  Hey, Franny. Welcome back.
-1900-01-01 00:17:02.895000	1022	How was Florida?
-1900-01-01 00:17:04.397000	1024	You had sex, didn't you?
-1900-01-01 00:17:07.316000	1027	How do you do that?
-1900-01-01 00:17:10.341000	1030	So, who?  You know Paul?
-1900-01-01 00:17:14.365000	1034	Paul, the wine guy?
-1900-01-01 00:17:16.117000	1036	Oh, yeah, I know Paul.
-1900-01-01 00:17:19.913000	1039	You mean, you know Paul like I know Paul?
-1900-01-01 00:17:22.519500	1042	Are you kidding? I take credit for Paul.
-1900-01-01 00:17:25.898000	1045	Before me, there was no snap in his turtle for two years.
-1900-01-01 00:17:32.488000	1052	Of course it was a line.
-1900-01-01 00:17:35.512000	1055	Why? Why would anybody do something like that?
-1900-01-01 00:17:38.682000	1058	We're looking for an answer more sophisticated than
-1900-01-01 00:17:42.393000	1062	"To get you into bed."
-1900-01-01 00:17:45.021000	1065	Is it me?
-1900-01-01 00:17:46.961000	1066	Is it like I have some sort of beacon that only dogs...
-1900-01-01 00:17:50.214000	1070	...and men with severe emotional problems can hear?
-1900-01-01 00:17:53.654000	1073	All right, come here. Give me your feet.
-1900-01-01 00:18:02.997000	1082	I just thought he was nice, you know?
-1900-01-01 00:18:07.106000	1087	I can't believe you didn't know it was a line.
-1900-01-01 00:18:14.258000	1094	Guess what.
-1900-01-01 00:18:16.219000	1096	You got a job?  Are you kidding?
-1900-01-01 00:18:18.054000	1098	I'm trained for nothing.
-1900-01-01 00:18:20.911500	1100	I was laughed out of 12 interviews today.
-1900-01-01 00:18:23.643000	1103	Yet you're surprisingly upbeat.
-1900-01-01 00:18:25.603500	1105	Well, you would be too if you found Joan and David boots on sale...
-1900-01-01 00:18:29.273000	1109	...50 percent off.
-1900-01-01 00:18:31.275000	1111	Oh, how well you know me.
-1900-01-01 00:18:34.154000	1114	They're my new "I don't need a job or my parents.
-1900-01-01 00:18:36.698000	1116	I've got great boots" boots.
-1900-01-01 00:18:40.264000	1120	How'd you pay for them?  Uh, credit card.
-1900-01-01 00:18:43.579000	1123	And who pays for that?
-1900-01-01 00:18:45.290000	1125	Um, my father.
-1900-01-01 00:18:50.003000	1130	You can't live off your parents your whole life.
-1900-01-01 00:18:53.131000	1133	I know that. That's why I was getting married.
-1900-01-01 00:18:56.843000	1136	Give her a break. It's hard being on your own for the first time.
-1900-01-01 00:19:00.012000	1140	Thank you.  You're welcome.
-1900-01-01 00:19:01.535000	1141	I remember when I first came to this city, I was 14.
-1900-01-01 00:19:04.496500	1144	My mom had killed herself and my stepdad was back in prison.
-1900-01-01 00:19:07.124500	1147	And I got here, and I didn't know anybody.
-1900-01-01 00:19:10.002000	1150	I ended up living with this albino guy who was cleaning windshields...
-1900-01-01 00:19:13.756000	1153	...outside Port Authority. And then he killed himself.
-1900-01-01 00:19:18.323000	1158	And then I found aromatherapy. So believe me, I know exactly how you feel.
-1900-01-01 00:19:25.747000	1165	The word you're looking for is
-1900-01-01 00:19:28.958000	1168	"Anyway..."
-1900-01-01 00:19:34.255000	1174	All right. You ready?
-1900-01-01 00:19:36.132000	1176	Oh, come on.
-1900-01-01 00:19:37.884000	1177	Cut. Cut.
-1900-01-01 00:19:39.573000	1179	Cut, cut, cut.
-1900-01-01 00:19:44.140500	1184	Hey. MONICA: All right.
-1900-01-01 00:19:47.560000	1187	Welcome to the real world.
-1900-01-01 00:19:49.145000	1189	It sucks. You're gonna love it.
-1900-01-01 00:19:59.113500	1199	Well, that's it. You gonna crash on the couch?
-1900-01-01 00:20:02.659000	1202	No. No, I gotta go home sometime.  Are you gonna be okay?
-1900-01-01 00:20:05.995000	1205	Yeah.
-1900-01-01 00:20:08.915000	1208	Look what I just found on the floor.
-1900-01-01 00:20:12.460000	1212	What?
-1900-01-01 00:20:14.420000	1214	That's Paul's watch.
-1900-01-01 00:20:15.630000	1215	You can just put it back where you found it.
-1900-01-01 00:20:20.030500	1220	Oh, boy. All right. Good night, everybody.
-1900-01-01 00:20:22.970000	1222	Good night.
-1900-01-01 00:20:33.147000	1233	Hmm.   Hmm.
-1900-01-01 00:20:35.524000	1235	Oh, sorry.  No. Oh, no. Go.
-1900-01-01 00:20:37.652000	1237	No, have it, really.  Split it?
-1900-01-01 00:20:38.819500	1238	Okay.  Okay.
-1900-01-01 00:20:42.782000	1242	Thanks.
-1900-01-01 00:20:45.285000	1245	You probably didn't know this, but back in high school I had...
-1900-01-01 00:20:49.080000	1249	...a major crush on you.
-1900-01-01 00:20:51.707000	1251	I knew.
-1900-01-01 00:20:53.209500	1253	You did? Oh.
-1900-01-01 00:20:56.629000	1256	I figured you thought I was Monica's geeky older brother.
-1900-01-01 00:20:59.882500	1259	I did.  Oh.
-1900-01-01 00:21:07.348000	1267	Listen, do you think...
-1900-01-01 00:21:09.267000	1269	And try not to let my vulnerability become any kind of a factor here.
-1900-01-01 00:21:15.044000	1275	Do you think it would be okay if I ask you out sometime, maybe?
-1900-01-01 00:21:20.069000	1280	Yeah.
-1900-01-01 00:21:21.821000	1281	Maybe.
-1900-01-01 00:21:24.657000	1284	Okay.
-1900-01-01 00:21:30.642500	1290	Okay, maybe I will.
-1900-01-01 00:21:36.899000	1296	Good night.  Good night.
-1900-01-01 00:21:53.227000	1313	See you.
-1900-01-01 00:21:54.770000	1314	Mmhm.
-1900-01-01 00:21:56.147000	1316	Wait, wait. Hey, what's with you?
-1900-01-01 00:22:00.985500	1320	I just grabbed a spoon.
-1900-01-01 00:22:11.954000	1331	Can't believe what I'm hearing.
-1900-01-01 00:22:13.873000	1333	I can't believe What I'm hearing here
-1900-01-01 00:22:15.145500	1335	What? I said you had...  What? I said you had...
-1900-01-01 00:22:18.524000	1338	Would you stop?  Oh, was I doing it again?
-1900-01-01 00:22:21.797000	1341	Yes.
-1900-01-01 00:22:23.841500	1343	Would anybody like more coffee?
-1900-01-01 00:22:27.950000	1347	Did you make it or are you just serving it?
-1900-01-01 00:22:30.994500	1350	I'll have a cup of coffee.
-1900-01-01 00:22:34.352000	1354	Kids, new dream.
-1900-01-01 00:22:36.771000	1356	I'm in Las Vegas. I'm Liza Minnelli.
+1900-01-01 00:00:04.294000	4	What you guys don't understand is...
+1900-01-01 00:00:06.026000	6	...for us, kissing is as important as any part of it.
+1900-01-01 00:00:09.508000	9	Yeah, right.
+1900-01-01 00:00:13.095000	13	You serious?
+1900-01-01 00:00:15.097000	15	Oh, yeah.
+1900-01-01 00:00:16.494500	16	Everything you need to know is in that first kiss.
+1900-01-01 00:00:19.768000	19	Absolutely.  Yeah, I think, for us...
+1900-01-01 00:00:20.999500	20	...kissing is pretty much like an opening act.
+1900-01-01 00:00:23.501500	23	I mean, it's like the standup comedian you have to sit through...
+1900-01-01 00:00:26.046000	26	...before Pink Floyd comes out.
+1900-01-01 00:00:32.031000	32	Yeah, and it's not that we don't like the comedian.
+1900-01-01 00:00:35.492500	35	It's just that that's not...
+1900-01-01 00:00:38.287500	38	...why we bought the ticket.
+1900-01-01 00:00:42.207000	42	See, the problem is, though...
+1900-01-01 00:00:43.709500	43	...after the concert's over, no matter how great the show was...
+1900-01-01 00:00:46.941500	46	...you girls are always looking for the comedian again.
+1900-01-01 00:00:49.882500	49	I mean, we're in the car, we're fighting traffic...
+1900-01-01 00:00:52.468000	52	...basically just trying to stay awake.
+1900-01-01 00:00:57.410500	57	Bring back the comedian.
+1900-01-01 00:01:00.893000	60	Otherwise, you're gonna find yourself...
+1900-01-01 00:01:02.394500	62	...sitting at home listening to that album alone.
+1900-01-01 00:01:09.610500	69	Are we still talking about sex?
+1900-01-01 00:01:14.146000	74	The One with the Sonogram at the End
+1900-01-01 00:02:07.209000	127	No, it's good. It is good.
+1900-01-01 00:02:09.253000	129	It's just that, doesn't she seem a little angry?
+1900-01-01 00:02:13.006000	133	Well, she has issues.
+1900-01-01 00:02:16.218000	136	Does she?
+1900-01-01 00:02:17.532000	137	He's out banging other women over the head with a club...
+1900-01-01 00:02:20.765000	140	...while she sits at home trying to get the mastodon smell out of the carpet.
+1900-01-01 00:02:24.456000	144	Marsha, see, these are cave people.
+1900-01-01 00:02:28.188500	148	Okay, they have issues like
+1900-01-01 00:02:31.567500	151	"Gee, that glacier's getting kind of close." See?
+1900-01-01 00:02:34.820500	154	Speaking of issues, isn't that your exwife?
+1900-01-01 00:02:37.406000	157	No, no.  Yes, it is. Carol, hi.
+1900-01-01 00:02:40.492000	160	Okay. Yes. Yes, it is.
+1900-01-01 00:02:41.890000	161	How about I'll catch up with you in the Ice Age?
+1900-01-01 00:02:59.761000	179	Hi.  Hi.
+1900-01-01 00:03:08.520000	188	So...
+1900-01-01 00:03:11.190000	191	You look great.
+1900-01-01 00:03:13.066000	193	I hate that.
+1900-01-01 00:03:15.715000	195	Sorry. Thanks. You look good too.
+1900-01-01 00:03:19.031000	199	Well, you know, in here, anyone who...
+1900-01-01 00:03:23.327000	203	...stands erect...
+1900-01-01 00:03:28.624000	208	So, what's new? Still a...  A lesbian?
+1900-01-01 00:03:30.417000	210	Well...
+1900-01-01 00:03:32.961000	212	You never know.
+1900-01-01 00:03:34.192500	214	How's, um...? How's the family?
+1900-01-01 00:03:36.757000	216	Marty's still totally paranoid.
+1900-01-01 00:03:39.551500	219	Oh, and...  Carol, why are you here, Carol?
+1900-01-01 00:03:43.868500	223	I'm pregnant.  Pregnant.
+1900-01-01 00:03:54.546000	234	Oh. Looks like she didn't leave in such a hurry after all.
+1900-01-01 00:03:57.653000	237	I think this is the episode of Three's Company...
+1900-01-01 00:04:00.051500	240	...where's there's some kind of misunderstanding.
+1900-01-01 00:04:05.327000	245	Then I've already seen this one.
+1900-01-01 00:04:09.998000	249	Are you through with that? Thanks.
+1900-01-01 00:04:11.417000	251	Yeah, sorry, the swallowing slowed me down.
+1900-01-01 00:04:15.921000	255	Whose little ball of paper is this?
+1900-01-01 00:04:17.172000	257	Oh, that would be mine.
+1900-01-01 00:04:18.611500	258	See, I wrote a note to myself, then I didn't need it.
+1900-01-01 00:04:21.156000	261	So I balled it up and now I wish I was dead.
+1900-01-01 00:04:26.285500	266	She already fluffed that pillow. Monica, you know, you already fluffed...
+1900-01-01 00:04:29.768000	269	But it's fine.
+1900-01-01 00:04:31.186000	271	Look, I'm sorry.
+1900-01-01 00:04:32.625500	272	I don't want to give them any more ammunition than they have.
+1900-01-01 00:04:35.941000	275	Yes, we know how cruel a parent can be...
+1900-01-01 00:04:37.714000	277	...about the flatness of a child's pillow.
+1900-01-01 00:04:41.051000	281	Monica? Hi. Um...
+1900-01-01 00:04:44.095000	284	Monica, um, you're scaring me.
+1900-01-01 00:04:48.454000	288	I mean, you're, like, all chaotic and twirly, you know?
+1900-01-01 00:04:51.665000	291	Not in a good way.
+1900-01-01 00:04:54.710000	294	Yeah, calm down.
+1900-01-01 00:04:57.066500	297	You don't see Ross getting all chaotic and twirly every time they come.
+1900-01-01 00:05:01.363000	301	That's because, as far as my parents are concerned, Ross can do no wrong.
+1900-01-01 00:05:04.532500	304	You see, he's the prince.
+1900-01-01 00:05:07.452000	307	Apparently they had some big ceremony before I was born.
+1900-01-01 00:05:12.561000	312	Ew, ew, ew.
+1900-01-01 00:05:14.125500	314	What?  Ugly Naked Guy got a ThighMaster.
+1900-01-01 00:05:19.526000	319	Ew.
+1900-01-01 00:05:21.925000	321	Has anybody seen my engagement ring?  Yeah, it's beautiful.
+1900-01-01 00:05:30.370000	330	Oh, God. Oh, God.
+1900-01-01 00:05:32.310500	332	Oh, God, oh, God, oh, God.  No, don't touch that.
+1900-01-01 00:05:38.587500	338	Oh, like I wasn't dreading tomorrow enough having to give it back to him.
+1900-01-01 00:05:42.716000	342	"Hi, Barry, remember me? I'm the girl...
+1900-01-01 00:05:44.509500	344	...that stomped on your heart in front of your entire family"
+1900-01-01 00:05:47.971500	347	Oh, God. Now I'm gonna have to return the ring, without the ring...
+1900-01-01 00:05:51.287500	351	...which makes it so much harder.
+1900-01-01 00:05:55.562000	355	Easy, Rach, we'll find it. Won't we?
+1900-01-01 00:05:57.481000	357	Okay, look.
+1900-01-01 00:06:01.693000	361	When did you have it on last?
+1900-01-01 00:06:03.070000	363	Doy. Probably right before she lost it.
+1900-01-01 00:06:07.908000	367	You don't get a lot of "doy" these days.
+1900-01-01 00:06:12.287500	372	I know I had it this morning.
+1900-01-01 00:06:15.353500	375	I know I had it when I was in the kitchen with...
+1900-01-01 00:06:18.627000	378	Dinah?
+1900-01-01 00:06:22.673000	382	Oh, don't be mad.
+1900-01-01 00:06:25.676000	385	You didn't.  Oh, I'm sorry.
+1900-01-01 00:06:28.241500	388	I gave you one job.
+1900-01-01 00:06:32.140500	392	Oh, but look how straight those noodles are.
+1900-01-01 00:06:36.499500	396	Monica, you know that's not how you look for an engagement ring in a lasagna.
+1900-01-01 00:06:42.609000	402	I just can't do it.
+1900-01-01 00:06:45.153000	405	Boys?
+1900-01-01 00:06:47.697000	407	We're going in.
+1900-01-01 00:06:57.416000	417	Hi.
+1900-01-01 00:06:59.439000	419	Oh, that is not a happy "hi."
+1900-01-01 00:07:02.254000	422	Carol's pregnant.
+1900-01-01 00:07:04.047000	424	Oh, I found it.
+1900-01-01 00:07:07.759500	427	Well, what...? What?
+1900-01-01 00:07:11.054000	431	Yeah.
+1900-01-01 00:07:13.348000	433	Do that for another two hours...
+1900-01-01 00:07:15.059000	435	...you might be where I am right about now.
+1900-01-01 00:07:19.208500	439	Kind of puts that whole pillow thing in perspective, huh, Mon?
+1900-01-01 00:07:24.151500	444	Well, now, how do you fit into this whole thing?
+1900-01-01 00:07:26.904000	446	Well, Carol says she and Susan want me to be involved.
+1900-01-01 00:07:30.970500	450	But if I'm not comfortable with it, I don't have to be involved.
+1900-01-01 00:07:35.495000	455	Basically, it's totally up to me.
+1900-01-01 00:07:36.809500	456	She is so great. I miss her.
+1900-01-01 00:07:44.546000	464	What does she mean by "involved"?
+1900-01-01 00:07:46.047500	466	I mean, presumably, the biggest part of your job is done.
+1900-01-01 00:07:50.886500	470	Anyway, they want me to go down to this...
+1900-01-01 00:07:53.597000	473	...sonogram thing with them tomorrow.
+1900-01-01 00:07:56.057000	476	So, what are you gonna do?
+1900-01-01 00:07:57.288500	477	I have no idea.
+1900-01-01 00:08:00.333000	480	No matter what I do, though, I'm still gonna be a father.
+1900-01-01 00:08:13.909000	493	Well, this is still ruined, right?
+1900-01-01 00:08:21.833500	501	Oh. Martha Lugwin's daughter is gonna call you.
+1900-01-01 00:08:26.943000	506	Mm. What's that curry taste?
+1900-01-01 00:08:30.133000	510	Curry.
+1900-01-01 00:08:32.802000	512	Mm.
+1900-01-01 00:08:36.014500	516	I think they're great. I really do.
+1900-01-01 00:08:38.725000	518	You remember the Lugwins?
+1900-01-01 00:08:40.810000	520	The big one had a thing for you, didn't she?
+1900-01-01 00:08:42.771000	522	They all had a thing for him.
+1900-01-01 00:08:44.731000	524	Oh, Mom.
+1900-01-01 00:08:45.983000	525	I'm sorry. Why is this girl going to call me?
+1900-01-01 00:08:49.486500	529	Oh, she just graduated, and she wants to be something in cooking or food...
+1900-01-01 00:08:53.073000	533	...or I don't know.
+1900-01-01 00:08:54.470500	534	Anyway, I told her you had a restaurant, so...
+1900-01-01 00:08:57.202500	537	No, Mom. I don't have a restaurant. I work in a restaurant.
+1900-01-01 00:09:00.080000	540	Well, they don't have to know that.
+1900-01-01 00:09:05.815500	545	Ross, could you come and help me with the spaghetti.
+1900-01-01 00:09:08.129000	548	Yes.
+1900-01-01 00:09:09.464500	549	Oh, we're having spaghetti. That's...
+1900-01-01 00:09:12.259000	552	...easy.
+1900-01-01 00:09:15.804500	555	I know this is going to sound unbelievably selfish on my part...
+1900-01-01 00:09:19.162000	559	...but were you planning on bringing up the whole baby/lesbian thing?
+1900-01-01 00:09:22.332000	562	Because I think it might take some of the heat off me.
+1900-01-01 00:09:28.734000	568	What that Rachel did to her life. We ran into her parents at the club.
+1900-01-01 00:09:32.821000	572	They were not playing very well.
+1900-01-01 00:09:34.156000	574	I'm not gonna tell you what they spent on that wedding...
+1900-01-01 00:09:36.846000	576	...but $40,000 is a lot of money.
+1900-01-01 00:09:42.831500	582	Well, at least she had the chance to leave a man at the altar.
+1900-01-01 00:09:49.213000	589	What's that supposed to mean?  Nothing.
+1900-01-01 00:09:52.445000	592	It's an expression.  No, it's not.
+1900-01-01 00:09:55.468000	595	Don't listen to your mother.
+1900-01-01 00:09:57.637000	597	You're independent and you always have been.
+1900-01-01 00:09:59.077000	599	Even when you were a kid, and you were chubby...
+1900-01-01 00:10:01.933500	601	...and you had no friends, you were just fine.
+1900-01-01 00:10:06.709500	606	You'd read alone in your room. And your puzzles...
+1900-01-01 00:10:13.799500	613	Look, there are people, like Ross, who need to shoot for the stars.
+1900-01-01 00:10:17.407500	617	With his museum and his papers getting published.
+1900-01-01 00:10:20.160500	620	Other people are satisfied with staying where they are.
+1900-01-01 00:10:23.330000	623	I'm telling you, these are the people who never get cancer.
+1900-01-01 00:10:30.149000	630	And I read about these women trying to have it all, and I thank God...
+1900-01-01 00:10:33.924000	633	...our little Harmonica doesn't seem to have that problem.
+1900-01-01 00:10:39.492000	639	So, Ross, what's going on with you?
+1900-01-01 00:10:43.934000	643	Any stories? No news, no little anecdotes to share with the folks?
+1900-01-01 00:10:47.270000	647	Okay, okay.
+1900-01-01 00:10:51.650000	651	Ahem. Look, I, uh... I realize you guys have been wondering...
+1900-01-01 00:10:55.549500	655	...what exactly happened between Carol and me.
+1900-01-01 00:10:58.865000	658	And so, well, here's the deal.
+1900-01-01 00:11:03.370000	663	Carol's a lesbian.
+1900-01-01 00:11:06.748500	666	She's living with a woman named Susan.
+1900-01-01 00:11:11.378000	671	She's pregnant with my child.
+1900-01-01 00:11:14.965000	674	And she and Susan are going to raise the baby.
+1900-01-01 00:11:22.180000	682	And you knew about this?
+1900-01-01 00:11:38.655000	698	Your folks are really that bad, huh?
+1900-01-01 00:11:41.053500	701	Well, you know, these people are pros.
+1900-01-01 00:11:45.891500	705	They know what they're doing. They take their time.
+1900-01-01 00:11:48.707000	708	They get the job done.
+1900-01-01 00:11:53.420000	713	Boy, I know they say that you can't change your parents.
+1900-01-01 00:11:56.777500	716	Boy, if you could, I'd want yours.
+1900-01-01 00:12:01.928000	721	Must pee.
+1900-01-01 00:12:04.764000	724	You know, it's even worse when you're twins.
+1900-01-01 00:12:06.058000	726	You're a twin?  Oh, yeah. We don't speak.
+1900-01-01 00:12:08.748000	728	She's like this highpowered, driven, careertype.
+1900-01-01 00:12:12.313000	732	What does she do?  She's a waitress.
+1900-01-01 00:12:16.047000	736	All right. You guys, I kind of gotta clean up now.
+1900-01-01 00:12:19.175000	739	Chandler, you're an only child, right? You don't have any of this.
+1900-01-01 00:12:22.491000	742	Well, no, although I did have an imaginary friend...
+1900-01-01 00:12:26.244000	746	...who my parents actually preferred.
+1900-01-01 00:12:29.560500	749	Hit the lights, please.
+1900-01-01 00:12:38.923000	758	How long was I in there?
+1900-01-01 00:12:41.885000	761	I'm just cleaning up.
+1900-01-01 00:12:44.054000	764	Oh, do you, uh...? Do you need any help?
+1900-01-01 00:12:47.015000	767	Um, okay, sure. Thanks.
+1900-01-01 00:12:55.690000	775	Anyway...
+1900-01-01 00:12:57.776000	777	So you nervous about Barry tomorrow?
+1900-01-01 00:13:00.779000	780	Oh, a little.  Mmhm.
+1900-01-01 00:13:05.200000	785	A lot.  Mmhm.
+1900-01-01 00:13:07.181500	787	So got any advice?
+1900-01-01 00:13:10.205000	790	You know, as someone who's recently been dumped.
+1900-01-01 00:13:14.730500	794	Well, you may want to steer clear of the word "dumped."
+1900-01-01 00:13:19.985500	799	Chances are he's going to be this broken shell of a man. You know?
+1900-01-01 00:13:24.323500	804	So you should try not to look too terrific. I know it'll be hard.
+1900-01-01 00:13:32.039500	812	Or, you know, hey, I'll go down there, and I'll give Barry back his ring.
+1900-01-01 00:13:36.606500	816	And you can go with Carol and Susan to the OBGYN.
+1900-01-01 00:13:42.258000	822	You've got Carol tomorrow.
+1900-01-01 00:13:46.282000	826	When did it get so complicated?
+1900-01-01 00:13:47.784000	827	Got me.
+1900-01-01 00:13:49.765500	829	Remember when we were in high school?  Yeah.
+1900-01-01 00:13:52.539000	832	I mean, didn't you think you' were gonna meet someone...
+1900-01-01 00:13:55.271000	835	...fall in love, and that'd be it?
+1900-01-01 00:14:03.508000	843	Ross?  Yes, yes.
+1900-01-01 00:14:06.989500	846	Oh. Man. I never thought I'd be here.
+1900-01-01 00:14:18.398000	858	Me neither.
+1900-01-01 00:14:36.750000	876	Hi. Sorry I'm late. I got stuck at work.
+1900-01-01 00:14:39.815500	879	There was this big dinosaur thing. Anyway...
+1900-01-01 00:14:44.173000	884	Hi.
+1900-01-01 00:14:46.322000	886	Ross, you remember Susan.  How could I forget?
+1900-01-01 00:14:49.262000	889	Ross.
+1900-01-01 00:14:50.784500	890	Hello, Susan. Good shake, good shake.
+1900-01-01 00:14:55.373000	895	So, uh, we're just waiting for?
+1900-01-01 00:14:58.083500	898	Dr. Oberman.  Dr. Oberman. Okay, and is he...?
+1900-01-01 00:15:00.711500	900	She.  Of course, "she."
+1900-01-01 00:15:04.986000	904	She, uh, familiar with our special situation?
+1900-01-01 00:15:09.240000	909	Yes, and she's very supportive.
+1900-01-01 00:15:10.492000	910	Great. Okay, that's great. Heh.
+1900-01-01 00:15:14.704000	914	No, I'm...
+1900-01-01 00:15:17.165000	917	Thanks.
+1900-01-01 00:15:32.889000	932	Quack, quack...
+1900-01-01 00:15:34.098500	934	...quack, quack, quack.
+1900-01-01 00:15:36.976000	936	Ross?
+1900-01-01 00:15:38.937000	938	That opens my cervix.
+1900-01-01 00:15:47.028500	947	Come on in.
+1900-01-01 00:15:49.447000	949	Are you sure?
+1900-01-01 00:15:50.886500	950	It's fine, it's fine. Robbie's gonna be here for hours.
+1900-01-01 00:15:53.493000	953	Huh?
+1900-01-01 00:15:58.414000	958	So how are you doing?
+1900-01-01 00:16:01.250000	961	I'm...
+1900-01-01 00:16:03.753000	963	I'm okay.
+1900-01-01 00:16:05.797000	965	You look great.
+1900-01-01 00:16:07.256000	967	Yeah, well...
+1900-01-01 00:16:09.321500	969	Dr. Farber, Jason Greenspan's gagging.
+1900-01-01 00:16:12.220000	972	Be right there. I'll be back in a second.
+1900-01-01 00:16:20.186000	980	I dumped him.
+1900-01-01 00:16:22.814000	982	Okay.
+1900-01-01 00:16:32.573000	992	Oh!
+1900-01-01 00:16:39.810500	999	Ross.  So, um...? So how's this going to work...
+1900-01-01 00:16:43.918000	1003	...ahem, you know, with us?
+1900-01-01 00:16:45.587000	1005	You know, when, like, important decisions have to be made?
+1900-01-01 00:16:48.715000	1008	Give me a "for instance."
+1900-01-01 00:16:50.591000	1010	Well, I don't know. Okay, okay.
+1900-01-01 00:16:51.968500	1011	How about with the baby's name?  Marlon...
+1900-01-01 00:16:55.263000	1015	Marlon. ...if it's a boy. Minnie, if it's a girl.
+1900-01-01 00:17:00.893000	1020	As in "Mouse"?
+1900-01-01 00:17:03.813000	1023	As in my grandmother.
+1900-01-01 00:17:06.212000	1026	Still, you say "Minnie," you hear "Mouse."
+1900-01-01 00:17:11.404000	1031	How about, um...
+1900-01-01 00:17:13.489000	1033	How about "Julia"?
+1900-01-01 00:17:15.408000	1035	Julia.
+1900-01-01 00:17:16.784000	1036	We agreed on Minnie.
+1900-01-01 00:17:18.370000	1038	It's funny, um, we agreed we'd spend our lives together.
+1900-01-01 00:17:21.393500	1041	Things change. Roll with the punches.
+1900-01-01 00:17:25.251000	1045	I believe Julia's on the table.
+1900-01-01 00:17:28.525500	1048	Oh. Sorry about that.
+1900-01-01 00:17:34.135000	1054	So, what have you been up to?
+1900-01-01 00:17:36.987500	1056	Oh. Not much.
+1900-01-01 00:17:39.995500	1059	I got a job.  Hey, that's great.
+1900-01-01 00:17:43.936000	1063	Why are you so tan?
+1900-01-01 00:17:46.189000	1066	Oh, I, uh...
+1900-01-01 00:17:48.649000	1068	I went to Aruba.
+1900-01-01 00:17:50.381000	1070	Oh, no. You went on our honeymoon alone?
+1900-01-01 00:17:53.488000	1073	No.
+1900-01-01 00:17:56.950000	1076	See, uh, I went with...
+1900-01-01 00:18:01.412000	1081	Now, this may hurt.  Me?
+1900-01-01 00:18:02.872000	1082	No.
+1900-01-01 00:18:06.959000	1086	I went with Mindy.
+1900-01-01 00:18:09.462000	1089	Mindy?
+1900-01-01 00:18:11.714000	1091	My maid of honor, Mindy?
+1900-01-01 00:18:13.258000	1093	Yeah, well, we're kind of a thing now.
+1900-01-01 00:18:18.012000	1098	Well, I'm...
+1900-01-01 00:18:20.973000	1100	You got plugs.
+1900-01-01 00:18:22.600500	1102	Careful, careful. They haven't quite taken yet.
+1900-01-01 00:18:25.812000	1105	And you got lenses.
+1900-01-01 00:18:28.565000	1108	But you hate sticking your finger in your eye.
+1900-01-01 00:18:31.818000	1111	Not for her.
+1900-01-01 00:18:34.070000	1114	Oh.
+1900-01-01 00:18:36.885500	1116	Listen, I really wanted to thank you.
+1900-01-01 00:18:40.159000	1120	Okay.
+1900-01-01 00:18:42.995000	1122	About a month ago, I wanted to hurt you...
+1900-01-01 00:18:44.601500	1124	...more than I've ever wanted to hurt anyone in my life.
+1900-01-01 00:18:47.416000	1127	And I'm an orthodontist.
+1900-01-01 00:18:49.710000	1129	Wow.
+1900-01-01 00:18:51.713000	1131	You know, you were right. I mean, I thought we were happy.
+1900-01-01 00:18:54.757000	1134	We weren't happy.
+1900-01-01 00:18:58.261000	1138	But with Mindy...
+1900-01-01 00:19:00.847000	1140	...now I'm happy.
+1900-01-01 00:19:03.307000	1143	Spit.  What?
+1900-01-01 00:19:05.268000	1145	Me.
+1900-01-01 00:19:08.292000	1148	Anyway, um...
+1900-01-01 00:19:12.171000	1152	I guess, uh... I guess this belongs to you.
+1900-01-01 00:19:16.258000	1156	And thank you for giving it to me.
+1900-01-01 00:19:19.324000	1159	Well, thank you for giving it back.
+1900-01-01 00:19:25.746000	1165	Hello.
+1900-01-01 00:19:30.063500	1170	Oh, please. What's wrong with Helen?
+1900-01-01 00:19:32.420000	1172	Helen Geller?
+1900-01-01 00:19:35.506500	1175	I don't think so.  Hello, it's not gonna be Helen Geller.
+1900-01-01 00:19:38.801000	1178	Thank you.
+1900-01-01 00:19:40.761000	1180	No. I mean, it's not Geller.
+1900-01-01 00:19:43.055000	1183	What, it's gonna be Helen Willick?
+1900-01-01 00:19:46.350500	1186	No, actually, um, we talked about Helen Willick Bunch.
+1900-01-01 00:19:51.460000	1191	Well, wait a minute. Why is she in the title?
+1900-01-01 00:19:54.358000	1194	Because it's my baby too.
+1900-01-01 00:19:56.215000	1196	That's funny. Really? I don't remember you making any sperm.
+1900-01-01 00:20:01.866500	1201	And we all know what a challenge that is.
+1900-01-01 00:20:05.203000	1205	Uhhuh. See?  All right, you two, stop it.
+1900-01-01 00:20:06.579500	1206	No, no. She gets a credit. Hey, I'm in there too.
+1900-01-01 00:20:09.937000	1209	Honestly. You're not actually suggesting Helen Willick Bunch Geller.
+1900-01-01 00:20:13.711000	1213	I think that borders on child abuse.
+1900-01-01 00:20:15.818000	1215	Of course not. I'm suggesting Geller Willick Bunch.
+1900-01-01 00:20:19.154500	1219	Oh, no. No, no, no. You see what he's doing?
+1900-01-01 00:20:22.428000	1222	He knows no one is gonna say all those names.
+1900-01-01 00:20:23.951000	1223	He knows they'll wind up calling her Geller. Then he gets his way.
+1900-01-01 00:20:26.578500	1226	My way? You think this is my way?
+1900-01-01 00:20:29.665000	1229	Believe me, of all the ways I ever imagined this moment in my life being...
+1900-01-01 00:20:33.252000	1233	...this is not my way. You know what? This is too hard.
+1900-01-01 00:20:36.568000	1236	Knock, knock. How are we today? Any nausea?
+1900-01-01 00:20:40.154000	1240	A little.  Just a little.
+1900-01-01 00:20:44.263000	1244	Well, I was just wondering about the mothertobe, but, uh, thanks for sharing.
+1900-01-01 00:20:47.870000	1247	Uh, lie back.
+1900-01-01 00:20:50.289000	1250	You know what? I'm gonna go.
+1900-01-01 00:20:52.500500	1252	Um, I don't think I can be involved in this particular family thing.
+1900-01-01 00:21:07.348000	1267	Oh, my God.
+1900-01-01 00:21:08.641000	1268	Look at that.
+1900-01-01 00:21:10.309000	1270	I know.
+1900-01-01 00:21:22.217500	1282	Well, isn't that amazing?
+1900-01-01 00:21:28.494000	1288	What are we supposed to be seeing here?
+1900-01-01 00:21:32.269000	1292	I don't know, but I think it's about to attack the Enterprise.
+1900-01-01 00:21:39.714000	1299	You know, if you tilt your head to the left and relax your eyes...
+1900-01-01 00:21:42.508500	1302	...it kind of looks like an old potato.
+1900-01-01 00:21:45.907500	1305	Then don't do that, all right?
+1900-01-01 00:21:50.474000	1310	Monica?
+1900-01-01 00:21:52.226000	1312	What do you think?
+1900-01-01 00:21:53.894000	1313	Mmhm.
+1900-01-01 00:21:56.522000	1316	Are you welling up?
+1900-01-01 00:21:57.982000	1317	No.  You are.
+1900-01-01 00:21:59.317000	1319	You are. You're welling up.  No, I'm not.
+1900-01-01 00:22:02.215500	1322	You're gonna be an aunt.  Oh, shut up.
+1900-01-01 00:22:06.407000	1326	Hi, Mindy.
+1900-01-01 00:22:07.658500	1327	Hi, it's Rachel.
+1900-01-01 00:22:10.807500	1330	Yeah, I'm fine. I saw Barry today.
+1900-01-01 00:22:14.582000	1334	Oh, yeah, yeah, he told me.
+1900-01-01 00:22:16.146000	1336	No, it's okay. Really, it's okay.
+1900-01-01 00:22:19.545500	1339	I hope you two are very happy. I really do.
+1900-01-01 00:22:23.174500	1343	And, Min, you know, if everything works out...
+1900-01-01 00:22:27.032000	1347	...and you guys end up getting married and having kids and everything...
+1900-01-01 00:22:30.994500	1350	...I just hope they have his old hairline and your old nose.
+1900-01-01 00:22:39.357000	1359	Okay, I know it was a cheap shot, but I feel so much better now.
