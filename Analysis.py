@@ -17,3 +17,11 @@ def drew_seq(times,data_seq,save_path):
     for idx,pic in enumerate(data_seq):
         name=times[idx]
         drew_output_pic(pic,name,save_path)
+
+def write_sents(times,data_seq,save_path,vocab):
+    assert len(times)==len(data_seq)
+    f=open(save_path+'test_output.txt')
+    for idx,txt in enumerate(data_seq):
+        sent=[vocab.idx2word(word) for word in txt]
+        f.writelines(sent)
+    f.close()
