@@ -37,6 +37,10 @@ class batch_norm(object):
                 with tf.control_dependencies([ema_apply_op]):
                     mean, var = tf.identity(batch_mean), tf.identity(batch_var)
         else:
+            self.beta = tf.get_variable("beta", [shape[-1]],
+                                        initializer=tf.constant_initializer(0.))
+            self.gamma = tf.get_variable("gamma", [shape[-1]],
+                                         initializer=tf.random_normal_initializer(1., 0.02))
             try:
                 batch_mean, batch_var = tf.nn.moments(x, [0, 1, 2], name='moments')
             except:
