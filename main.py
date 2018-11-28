@@ -117,7 +117,7 @@ def main(_):
         print('Test model.......')
         print('establish the model...')
         # config.batch_size = len(test_data)
-        config.trained_emb = False
+
         model = Model.seq_pic2seq_pic(config, vocab)
         print('Reload model from checkpoints.....')
         ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)

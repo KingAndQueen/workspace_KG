@@ -16,10 +16,10 @@ class batch_norm(object):
             self.ema = tf.train.ExponentialMovingAverage(decay=self.momentum)
             self.name = name
 
-    def __call__(self, x, train=True):
+    def __call__(self, x, type='train'):
         shape = x.get_shape().as_list()
 
-        if train:
+        if type=='train':
             with tf.variable_scope(self.name) as scope:
                 self.beta = tf.get_variable("beta", [shape[-1]],
                                             initializer=tf.constant_initializer(0.))

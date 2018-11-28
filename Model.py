@@ -228,16 +228,16 @@ class seq_pic2seq_pic():
             z_concat = tf.concat([self._random_z, reduced_text_embedding],1)
             z_ = linear(z_concat, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
             h0 = tf.reshape(z_, [-1, s16, y16, self._cov_size * 8])
-            h0 = tf.nn.relu(self.g_bn0(h0))
+            h0 = tf.nn.relu(self.g_bn0(h0,type=self.model_type))
 
             h1 = deconv2d(h0, [self._batch_size, s8, y8, self._cov_size * 4], name='g_h1')
-            h1 = tf.nn.relu(self.g_bn1(h1))
+            h1 = tf.nn.relu(self.g_bn1(h1,type=self.model_type))
 
             h2 = deconv2d(h1, [self._batch_size, s4, y4, self._cov_size * 2], name='g_h2')
-            h2 = tf.nn.relu(self.g_bn2(h2))
+            h2 = tf.nn.relu(self.g_bn2(h2,type=self.model_type))
 
             h3 = deconv2d(h2, [self._batch_size, s2, y2, self._cov_size * 1], name='g_h3')
-            h3 = tf.nn.relu(self.g_bn3(h3))
+            h3 = tf.nn.relu(self.g_bn3(h3, type=self.model_type))
 
             h4 = deconv2d(h3, [self._batch_size, s, y, 3], name='g_h4')
 
