@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*
+
 import os, sys
-from PIL import Image
+import codecs
+# from PIL import Image
 import pdb
 # open a pipe from a command
-import tensorflow as tf
-import time
+# import tensorflow as tf
+# import time
 import numpy as np
 from datetime import datetime
 # unlegal='[^A-Za-z\ \']'
@@ -50,19 +53,23 @@ def read_srt(data_dir):
     # for file_ in train_file:
 
     # pdb.set_trace()
-    f = open(data_dir,'r')
+    f = codecs.open(data_dir,'r')
     lines = f.readlines()
     f.close()
     times,sentences=[],[]
     TIME_FORMAT='%H:%M:%S,%f'
     # pdb.set_trace()
-    start=False
+    # start=False
     for no,line in enumerate(lines):
         line=line.strip()
-        if line.find('http://bbs.btbbt.com')>0:
-            start=True
-        if len(line)>0 and start:
+        # if line.find('http://bbs.btbbt.com')>0:
+        #     start=True
+        if len(line)>0 :
             if ' --> 'in line:
+                if '（' in lines[no+1] or '<i>♪' in lines[no+1]:
+                    # pdb.set_trace()
+                    continue
+
                 time_begin=line[:line.index(' --> ')]
                 time_end=line[line.index(' --> ')+5:]
                 # pdb.set_trace()
@@ -74,9 +81,18 @@ def read_srt(data_dir):
                 else:
                     time_=time_end
                 times.append(time_)
-
-                sentence=lines[no+1].strip()
-                sentences.append(sentence)
+                sent=lines[no+1]
+                sent=sent.replace('-','')
+                sent =sent.strip()
+                if ':' in sent:
+                    if len(sent)-sent.index(':')<=1:
+                        sent=sent[:sent.index(':')]
+                    else:
+                        # pdb.set_trace()
+                        sent=sent[sent.index(':')+1:]
+                sent = sent.strip()
+                sentences.append(sent)
+    # pdb.set_trace()
     if len(times)==len(sentences):
         print('length of frames:',len(times))
         return times,sentences
@@ -95,7 +111,7 @@ def map_time(times, sentences,video_file_path,output_path):
         output_time_sents = str(time_) + '\t'+str(time_s)+'\t'+ sentences[no]+'\n'
         output.write(output_time_sents)
     output.close()
-    # pdb.set_trace()
+    pdb.set_trace()
     for no,time_ in enumerate(times):
         time_orig = datetime.strptime('00:00:00,0', TIME_FORMAT)
         relate_time = time_ - time_orig
@@ -108,8 +124,9 @@ if __name__ == "__main__":
     video_file_path = './data/video/S01E01.mp4'
     # pic_video(video_file_path, 32)
     # pdb.set_trace()
-    srt_file_path='./data/subtitle/Friends.S01E01.The.One.Where.Monica.Gets.A.New.Roommate.DVDRip.AC3.3.2ch.JOG.srt'
+    srt_file_path='./data/subtitle/Friends.S01E01.1994.BD.x264-10bit.720P.AAC.Mysilu.eng&chs.srt'
     times,sentences=read_srt(srt_file_path)
+    # pdb.set_trace()
     map_time(times,sentences,video_file_path,'./data/frame/S01E01.txt')
 
 
