@@ -120,7 +120,7 @@ def main(_):
         config.trained_emb = False
         model = Model.seq_pic2seq_pic(config, vocab)
         print('Reload model from checkpoints.....')
-        ckpt = tf.train.get_checkpoint_state(config.checkpoints_dir)
+        ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
         model.saver.restore(sess, ckpt.model_checkpoint_path)
         test_model(sess, model, test_data, vocab,times[:-len(test_data)])
 
