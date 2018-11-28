@@ -37,6 +37,11 @@ class batch_norm(object):
                 with tf.control_dependencies([ema_apply_op]):
                     mean, var = tf.identity(batch_mean), tf.identity(batch_var)
         else:
+            try:
+                batch_mean, batch_var = tf.nn.moments(x, [0, 1, 2], name='moments')
+            except:
+                batch_mean, batch_var = tf.nn.moments(x, [0, 1], name='moments')
+            self.ema_mean, self.ema_var = self.ema.average(batch_mean), self.ema.average(batch_var)
             mean, var = self.ema_mean, self.ema_var
 
         normed = tf.nn.batch_norm_with_global_normalization(
