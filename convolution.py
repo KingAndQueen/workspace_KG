@@ -19,35 +19,27 @@ class batch_norm(object):
     def __call__(self, x, type='train'):
         shape = x.get_shape().as_list()
 
-        if type=='train':
-            with tf.variable_scope(self.name) as scope:
-                self.beta = tf.get_variable("beta", [shape[-1]],
-                                            initializer=tf.constant_initializer(0.))
-                self.gamma = tf.get_variable("gamma", [shape[-1]],
-                                             initializer=tf.random_normal_initializer(1., 0.02))
-
-                try:
-                    batch_mean, batch_var = tf.nn.moments(x, [0, 1, 2], name='moments')
-                except:
-                    batch_mean, batch_var = tf.nn.moments(x, [0, 1], name='moments')
-
-                ema_apply_op = self.ema.apply([batch_mean, batch_var])
-                self.ema_mean, self.ema_var = self.ema.average(batch_mean), self.ema.average(batch_var)
-
-                with tf.control_dependencies([ema_apply_op]):
-                    mean, var = tf.identity(batch_mean), tf.identity(batch_var)
-        else:
+        with tf.variable_scope(self.name) as scope:
             self.beta = tf.get_variable("beta", [shape[-1]],
                                         initializer=tf.constant_initializer(0.))
             self.gamma = tf.get_variable("gamma", [shape[-1]],
                                          initializer=tf.random_normal_initializer(1., 0.02))
-            try:
-                batch_mean, batch_var = tf.nn.moments(x, [0, 1, 2], name='moments')
-            except:
-                batch_mean, batch_var = tf.nn.moments(x, [0, 1], name='moments')
-            self.ema_mean, self.ema_var = self.ema.average(batch_mean), self.ema.average(batch_var)
-            mean, var = self.ema_mean, self.ema_var
 
+            try:
+                batch_mean, batch_var = tf.nn.moments(x, [0, 1, 2], name='moments_2')
+            except:
+                batch_mean, batch_var = tf.nn.moments(x, [0, 1], name='moments_1')
+
+            ema_apply_op = self.ema.apply([batch_mean, batch_var])
+            self.ema_mean, self.ema_var = self.ema.average(batch_mean), self.ema.average(batch_var)
+            # pdb.set_trace()
+        if type == 'train':
+            with tf.control_dependencies([ema_apply_op]):
+                mean, var = tf.identity(batch_mean), tf.identity(batch_var)
+        else:
+
+            mean, var = self.ema_mean, self.ema_var
+        # pdb.set_trace()
         normed = tf.nn.batch_norm_with_global_normalization(
             x, mean, var, self.beta, self.gamma, self.epsilon, scale_after_normalization=True)
 

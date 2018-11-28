@@ -34,7 +34,7 @@ class seq_pic2seq_pic():
         self.g_bn1 = convolution.batch_norm(name='g_bn1')
         self.g_bn2 = convolution.batch_norm(name='g_bn2')
         self.g_bn3 = convolution.batch_norm(name='g_bn3')
-        self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
+
         with tf.variable_scope('embedding'):
             self._word_embedding = tf.get_variable(name='embedding_word',
                                                    shape=[self._vocab.vocab_size, config.recurrent_dim])
@@ -45,7 +45,7 @@ class seq_pic2seq_pic():
 
         def _encoding_txt_sentence(person_emb, name='', GPU_id=0):
             # with tf.device('/device:GPU:%d' %GPU_id):
-            with tf.variable_scope('encoding_role_' + name):
+            with tf.variable_scope('encoding_TXT_' + name):
                 encoding_single_layer = tf.nn.rnn_cell.GRUCell(config.recurrent_dim, reuse=tf.get_variable_scope().reuse)
                 encoding_cell = tf.nn.rnn_cell.MultiRNNCell([encoding_single_layer] * config.layers)
                 encoding_cell = tf.contrib.rnn.DropoutWrapper(encoding_cell, 0.8, 0.8, 0.8)
@@ -62,7 +62,7 @@ class seq_pic2seq_pic():
                 attention_states = array_ops.concat(top_output, 1)
                 return  attention_states,state_fw
 
-        encoder_txt_output, question_state = _encoding_txt_sentence(question_emb,'question_bi-encode')  # monica_sate.shape=layers*[batch_size,neurons]
+        encoder_txt_output, question_state = _encoding_txt_sentence(question_emb,name='question')  # monica_sate.shape=layers*[batch_size,neurons]
         # pdb.set_trace()
         def _encoding_pic_frame(frame,name='',GPU_id=0):
             with tf.variable_scope('encoding_frame_' + name):
@@ -278,6 +278,7 @@ class seq_pic2seq_pic():
         grads_and_vars = [(self.add_gradient_noise(g), v) for g, v in grads_and_vars]
 
         self.train_op = self._opt.apply_gradients(grads_and_vars=grads_and_vars, name='train_op')
+        self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
         with tf.variable_scope('output_information'):
             self.predict_pic = predict_pic
             self.predict_txt = tf.argmax(response_txt, axis=2)
