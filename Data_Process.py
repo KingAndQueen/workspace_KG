@@ -205,7 +205,10 @@ def read_pic_file_1E(data_path):
     for no,file in enumerate(files):
         # image_raw = tf.gfile.FastGFile(file, 'rb').read()
         # img = tf.image.decode_jpeg(image_raw,channels=3)
-        img=np.asarray(Image.open(file))
+        try:
+            img=np.asarray(Image.open(file))
+        except:
+            pdb.set_trace()
         # print(img.shape)
         # pdb.set_trace()
         file_name=os.path.basename(file)
