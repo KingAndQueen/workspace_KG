@@ -30,7 +30,7 @@ def pic_video(file_path, time_ss):
         t = time_ss
 
         # t is seconds in the video
-        os.system("ffmpeg -i " + file_path + " -y -f mjpeg -ss %s -t 1 %s_frame_%i.jpg" % (t, season, t))
+        os.system("ffmpeg -i " + file_path + " -y -f mjpeg -s 350x240 -ss %s -t 1 %s_frame_%i.jpg" % (t, season, t))
     return True
 
 
