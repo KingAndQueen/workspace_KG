@@ -26,8 +26,8 @@ tf.flags.DEFINE_integer('stop_limit', 5, 'number of evaluation loss is greater t
 tf.flags.DEFINE_string("checkpoint_path", "./checkpoints/", "Directory to save checkpoints")
 #tf.flags.DEFINE_string("summary_path", "./summary/", "Directory to save summary")
 tf.flags.DEFINE_string("model_type", "train", "whether to train or test model")
-tf.flags.DEFINE_integer('img_size_x',480,'generate pic size in X')
-tf.flags.DEFINE_integer('img_size_y',640,'generate pic size in Y')
+tf.flags.DEFINE_integer('img_size_x',180,'generate pic size in X')
+tf.flags.DEFINE_integer('img_size_y',320,'generate pic size in Y')
 tf.flags.DEFINE_integer('noise_dim',100,'dim in noise')
 tf.flags.DEFINE_integer('convolution_dim',64,'dim in the first layer pic decoder')
 
