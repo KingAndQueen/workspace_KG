@@ -14,10 +14,10 @@ tf.flags.DEFINE_float("learn_rate", 0.001, "Learning rate for SGD.")
 # tf.flags.DEFINE_float("learning_rate_decay_factor", 0.5, 'if loss not decrease, multiple the lr with factor')
 tf.flags.DEFINE_float("max_grad_norm", 5.0, "Clip gradients to this norm.")
 tf.flags.DEFINE_integer("evaluation_interval", 10, "Evaluate and print results every x epochs")
-tf.flags.DEFINE_integer("batch_size", 2, "Batch size for training.")  # should consider the size of validation set
+tf.flags.DEFINE_integer("batch_size", 4, "Batch size for training.")  # should consider the size of validation set
 tf.flags.DEFINE_integer("head", 3, "head number of attention")
-tf.flags.DEFINE_integer("epochs", 4, "Number of epochs to train for.")
-tf.flags.DEFINE_integer('check_epoch',2, 'evaluation times')
+tf.flags.DEFINE_integer("epochs", 200, "Number of epochs to train for.")
+tf.flags.DEFINE_integer('check_epoch',20, 'evaluation times')
 tf.flags.DEFINE_integer("layers", 3, "the num layers of RNN.")
 tf.flags.DEFINE_integer("recurrent_dim", 100, "Embedding size for neural networks.")
 tf.flags.DEFINE_string("data_dir", "data/frame/", "Directory containing tasks")
@@ -88,7 +88,7 @@ def test_model(sess, model, test_data, vocab,times):
         pred_txts.append(pred_txt)
 
     Analysis.drew_seq(times,pred_pics,'./result/')
-    Analysis.write_sents(times,pred_txts,'/result/',vocab)
+    Analysis.write_sents(times,pred_txts,'./result/',vocab)
     test_loss=test_loss / len(test_data)
     print('test total loss:', test_loss)
 
