@@ -255,7 +255,7 @@ def vectorize_batch(input_data_txt,output_data_txt,input_data_pic,output_data_pi
         output_batch_pic=output_data_pic[_:_+batch_size]
         weight_batch_txt=weights[_:_+batch_size]
         batches_data.append([input_batch_txt,output_batch_txt,input_batch_pic,output_batch_pic,weight_batch_txt])
-    pdb.set_trace()
+    # pdb.set_trace()
     return batches_data
 
 def store_vocab(vocab, data_path):
