@@ -106,13 +106,18 @@ def main(_):
     valid_data,test_data=model_selection.train_test_split(valid_test_data,test_size=0.5,shuffle=False)
     # pdb.set_trace()
     sess = tf.Session()
+    test_ignore_len=len(test_data)-int(len(test_data)/config.batch_size)*config.batch_size
+    if test_ignore_len>0:
+        times_test=times[-len(test_data):-test_ignore_len]
+    else:
+        times_test=times[-len(test_data):]
     if config.model_type == 'train':
         print('establish the model...')
         model = Model.seq_pic2seq_pic(config, vocab)
         sess.run(tf.global_variables_initializer())
         train_model(sess, model, train_data, valid_data)
         # config.model_type = 'test'
-        test_model(sess, model, test_data, vocab,times[:-len(test_data)])
+        test_model(sess, model, test_data, vocab,times_test)
 
     if config.model_type == 'test' :
         print('Test model.......')
@@ -123,7 +128,7 @@ def main(_):
         print('Reload model from checkpoints.....')
         ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
         model.saver.restore(sess, ckpt.model_checkpoint_path)
-        test_model(sess, model, test_data, vocab,times[:-len(test_data)])
+        test_model(sess, model, test_data, vocab,times_test)
 
 if __name__ == "__main__":
     tf.app.run()
