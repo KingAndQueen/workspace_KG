@@ -3,8 +3,10 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
+import pdb
 
 def drew_output_pic(data_patch,case_name,save_path):
+    pdb.set_trace()
     plt.figure(figsize=(160, 320))
     plt.imshow(data_patch)
     if not os.path.exists(save_path):
