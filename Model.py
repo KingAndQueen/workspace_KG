@@ -243,7 +243,7 @@ class seq_pic2seq_pic():
 
             predict_pic=tf.tanh(h4) / 2. + 0.5
 
-
+        # pdb.set_trace()
         with tf.variable_scope('loss_function_pic'):
             # pdb.set_trace()
             # cov_input=convolution.deeplab_v3(predict_pic)

@@ -4,11 +4,12 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 import pdb
-
+import numpy as np
 def drew_output_pic(data_patch,case_name,save_path):
     pdb.set_trace()
+    batch_imgs=np.split(data_patch,2,axis=0)
     plt.figure(figsize=(160, 320))
-    plt.imshow(data_patch)
+    plt.imshow(batch_imgs)
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     plt.savefig(save_path+case_name+'.png')
