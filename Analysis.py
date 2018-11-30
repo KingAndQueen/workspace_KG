@@ -1,14 +1,14 @@
 
-import matplotlib
-matplotlib.use('TkAgg')
+# import matplotlib
+# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import os
 
 def drew_output_pic(data_patch,case_name,save_path):
-    plt.figure(figsize=(35, 15))
+    plt.figure(figsize=(160, 320))
     plt.imshow(data_patch)
-    if not os.path.exists('./imgs'):
-        os.makedirs('./imgs')
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
     plt.savefig(save_path+case_name+'.png')
     plt.close('all')
 
