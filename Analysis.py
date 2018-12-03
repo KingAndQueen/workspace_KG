@@ -3,8 +3,19 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
+import time
 import pdb
 import numpy as np
+
+def run_tm(func):
+    def inner(*N):
+        start = time.time()
+        res = func(*N)
+        end = time.time()
+        tm = end - start
+        # print('time : %f' % tm)
+        return res, tm
+    return inner
 
 def drew_output_pic(data_patch,case_name,save_path):
     # pdb.set_trace()
@@ -25,7 +36,8 @@ def drew_seq(times,data_seq,save_path):
 def write_sents(times,data_seq,save_path,vocab):
     assert len(times)==len(data_seq)
     f=open(save_path+'test_output.txt','w')
-    for idx,txt in enumerate(data_seq):
-        sent=[vocab.idx2word(word) for word in txt]
-        f.writelines(sent)
+    for idx,txt2 in enumerate(data_seq):
+        for txt in txt2:
+            sent=[vocab.idx2word(word) for word in txt]
+            f.writelines(sent)
     f.close()
