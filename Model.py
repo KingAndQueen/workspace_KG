@@ -46,8 +46,11 @@ class seq_pic2seq_pic():
         def _encoding_txt_sentence(person_emb, name='', GPU_id=0):
             # with tf.device('/device:GPU:%d' %GPU_id):
             with tf.variable_scope('encoding_TXT_' + name):
-                encoding_single_layer = tf.nn.rnn_cell.GRUCell(config.recurrent_dim, reuse=tf.get_variable_scope().reuse)
-                encoding_cell = tf.nn.rnn_cell.MultiRNNCell([encoding_single_layer] * config.layers)
+                # encoding_single_layer = tf.nn.rnn_cell.GRUCell(config.recurrent_dim, reuse=tf.get_variable_scope().reuse)
+                # encoding_cell = tf.nn.rnn_cell.MultiRNNCell([encoding_single_layer] * config.layers)
+                #, reuse=tf.get_variable_scope().reuse)
+                encoding_single_layer = [tf.nn.rnn_cell.GRUCell(config.recurrent_dim) for n in range(config.layers)]
+                encoding_cell = tf.nn.rnn_cell.MultiRNNCell(encoding_single_layer)
                 encoding_cell = tf.contrib.rnn.DropoutWrapper(encoding_cell, 0.8, 0.8, 0.8)
                 # for future test
                 # output, state_fw, state_bw = rnn.static_bidirectional_rnn(cell_fw=encoding_cell, cell_bw=encoding_cell,
@@ -57,7 +60,7 @@ class seq_pic2seq_pic():
                 # state = tf.matmul(state, tf.get_variable('Wi', [3, 2 * self._embedding_size, self._embedding_size],
                 #                                          dtype=tf.float32, trainable=True))
 
-                top_output = [array_ops.reshape(o, [-1, 1, encoding_single_layer.output_size]) for o in output]
+                top_output = [array_ops.reshape(o, [-1, 1, config.recurrent_dim]) for o in output]
                 # pdb.set_trace()
                 attention_states = array_ops.concat(top_output, 1)
                 return  attention_states,state_fw
@@ -131,10 +134,12 @@ class seq_pic2seq_pic():
                     a.set_shape([None, attn_size])
 
                 with tf.variable_scope("rnn_decoder"):
-                    single_cell_de = tf.nn.rnn_cell.GRUCell(self._embedding_size)
+                    # single_cell_de = tf.nn.rnn_cell.GRUCell(self._embedding_size)
+                    # cell_de = tf.nn.rnn_cell.MultiRNNCell([single_cell_de] * self._layers)
                     # $ cell_de = single_cell_de
                     # if self._layers > 1:
-                    cell_de = tf.nn.rnn_cell.MultiRNNCell([single_cell_de] * self._layers)
+                    single_cell = [tf.nn.rnn_cell.GRUCell(self._embedding_size) for n in range(self._layers)]
+                    cell_de =tf.nn.rnn_cell.MultiRNNCell(single_cell)
                     cell_de = tf.contrib.rnn.DropoutWrapper(cell_de, 0.5, 1, 0.5)
                     # cell_de = core_rnn_cell.OutputProjectionWrapper(cell_de, self._vocab_size)
                     outputs = []
