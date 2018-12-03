@@ -413,7 +413,7 @@ def resnet_v2(inputs,
 
             if global_pool:
                 # Global average pooling.
-                net = tf.reduce_mean(net, [1, 2], name='pool5', keep_dims=True)
+                net = tf.reduce_mean(net, [1, 2], name='pool5', keepdims=True)
                 end_points['global_pool'] = net
             if num_classes is not None:
                 net = slim.conv2d(net, num_classes, [1, 1], activation_fn=None,
@@ -562,7 +562,7 @@ def atrous_spatial_pyramid_pooling(net, scope, depth=256, reuse=None):
     with tf.variable_scope(scope, reuse=reuse):
         feature_map_size = tf.shape(net)
 
-        image_level_features = tf.reduce_mean(net, [1, 2], name='image_level_global_pool', keep_dims=True)
+        image_level_features = tf.reduce_mean(net, [1, 2], name='image_level_global_pool', keepdims=True)
         image_level_features = slim.conv2d(image_level_features, depth, [1, 1], scope="image_level_conv_1x1",
                                            activation_fn=None)
         image_level_features = tf.image.resize_bilinear(image_level_features,

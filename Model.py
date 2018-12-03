@@ -4,7 +4,7 @@ from tensorflow.python.ops import embedding_ops
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import nn_ops
 from tensorflow.python.ops import rnn
-from tensorflow.python.ops import rnn_cell_impl
+from tensorflow.contrib.rnn.python.ops import core_rnn_cell
 from tensorflow.python.util import nest
 import pdb
 import convolution
@@ -123,7 +123,7 @@ class seq_pic2seq_pic():
                 else:
                     loop_function = None
 
-                linear = rnn_cell_impl._linear
+                linear = core_rnn_cell._linear
                 batch_attn_size = array_ops.stack([batch_size, attn_size])
                 attns = [array_ops.zeros(batch_attn_size, dtype=tf.float32) for _ in range(num_heads)]
                 # pdb.set_trace()
