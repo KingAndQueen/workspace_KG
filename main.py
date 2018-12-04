@@ -99,7 +99,7 @@ def main(_):
     input_data_txt, output_data_txt, input_data_pic, output_data_pic,weights,times = Data_Process.get_input_output_data(config.data_dir, vocab, config.sentence_size)
     # config.img_size_x =input_data_pic.values()[0].shape[0]
     # config.img_size_y=input_data_pic.values()[0].shape[1]
-
+    # pdb.set_trace()
     batches_data=Data_Process.vectorize_batch(input_data_txt,output_data_txt,input_data_pic,output_data_pic,weights,config.batch_size)
     print('data processed,vocab size:', vocab.vocab_size)
     train_data,valid_test_data=model_selection.train_test_split(batches_data,test_size=0.2,shuffle=False)

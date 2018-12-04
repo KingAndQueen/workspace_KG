@@ -2,7 +2,7 @@
 import os, sys
 import codecs
 # from PIL import Image
-
+import re
 import pdb
 # open a pipe from a command
 # import tensorflow as tf
@@ -170,6 +170,12 @@ class Vocab():
     def vocab_size(self):
         return len(self.idx2word)
 
+def tokenize(sent):
+    '''Return the tokens of a sentence including punctuation.
+    >>> tokenize('Bob dropped the apple. Where is the apple?')
+    ['Bob', 'dropped', 'the', 'apple', '.', 'Where', 'is', 'the', 'apple', '?']
+    '''
+    return [x.strip() for x in re.split('(\W+)?', sent) if x.strip()]
 
 def read_txt_file_1E(data_path, vocabulary, sentence_size):
     f = open(data_path, 'r')
@@ -181,9 +187,14 @@ def read_txt_file_1E(data_path, vocabulary, sentence_size):
         sent_idx=[]
         weight=[]
         sent=sent.strip()
+        sent=sent.split('\t')
+        sent=sent[-1]
+        # pdb.set_trace()
+        sent=tokenize(sent)
         sent=sent[:sentence_size-1]
         for word in sent:
             idx=vocabulary.word_to_index(word)
+            # pdb.set_trace()
             weight.append(1)
             sent_idx.append(idx)
         sent_idx.append(vocabulary.word_to_index('<eos>'))
