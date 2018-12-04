@@ -37,7 +37,7 @@ def write_sents(times,data_seq,save_path,vocab):
     assert len(times)==len(data_seq)
     f=open(save_path+'test_output.txt','w')
     for idx,txt2 in enumerate(data_seq):
-        for txt in txt2:
+        # for txt in txt2:
             sent=[vocab.idx2word(word) for word in txt]
             f.writelines(sent)
     f.close()

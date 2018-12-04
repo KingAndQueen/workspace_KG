@@ -25,7 +25,7 @@ tf.flags.DEFINE_integer('sentence_size', 30, 'length of word in a sentence')
 tf.flags.DEFINE_integer('stop_limit', 5, 'number of evaluation loss is greater than train loss  ')
 tf.flags.DEFINE_string("checkpoint_path", "./checkpoints/", "Directory to save checkpoints")
 #tf.flags.DEFINE_string("summary_path", "./summary/", "Directory to save summary")
-tf.flags.DEFINE_string("model_type", "train", "whether to train or test model")
+tf.flags.DEFINE_string("model_type", "test", "whether to train or test model")
 tf.flags.DEFINE_integer('img_size_x',160,'generate pic size in X')
 tf.flags.DEFINE_integer('img_size_y',320,'generate pic size in Y')
 tf.flags.DEFINE_integer('noise_dim',100,'dim in noise')
@@ -84,8 +84,8 @@ def test_model(sess, model, test_data, vocab,times):
         loss, pred_pic,pred_txt = model.steps(sess, data_test,z_noise, step_type='test')
         test_loss += loss
 
-        pred_pics.append(pred_pic)
-        pred_txts.append(pred_txt)
+        pred_pics+=pred_pic
+        pred_txts+=pred_txt
 
     Analysis.drew_seq(times,pred_pics,'./result/')
     Analysis.write_sents(times,pred_txts,'./result/',vocab)
@@ -106,11 +106,12 @@ def main(_):
     valid_data,test_data=model_selection.train_test_split(valid_test_data,test_size=0.5,shuffle=False)
     # pdb.set_trace()
     sess = tf.Session()
-    test_ignore_len=len(test_data)-int(len(test_data)/config.batch_size)*config.batch_size
+    test_ignore_len=len(times)-len(batches_data)*config.batch_size
     if test_ignore_len>0:
-        times_test=times[-len(test_data):-test_ignore_len]
+        times_test=times[-len(test_data)*config.batch_size:-test_ignore_len]
     else:
-        times_test=times[-len(test_data):]
+        times_test=times[-len(test_data)*config.batch_size:]
+    pdb.set_trace()
     if config.model_type == 'train':
         print('establish the model...')
         model = Model.seq_pic2seq_pic(config, vocab)
