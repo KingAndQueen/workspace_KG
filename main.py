@@ -84,8 +84,8 @@ def test_model(sess, model, test_data, vocab,times):
         loss, pred_pic,pred_txt = model.steps(sess, data_test,z_noise, step_type='test')
         test_loss += loss
 
-        pred_pics+=pred_pic
-        pred_txts+=pred_txt
+        pred_pics.append(pred_pic)
+        pred_txts.append(pred_txt)
 
     Analysis.drew_seq(times,pred_pics,'./result/')
     Analysis.write_sents(times,pred_txts,'./result/',vocab)

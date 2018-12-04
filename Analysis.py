@@ -19,25 +19,34 @@ def run_tm(func):
 
 def drew_output_pic(data_patch,case_name,save_path):
     # pdb.set_trace()
-    for i in range(data_patch.shape[0]):
+    # for i in range(data_patch.shape[0]):
         plt.figure(figsize=(160, 320))
-        plt.imshow(data_patch[i])
+        plt.imshow(data_patch)
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         plt.savefig(save_path+str(case_name)+'.png')
         plt.close('all')
 
-def drew_seq(times,data_seq,save_path):
+def drew_seq(times,data_seq_batch,save_path):
+    data_seq=[]
+    for pic_batch in data_seq_batch:
+        for pic in pic_batch:
+            data_seq.append(pic)
     assert len(times)==len(data_seq)
     for idx,pic in enumerate(data_seq):
         name=times[idx]
         drew_output_pic(pic,name,save_path)
 
-def write_sents(times,data_seq,save_path,vocab):
+def write_sents(times,data_seq_batch,save_path,vocab):
+    data_seq = []
+    for txt_batch in data_seq_batch:
+        for txt in txt_batch:
+            data_seq.append(txt)
+
     assert len(times)==len(data_seq)
     f=open(save_path+'test_output.txt','w')
     for idx,txt2 in enumerate(data_seq):
         # for txt in txt2:
-            sent=[vocab.idx2word(word) for word in txt]
+            sent=[vocab.idx2word(word) for word in txt2]
             f.writelines(sent)
     f.close()
