@@ -50,5 +50,5 @@ def write_sents(times,data_seq_batch,save_path,vocab):
         # for txt in txt2:
             sent=[vocab.index_to_word(word) for word in txt2]
             f.writelines(sent)
-            print('\n')
+            f.write('\n')
     f.close()
