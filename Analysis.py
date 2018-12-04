@@ -20,7 +20,7 @@ def run_tm(func):
 def drew_output_pic(data_patch,case_name,save_path):
     # pdb.set_trace()
     # for i in range(data_patch.shape[0]):
-        plt.figure(figsize=(160, 320))
+        plt.figure(figsize=(16, 32))
         plt.imshow(data_patch)
         if not os.path.exists(save_path):
             os.makedirs(save_path)
