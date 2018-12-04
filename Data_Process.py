@@ -245,9 +245,9 @@ def get_input_output_data(data_path, vocabulary,sentence_size):
 
     output_times=copy.copy(times)
     output_times.pop(0)
-    assert len(times) == len(output_data_txt)
+    assert len(output_times) == len(output_data_txt)
 
-    return input_data_txt,output_data_txt,input_data_pic,output_data_pic, output_weights,times
+    return input_data_txt,output_data_txt,input_data_pic,output_data_pic, output_weights,output_times
 
 def vectorize_batch(input_data_txt,output_data_txt,input_data_pic,output_data_pic,weights,batch_size):
     batches_data=[]
