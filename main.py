@@ -108,7 +108,7 @@ def main(_):
     sess = tf.Session()
     test_ignore_len=len(times)-len(batches_data)*config.batch_size
     if test_ignore_len>0:
-        times_test=times[-len(test_data)*config.batch_size:-test_ignore_len]
+        times_test=times[-(len(test_data)*config.batch_size+test_ignore_len):-test_ignore_len]
     else:
         times_test=times[-len(test_data)*config.batch_size:]
     # pdb.set_trace()
