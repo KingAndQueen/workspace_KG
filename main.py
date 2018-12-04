@@ -111,7 +111,7 @@ def main(_):
         times_test=times[-len(test_data)*config.batch_size:-test_ignore_len]
     else:
         times_test=times[-len(test_data)*config.batch_size:]
-    pdb.set_trace()
+    # pdb.set_trace()
     if config.model_type == 'train':
         print('establish the model...')
         model = Model.seq_pic2seq_pic(config, vocab)
