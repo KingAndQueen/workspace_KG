@@ -249,34 +249,32 @@ class seq_pic2seq_pic():
             predict_pic=tf.tanh(h4) / 2. + 0.5
 
         # pdb.set_trace()
-        def compute_error(real, fake, label):
-            return tf.reduce_mean(
-                label * tf.expand_dims(tf.reduce_mean(tf.abs(fake - real), reduction_indices=[3]), -1),
-                reduction_indices=[1, 2])  # diversity loss
+        def compute_error(real, fake):
+            return tf.reduce_mean(tf.abs(fake - real))
+                 # diversity loss
 
         with tf.variable_scope('loss_function_pic'):
             # pdb.set_trace()
             # cov_input=convolution.deeplab_v3(predict_pic)
             # cov_output=convolution.deeplab_v3(self._output_pic)
+            # sp=self.img_size_x
 
-            vgg_real = build_vgg19(real_image)
-            vgg_fake = build_vgg19(generator, reuse=True)
-            p0 = compute_error(vgg_real['input'], vgg_fake['input'], label)
-            p1 = compute_error(vgg_real['conv1_2'], vgg_fake['conv1_2'], label) / 1.6
-            p2 = compute_error(vgg_real['conv2_2'], vgg_fake['conv2_2'],
-                               tf.image.resize_area(label, (sp // 2, sp))) / 2.3
-            p3 = compute_error(vgg_real['conv3_2'], vgg_fake['conv3_2'],
-                               tf.image.resize_area(label, (sp // 4, sp // 2))) / 1.8
-            p4 = compute_error(vgg_real['conv4_2'], vgg_fake['conv4_2'],
-                               tf.image.resize_area(label, (sp // 8, sp // 4))) / 2.8
-            p5 = compute_error(vgg_real['conv5_2'], vgg_fake['conv5_2'], tf.image.resize_area(label, (
-            sp // 16, sp // 8))) * 10 / 0.8  # weights lambda are collected at 100th epoch
+            vgg_real = build_vgg19(self._real_pic)
+            vgg_fake = build_vgg19(predict_pic, reuse=True)
+            p0 = compute_error(vgg_real['input'], vgg_fake['input'])
+            p1 = compute_error(vgg_real['conv1_2'], vgg_fake['conv1_2']) / 1.6
+            p2 = compute_error(vgg_real['conv2_2'], vgg_fake['conv2_2']) / 2.3
+            p3 = compute_error(vgg_real['conv3_2'], vgg_fake['conv3_2']) / 1.8
+            p4 = compute_error(vgg_real['conv4_2'], vgg_fake['conv4_2']) / 2.8
+            p5 = compute_error(vgg_real['conv5_2'], vgg_fake['conv5_2']) * 10 / 0.8  # weights lambda are collected at 100th epoch
             content_loss = p0 + p1 + p2 + p3 + p4 + p5
-            G_loss = tf.reduce_sum(tf.reduce_min(content_loss, reduction_indices=0)) * 0.999 + tf.reduce_sum(
-                tf.reduce_mean(content_loss, reduction_indices=0)) * 0.001
 
-            pic_loss=tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._output_pic,predict_pic),name='pic_loss'),[1,2,3]))
-            pic_loss=tf.reduce_mean(pic_loss,name='l2_mean_loss_pic')
+            # pdb.set_trace()
+            G_loss = tf.reduce_sum(tf.reduce_min(content_loss)) * 0.999 + tf.reduce_sum(
+                tf.reduce_mean(content_loss)) * 0.001
+
+            # pic_loss=tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._real_pic,predict_pic),name='pic_loss'),[1,2,3]))
+            # pic_loss=tf.reduce_mean(pic_loss,name='l2_mean_loss_pic')
 
         with tf.variable_scope('loss_function_txt'):
             # with tf.device('/device:GPU:1'):
@@ -296,7 +294,7 @@ class seq_pic2seq_pic():
             cross_entropy_sentence = cross_entropy_sentence / weight_sum
             txt_loss = tf.reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
 
-        all_loss=pic_loss + txt_loss
+        all_loss=G_loss + txt_loss
         self.loss=all_loss
         # pdb.set_trace()
         grads_and_vars=self._opt.compute_gradients(all_loss)
@@ -325,7 +323,7 @@ class seq_pic2seq_pic():
         self._response = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Response')
         self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
         self._input_pic= tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,3], name='frame_input')
-        self._output_pic=tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,3], name='frame_output')
+        self._real_pic=tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,3], name='frame_output')
         self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
 
@@ -341,7 +339,7 @@ class seq_pic2seq_pic():
                      self._question: input_batch_txt,
                      self._weight:weight_batch_txt,
                      self._input_pic:input_batch_pic,
-                     self._output_pic:output_batch_pic,
+                     self._real_pic:output_batch_pic,
                      self._random_z:noise}
 
         if step_type == 'train':
