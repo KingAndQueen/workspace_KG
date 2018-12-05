@@ -208,7 +208,7 @@ def read_txt_file_1E(data_path, vocabulary, sentence_size):
         weights.append(copy.copy(weight))
     return sents_idx,weights
 
-def read_pic_file_1E(data_path):
+def read_pic_file_1E(data_path,gray=False):
     files_name = os.listdir(data_path)
     files = [os.path.join(data_path, f) for f in files_name if 'txt' not in f]
     sec_map_pic={}
@@ -217,8 +217,11 @@ def read_pic_file_1E(data_path):
         # image_raw = tf.gfile.FastGFile(file, 'rb').read()
         # img = tf.image.decode_jpeg(image_raw,channels=3)
         try:
-            img=np.asarray(Image.open(file).convert('L'))
-            img=np.expand_dims(img,-1)
+            if gray:
+                img=np.asarray(Image.open(file).convert('L'))
+                img=np.expand_dims(img,-1)
+            else:
+                img = np.asarray(Image.open(file))
         except:
             pdb.set_trace()
         # print(img.shape)
@@ -233,11 +236,11 @@ def read_pic_file_1E(data_path):
     return pic_output,sorted(sec_map_pic.keys())
 
 
-def get_input_output_data(data_path, vocabulary,sentence_size):
+def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
     files_name = os.listdir(data_path)
     data_path_txt=[file_name for file_name in files_name if 'txt' in file_name ]
     txt,weights=read_txt_file_1E(data_path+data_path_txt[0],vocabulary,sentence_size)
-    pic,times=read_pic_file_1E(data_path)
+    pic,times=read_pic_file_1E(data_path,gray)
     input_data_txt=copy.copy(txt)
     _=input_data_txt.pop()
     output_data_txt = copy.copy(txt)

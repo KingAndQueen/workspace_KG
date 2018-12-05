@@ -30,7 +30,7 @@ tf.flags.DEFINE_integer('img_size_x',160,'generate pic size in X')
 tf.flags.DEFINE_integer('img_size_y',320,'generate pic size in Y')
 tf.flags.DEFINE_integer('noise_dim',100,'dim in noise')
 tf.flags.DEFINE_integer('convolution_dim',64,'dim in the first layer pic decoder')
-
+tf.flags.DEFINE_bool('gray',True,'picture is gray or not')
 
 config = tf.flags.FLAGS
 
@@ -96,7 +96,7 @@ def test_model(sess, model, test_data, vocab,times):
 
 def main(_):
     vocab = Data_Process.Vocab()
-    input_data_txt, output_data_txt, input_data_pic, output_data_pic,weights,times = Data_Process.get_input_output_data(config.data_dir, vocab, config.sentence_size)
+    input_data_txt, output_data_txt, input_data_pic, output_data_pic,weights,times = Data_Process.get_input_output_data(config.data_dir, vocab, config.sentence_size,config.gray)
     # config.img_size_x =input_data_pic.values()[0].shape[0]
     # config.img_size_y=input_data_pic.values()[0].shape[1]
     # pdb.set_trace()
