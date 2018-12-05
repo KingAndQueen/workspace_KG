@@ -217,7 +217,8 @@ def read_pic_file_1E(data_path):
         # image_raw = tf.gfile.FastGFile(file, 'rb').read()
         # img = tf.image.decode_jpeg(image_raw,channels=3)
         try:
-            img=np.asarray(Image.open(file))
+            img=np.asarray(Image.open(file).convert('L'))
+            img=np.expand_dims(img,-1)
         except:
             pdb.set_trace()
         # print(img.shape)

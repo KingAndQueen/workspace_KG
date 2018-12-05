@@ -322,8 +322,8 @@ class seq_pic2seq_pic():
         self._question = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Question')
         self._response = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Response')
         self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
-        self._input_pic= tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,3], name='frame_input')
-        self._real_pic=tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,3], name='frame_output')
+        self._input_pic= tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,1], name='frame_input')
+        self._real_pic=tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,1], name='frame_output')
         self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
 
