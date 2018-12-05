@@ -48,7 +48,7 @@ def write_sents(times,data_seq_batch,save_path,vocab):
     f=open(save_path+'test_output.txt','w')
     for idx,txt2 in enumerate(data_seq):
         # for txt in txt2:
-            sent=[vocab.index_to_word(word) for word in txt2]
+            sent=[vocab.index_to_word(word)+' ' for word in txt2]
             f.writelines(sent)
             f.write('\n')
     f.close()
