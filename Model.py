@@ -226,13 +226,13 @@ class seq_pic2seq_pic():
             encoder_pic_output_reshape=tf.reshape(encoder_pic_output,[self._batch_size,-1])
             response_txt_reshape=tf.reshape(response_txt,[self._batch_size,-1])
             encoder_txt_output_reshape=tf.reshape(encoder_txt_output,[self._batch_size,-1])
-            all_infor=tf.concat([encoder_pic_output_reshape,response_txt_reshape,encoder_txt_output_reshape],1)
+            all_infor=tf.concat([response_txt_reshape,encoder_txt_output_reshape,encoder_pic_output_reshape],1)
             #try more input method to replace all_infor # test1
             # pdb.set_trace()
             reduced_text_embedding = lrelu(linear(all_infor, self._cov_size, 'g_embedding'))
             # reduced_text_embedding = lrelu(all_infor)
-            z_concat = tf.concat([self._random_z, reduced_text_embedding],1)
-            z_ = linear(z_concat, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
+            # z_concat = tf.concat([self._random_z, reduced_text_embedding],1)
+            z_ = linear(reduced_text_embedding, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
             h0 = tf.reshape(z_, [-1, s16, y16, self._cov_size * 8])
             h0 = tf.nn.relu(self.g_bn0(h0,type=self.model_type))
 
@@ -325,7 +325,7 @@ class seq_pic2seq_pic():
         self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
         self._input_pic= tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,1], name='frame_input')
         self._real_pic=tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,1], name='frame_output')
-        self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
+        # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
 
     def steps(self, sess, data_dict,noise, step_type='train'):
@@ -340,8 +340,8 @@ class seq_pic2seq_pic():
                      self._question: input_batch_txt,
                      self._weight:weight_batch_txt,
                      self._input_pic:input_batch_pic,
-                     self._real_pic:output_batch_pic,
-                     self._random_z:noise}
+                     self._real_pic:output_batch_pic}
+                     # self._random_z:noise}
 
         if step_type == 'train':
             output_list = [self.loss, self.train_op]
