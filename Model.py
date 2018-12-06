@@ -229,8 +229,8 @@ class seq_pic2seq_pic():
             all_infor=tf.concat([encoder_pic_output_reshape,response_txt_reshape,encoder_txt_output_reshape],1)
             #try more input method to replace all_infor # test1
             # pdb.set_trace()
-            # reduced_text_embedding = lrelu(linear(all_infor, self._embedding_size, 'g_embedding'))
-            reduced_text_embedding = lrelu(all_infor)
+            reduced_text_embedding = lrelu(linear(all_infor, self._cov_size, 'g_embedding'))
+            # reduced_text_embedding = lrelu(all_infor)
             z_concat = tf.concat([self._random_z, reduced_text_embedding],1)
             z_ = linear(z_concat, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
             h0 = tf.reshape(z_, [-1, s16, y16, self._cov_size * 8])
