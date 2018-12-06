@@ -25,7 +25,7 @@ def drew_output_pic(data_patch, case_name, save_path, gray=False):
     # for i in range(data_patch.shape[0]):
     plt.figure(figsize=(16, 32))
     if gray:
-        plt.imshow(data_patch, 'gray')
+        plt.imshow(np.squeeze(data_patch), cmap='gray')
     else:
         plt.imshow(data_patch)
     if not os.path.exists(save_path):
