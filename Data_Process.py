@@ -209,8 +209,8 @@ def read_txt_file_1E(data_path, vocabulary, sentence_size):
     return sents_idx,weights
 
 def read_pic_file_1E(data_path,gray=False):
-    files_name = os.listdir(data_path)
-    files = [os.path.join(data_path, f) for f in files_name if 'txt' not in f]
+
+    files = [f for f in data_path if 'txt' not in f]
     sec_map_pic={}
     pic_output=[]
     for no,file in enumerate(files):
@@ -227,20 +227,31 @@ def read_pic_file_1E(data_path,gray=False):
         # print(img.shape)
         # pdb.set_trace()
         file_name=os.path.basename(file)
-        sec=int(file_name[file_name.rindex('_')+1:file_name.rindex('.')])
+        sec=file_name[file_name.index('.')+1:file_name.rindex('.')]
         sec_map_pic[sec]=img
-
-    for key in sorted(sec_map_pic.keys()):
+    sorted_keys=sorted(sec_map_pic.keys(), key=lambda x: (x.split('.')[0], int(x.split('_')[-1])))
+    for key in sorted_keys:
         pic_output.append(sec_map_pic[key])
     # pdb.set_trace()
-    return pic_output,sorted(sec_map_pic.keys())
+    return pic_output,sorted_keys
 
 
 def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
-    files_name = os.listdir(data_path)
-    data_path_txt=[file_name for file_name in files_name if 'txt' in file_name ]
-    txt,weights=read_txt_file_1E(data_path+data_path_txt[0],vocabulary,sentence_size)
-    pic,times=read_pic_file_1E(data_path,gray)
+    files_name=os.listdir(data_path)
+    dir_list=[]
+    for path in files_name:
+        path = os.path.join(data_path,path)
+        if os.path.isdir(path):
+            dir_list.append(path)
+    files_list=[]
+    for path_ in dir_list:
+        files_name = os.listdir(path_)
+        for file_name in files_name:
+            files_list.append(os.path.join(path_,file_name))
+    # pdb.set_trace()
+    data_path_txt=[file_name for file_name in files_list if 'txt' in file_name ]
+    txt,weights=read_txt_file_1E(data_path_txt[0],vocabulary,sentence_size)
+    pic,times=read_pic_file_1E(files_list,gray)
     input_data_txt=copy.copy(txt)
     _=input_data_txt.pop()
     output_data_txt = copy.copy(txt)
