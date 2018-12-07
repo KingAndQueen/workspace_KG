@@ -300,7 +300,7 @@ class seq_pic2seq_pic():
             cross_entropy_sentence = cross_entropy_sentence / weight_sum
             txt_loss = tf.reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
 
-        all_loss = pic_loss + txt_loss
+        all_loss = pic_loss + 0*txt_loss
         self.loss = all_loss
         # pdb.set_trace()
         grads_and_vars = self._opt.compute_gradients(all_loss)
