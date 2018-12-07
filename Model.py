@@ -82,7 +82,7 @@ class seq_pic2seq_pic():
         # pdb.set_trace()
         encoder_pic_output = _encoding_pic_frame(self._input_pic)
 
-        pdb.set_trace()
+        # pdb.set_trace()
         def decoder_txt_atten(encoder_state, attention_states, ans_emb, model_type='train'):
             with tf.variable_scope('speaker'):
                 num_heads = 1
@@ -302,7 +302,7 @@ class seq_pic2seq_pic():
             cross_entropy_sentence = cross_entropy_sentence / weight_sum
             txt_loss = tf.reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
 
-        all_loss = pic_loss + 0.001*txt_loss
+        all_loss = pic_loss + 0.0*txt_loss
         self.loss = all_loss
         # pdb.set_trace()
         grads_and_vars = self._opt.compute_gradients(all_loss)
