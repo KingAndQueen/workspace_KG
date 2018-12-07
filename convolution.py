@@ -423,8 +423,8 @@ def resnet_v2(inputs,
                     net = tf.squeeze(net, [1, 2], name='SpatialSqueeze')
                     end_points[sc.name + '/spatial_squeeze'] = net
                 end_points['predictions'] = slim.softmax(net, scope='predictions')
+            # pdb.set_trace()
             return net, end_points
-
 
 resnet_v2.default_image_size = 480
 

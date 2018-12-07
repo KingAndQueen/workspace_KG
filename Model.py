@@ -8,7 +8,7 @@ from tensorflow.contrib.rnn.python.ops import core_rnn_cell
 from tensorflow.python.util import nest
 import pdb
 import convolution
-from VGG import build_vgg19
+# from VGG import build_vgg19
 
 
 class seq_pic2seq_pic():
@@ -76,11 +76,13 @@ class seq_pic2seq_pic():
                 # resident net
                 resnet_output, end_points = convolution.resnet_v2_50(frame)
                 # resnet_output=end_points['resnet_v2_50' + '/block4'] # test2 to check the full connections effect
-                return resnet_output
+                encode_output=end_points['encoding_frame_'+name+'/resnet_v2_50/block4']
+                return encode_output
 
         # pdb.set_trace()
         encoder_pic_output = _encoding_pic_frame(self._input_pic)
 
+        pdb.set_trace()
         def decoder_txt_atten(encoder_state, attention_states, ans_emb, model_type='train'):
             with tf.variable_scope('speaker'):
                 num_heads = 1
@@ -300,15 +302,16 @@ class seq_pic2seq_pic():
             cross_entropy_sentence = cross_entropy_sentence / weight_sum
             txt_loss = tf.reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
 
-        all_loss = pic_loss + 0*txt_loss
+        all_loss = pic_loss + 0.001*txt_loss
         self.loss = all_loss
         # pdb.set_trace()
         grads_and_vars = self._opt.compute_gradients(all_loss)
         # pdb.set_trace()
-        grads_and_vars = [(tf.clip_by_norm(g, self._max_grad_norm), v) for g, v in grads_and_vars]
-        grads_and_vars = [(self.add_gradient_noise(g), v) for g, v in grads_and_vars]
+        # grads_and_vars = [(tf.clip_by_norm(g, self._max_grad_norm), v) for g, v in grads_and_vars]
+        # grads_and_vars = [(self.add_gradient_noise(g), v) for g, v in grads_and_vars]
 
         self.train_op = self._opt.apply_gradients(grads_and_vars=grads_and_vars, name='train_op')
+        # pdb.set_trace()
         self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
         with tf.variable_scope('output_information'):
             self.predict_pic = predict_pic
