@@ -19,7 +19,7 @@ tf.flags.DEFINE_integer("head", 3, "head number of attention")
 tf.flags.DEFINE_integer("epochs", 100, "Number of epochs to train for.")
 tf.flags.DEFINE_integer('check_epoch',20, 'evaluation times')
 tf.flags.DEFINE_integer("layers", 3, "the num layers of RNN.")
-tf.flags.DEFINE_integer("recurrent_dim", 100, "Embedding size for neural networks.")
+tf.flags.DEFINE_integer("recurrent_dim", 64, "Embedding size for neural networks.")
 tf.flags.DEFINE_string("data_dir", "data/", "Directory containing tasks")
 tf.flags.DEFINE_integer('sentence_size', 30, 'length of word in a sentence')
 tf.flags.DEFINE_integer('stop_limit', 5, 'number of evaluation loss is greater than train loss  ')
@@ -29,7 +29,7 @@ tf.flags.DEFINE_string("model_type", "train", "whether to train or test model")
 tf.flags.DEFINE_integer('img_size_x',160,'generate pic size in X')
 tf.flags.DEFINE_integer('img_size_y',320,'generate pic size in Y')
 tf.flags.DEFINE_integer('noise_dim',64,'dim in noise')
-tf.flags.DEFINE_integer('convolution_dim',64,'dim in the first layer pic decoder')
+tf.flags.DEFINE_integer('convolution_dim',32,'dim in the first layer pic decoder')
 tf.flags.DEFINE_bool('gray',True,'picture is gray or not, placeholder also should be changed')
 
 config = tf.flags.FLAGS
@@ -115,6 +115,7 @@ def main(_):
     if config.model_type == 'train':
         print('establish the model...')
         model = Model.seq_pic2seq_pic(config, vocab)
+        # pdb.set_trace()
         sess.run(tf.global_variables_initializer())
         train_model(sess, model, train_data, valid_data)
         # config.model_type = 'test'

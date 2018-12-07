@@ -77,10 +77,13 @@ class seq_pic2seq_pic():
                 resnet_output, end_points = convolution.resnet_v2_50(frame)
                 # resnet_output=end_points['resnet_v2_50' + '/block4'] # test2 to check the full connections effect
                 encode_output=end_points['encoding_frame_'+name+'/resnet_v2_50/block4']
+                # pdb.set_trace()
+
                 return encode_output
 
         # pdb.set_trace()
-        encoder_pic_output = _encoding_pic_frame(self._input_pic)
+        encoder_pic_output = _encoding_pic_frame(self._input_pic,'one')
+
 
         # pdb.set_trace()
         def decoder_txt_atten(encoder_state, attention_states, ans_emb, model_type='train'):
@@ -211,6 +214,7 @@ class seq_pic2seq_pic():
         def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
             shape = input_.get_shape().as_list()
 
+
             with tf.variable_scope(scope or "Linear"):
                 matrix = tf.get_variable("Matrix", [shape[1], output_size], tf.float32,
                                          tf.random_normal_initializer(stddev=stddev))
@@ -219,6 +223,7 @@ class seq_pic2seq_pic():
                 if with_w:
                     return tf.matmul(input_, matrix) + bias, matrix, bias
                 else:
+                    # pdb.set_trace()
                     return tf.matmul(input_, matrix) + bias
 
         def lrelu(x, leak=0.2, name="lrelu"):
@@ -254,6 +259,10 @@ class seq_pic2seq_pic():
             h4 = deconv2d(h3, [self._batch_size, s, y, 1], name='g_h4')
 
             predict_pic = tf.tanh(h4) / 2. + 0.5
+
+            # print '$$$$$$$$$$$$$$$$$$$$'
+            # print h4.get_shape().as_list()
+            # print '$$$$$$$$$$$$$$$$$$$$'
 
         # pdb.set_trace()
         def compute_error(real, fake):
