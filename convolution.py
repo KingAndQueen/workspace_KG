@@ -426,7 +426,7 @@ def resnet_v2(inputs,
             # pdb.set_trace()
             return net, end_points
 
-resnet_v2.default_image_size = 480
+resnet_v2.default_image_size = 160
 
 
 def resnet_v2_block(scope, base_depth, num_units, stride):
@@ -453,7 +453,7 @@ def resnet_v2_block(scope, base_depth, num_units, stride):
     }])
 
 
-resnet_v2.default_image_size = 224
+resnet_v2.default_image_size = 160
 
 
 def resnet_v2_50(inputs,
