@@ -234,7 +234,7 @@ class seq_pic2seq_pic():
             y = self.img_size_y
             s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
             y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
-            encoder_pic_output_reshape = tf.reshape(encoder_pic_output, [self._batch_size, -1])
+            # encoder_pic_output_reshape = tf.reshape(encoder_pic_output, [self._batch_size, -1])
             # response_txt_reshape=tf.reshape(response_txt,[self._batch_size,-1])
             # encoder_txt_output_reshape=tf.reshape(encoder_txt_output,[self._batch_size,-1])
             # all_infor=tf.concat([response_txt_reshape,encoder_txt_output_reshape,encoder_pic_output_reshape],1)
@@ -243,7 +243,9 @@ class seq_pic2seq_pic():
             # reduced_text_embedding = lrelu(linear(all_infor, self._cov_size, 'g_embedding'))
             # reduced_text_embedding = lrelu(all_infor)
             # z_concat = tf.concat([self._random_z, reduced_text_embedding],1)
-            z_ = linear(encoder_pic_output_reshape, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
+            # z_ = linear(encoder_pic_output_reshape, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
+            z_=encoder_pic_output
+            # pdb.set_trace()
             h0 = tf.reshape(z_, [-1, s16, y16, self._cov_size * 8])
             h0 = tf.nn.relu(self.g_bn0(h0, type=self.model_type))
 
