@@ -93,7 +93,6 @@ def test_model(sess, model, test_data, vocab,times):
     print('test total loss:', test_loss)
 
 
-
 def main(_):
     vocab = Data_Process.Vocab()
     input_data_txt, output_data_txt, input_data_pic, output_data_pic,weights,times = Data_Process.get_input_output_data(config.data_dir, vocab, config.sentence_size,config.gray)
@@ -119,7 +118,7 @@ def main(_):
         sess.run(tf.global_variables_initializer())
         train_model(sess, model, train_data, valid_data)
         # config.model_type = 'test'
-        test_model(sess, model, test_data, vocab,times_test)
+        test_model(sess, model, train_data[:9], vocab,times_test) ################## test_data
 
     if config.model_type == 'test' :
         print('Test model.......')
