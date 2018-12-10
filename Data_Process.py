@@ -178,11 +178,15 @@ def tokenize(sent):
     return [x.strip() for x in re.split('(\W+)?', sent) if x.strip()]
 
 def read_txt_file_1E(data_path, vocabulary, sentence_size):
-    f = open(data_path, 'r')
-    sents=f.readlines()
-    f.close()
+    sents=[]
+    for data_txt in data_path:
+        f = open(data_txt, 'r')
+        sent=f.readlines()
+        sents+=sent
+        f.close()
     sents_idx=[]
     weights=[]
+    # pdb.set_trace()
     for sent in sents:
         sent_idx=[]
         weight=[]
@@ -250,7 +254,7 @@ def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
             files_list.append(os.path.join(path_,file_name))
     # pdb.set_trace()
     data_path_txt=[file_name for file_name in files_list if 'txt' in file_name ]
-    txt,weights=read_txt_file_1E(data_path_txt[0],vocabulary,sentence_size)
+    txt,weights=read_txt_file_1E(data_path_txt,vocabulary,sentence_size)
     pic,times=read_pic_file_1E(files_list,gray)
     input_data_txt=copy.copy(txt)
     # _=input_data_txt.pop()  ################ test the deCNN process
