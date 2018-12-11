@@ -35,37 +35,37 @@ class seq_pic2seq_pic():
         self.g_bn2 = convolution.batch_norm(name='g_bn2')
         self.g_bn3 = convolution.batch_norm(name='g_bn3')
 
-        with tf.variable_scope('embedding'):
-            self._word_embedding = tf.get_variable(name='embedding_word',
-                                                   shape=[self._vocab.vocab_size, config.recurrent_dim])
-            _Question = tf.unstack(self._question, axis=1)
-            question_emb = [tf.nn.embedding_lookup(self._word_embedding, word) for word in _Question]
-            _Response = tf.unstack(self._response, axis=1)
-            response_emb = [tf.nn.embedding_lookup(self._word_embedding, word) for word in _Response]
+        # with tf.variable_scope('embedding'):
+        #     self._word_embedding = tf.get_variable(name='embedding_word',
+        #                                            shape=[self._vocab.vocab_size, config.recurrent_dim])
+        #     _Question = tf.unstack(self._question, axis=1)
+        #     question_emb = [tf.nn.embedding_lookup(self._word_embedding, word) for word in _Question]
+        #     _Response = tf.unstack(self._response, axis=1)
+        #     response_emb = [tf.nn.embedding_lookup(self._word_embedding, word) for word in _Response]
 
-        def _encoding_txt_sentence(person_emb, name='', GPU_id=0):
-            # with tf.device('/device:GPU:%d' %GPU_id):
-            with tf.variable_scope('encoding_TXT_' + name):
-                # encoding_single_layer = tf.nn.rnn_cell.GRUCell(config.recurrent_dim, reuse=tf.get_variable_scope().reuse)
-                # encoding_cell = tf.nn.rnn_cell.MultiRNNCell([encoding_single_layer] * config.layers)
-                #, reuse=tf.get_variable_scope().reuse)
-                encoding_single_layer = [tf.nn.rnn_cell.GRUCell(config.recurrent_dim) for n in range(config.layers)]
-                encoding_cell = tf.nn.rnn_cell.MultiRNNCell(encoding_single_layer)
-                encoding_cell = tf.contrib.rnn.DropoutWrapper(encoding_cell, 0.8, 0.8, 0.8)
-                # for future test
-                # output, state_fw, state_bw = rnn.static_bidirectional_rnn(cell_fw=encoding_cell, cell_bw=encoding_cell,
-                #                                                           inputs=person_emb, dtype=tf.float32)
-                output, state_fw = rnn.static_rnn(encoding_cell, person_emb, dtype=tf.float32)
-                # state = tf.concat([state_fw, state_bw], -1)
-                # state = tf.matmul(state, tf.get_variable('Wi', [3, 2 * self._embedding_size, self._embedding_size],
-                #                                          dtype=tf.float32, trainable=True))
+        # def _encoding_txt_sentence(person_emb, name='', GPU_id=0):
+        #     # with tf.device('/device:GPU:%d' %GPU_id):
+        #     with tf.variable_scope('encoding_TXT_' + name):
+        #         # encoding_single_layer = tf.nn.rnn_cell.GRUCell(config.recurrent_dim, reuse=tf.get_variable_scope().reuse)
+        #         # encoding_cell = tf.nn.rnn_cell.MultiRNNCell([encoding_single_layer] * config.layers)
+        #         #, reuse=tf.get_variable_scope().reuse)
+        #         encoding_single_layer = [tf.nn.rnn_cell.GRUCell(config.recurrent_dim) for n in range(config.layers)]
+        #         encoding_cell = tf.nn.rnn_cell.MultiRNNCell(encoding_single_layer)
+        #         encoding_cell = tf.contrib.rnn.DropoutWrapper(encoding_cell, 0.8, 0.8, 0.8)
+        #         # for future test
+        #         # output, state_fw, state_bw = rnn.static_bidirectional_rnn(cell_fw=encoding_cell, cell_bw=encoding_cell,
+        #         #                                                           inputs=person_emb, dtype=tf.float32)
+        #         output, state_fw = rnn.static_rnn(encoding_cell, person_emb, dtype=tf.float32)
+        #         # state = tf.concat([state_fw, state_bw], -1)
+        #         # state = tf.matmul(state, tf.get_variable('Wi', [3, 2 * self._embedding_size, self._embedding_size],
+        #         #                                          dtype=tf.float32, trainable=True))
+        #
+        #         top_output = [array_ops.reshape(o, [-1, 1, config.recurrent_dim]) for o in output]
+        #         # pdb.set_trace()
+        #         attention_states = array_ops.concat(top_output, 1)
+        #         return  attention_states,state_fw
 
-                top_output = [array_ops.reshape(o, [-1, 1, config.recurrent_dim]) for o in output]
-                # pdb.set_trace()
-                attention_states = array_ops.concat(top_output, 1)
-                return  attention_states,state_fw
-
-        encoder_txt_output, question_state = _encoding_txt_sentence(question_emb,name='question')  # monica_sate.shape=layers*[batch_size,neurons]
+        # encoder_txt_output, question_state = _encoding_txt_sentence(question_emb,name='question')  # monica_sate.shape=layers*[batch_size,neurons]
         # pdb.set_trace()
         def _encoding_pic_frame(frame,name='',GPU_id=0):
             with tf.variable_scope('encoding_frame_' + name):
@@ -76,112 +76,112 @@ class seq_pic2seq_pic():
 
         encoder_pic_output=_encoding_pic_frame(self._input_pic)
 
-        def decoder_txt_atten(encoder_state, attention_states, ans_emb,model_type='train'):
-            with tf.variable_scope('speaker'):
-                num_heads = 1
-                batch_size = ans_emb[0].get_shape()[0]
-                attn_length = attention_states.get_shape()[1].value
-                attn_size = attention_states.get_shape()[2].value
-                hidden = array_ops.reshape(attention_states, [-1, attn_length, 1, attn_size])
-                # (128,20,100)--> hidden= (128,20,1,100)
-                hidden_features = []
-                v = []
-                attention_vec_size = attn_size
-                for a in range(num_heads):
-                    k = tf.get_variable('AttnW_%d' % a, [1, 1, attn_size, attention_vec_size])
-                    hidden_features.append(
-                        nn_ops.conv2d(hidden, k, [1, 1, 1, 1], 'SAME'))  # hidden_features=(128,20,1,100)
-                    v.append(tf.get_variable('AttnV_%d' % a, [attention_vec_size]))  # [100]
+        # def decoder_txt_atten(encoder_state, attention_states, ans_emb,model_type='train'):
+        #     with tf.variable_scope('speaker'):
+        #         num_heads = 1
+        #         batch_size = ans_emb[0].get_shape()[0]
+        #         attn_length = attention_states.get_shape()[1].value
+        #         attn_size = attention_states.get_shape()[2].value
+        #         hidden = array_ops.reshape(attention_states, [-1, attn_length, 1, attn_size])
+        #         # (128,20,100)--> hidden= (128,20,1,100)
+        #         hidden_features = []
+        #         v = []
+        #         attention_vec_size = attn_size
+        #         for a in range(num_heads):
+        #             k = tf.get_variable('AttnW_%d' % a, [1, 1, attn_size, attention_vec_size])
+        #             hidden_features.append(
+        #                 nn_ops.conv2d(hidden, k, [1, 1, 1, 1], 'SAME'))  # hidden_features=(128,20,1,100)
+        #             v.append(tf.get_variable('AttnV_%d' % a, [attention_vec_size]))  # [100]
+        #
+        #         # pdb.set_trace()
+        #         def attention(query):
+        #             ds = []
+        #             if nest.is_sequence(query):
+        #                 query_list = nest.flatten(query)
+        #                 for q in query_list:
+        #                     ndims = q.get_shape().ndims
+        #                     if ndims:
+        #                         assert ndims == 2
+        #                 query = array_ops.concat(query_list, 1)
+        #             for a in range(num_heads):
+        #                 with tf.variable_scope('Attention_%d' % a):
+        #                     y = linear(query, attention_vec_size, True)
+        #                     y = array_ops.reshape(y, [-1, 1, 1, attention_vec_size])
+        #                     s = math_ops.reduce_sum(v[a] * math_ops.tanh(hidden_features[a] + y),
+        #                                             [2, 3])  # shape=(128, 20)
+        #                     a = nn_ops.softmax(s)  # shape=(128, 20)
+        #                     d = math_ops.reduce_sum(array_ops.reshape(a, [-1, attn_length, 1, 1]) * hidden,
+        #                                             [1, 2])  # (128,100)
+        #                     ds.append(array_ops.reshape(d, [-1, attn_size]))
+        #                     # pdb.set_trace()
+        #             return ds
+        #
+        #         def extract_argmax_and_embed(prev, _):
+        #             """Loop_function that extracts the symbol from prev and embeds it."""
+        #             prev_symbol = array_ops.stop_gradient(math_ops.argmax(prev, 1))
+        #             return embedding_ops.embedding_lookup(self._word_embedding, prev_symbol)
+        #
+        #         if model_type == 'test':
+        #             loop_function = extract_argmax_and_embed
+        #         else:
+        #             loop_function = None
+        #
+        #         linear = core_rnn_cell._linear
+        #         batch_attn_size = array_ops.stack([batch_size, attn_size])
+        #         attns = [array_ops.zeros(batch_attn_size, dtype=tf.float32) for _ in range(num_heads)]
+        #         # pdb.set_trace()
+        #         for a in attns:
+        #             a.set_shape([None, attn_size])
+        #
+        #         with tf.variable_scope("rnn_decoder"):
+        #             # single_cell_de = tf.nn.rnn_cell.GRUCell(self._embedding_size)
+        #             # cell_de = tf.nn.rnn_cell.MultiRNNCell([single_cell_de] * self._layers)
+        #             # $ cell_de = single_cell_de
+        #             # if self._layers > 1:
+        #             single_cell = [tf.nn.rnn_cell.GRUCell(self._embedding_size) for n in range(self._layers)]
+        #             cell_de =tf.nn.rnn_cell.MultiRNNCell(single_cell)
+        #             cell_de = tf.contrib.rnn.DropoutWrapper(cell_de, 0.5, 1, 0.5)
+        #             # cell_de = core_rnn_cell.OutputProjectionWrapper(cell_de, self._vocab_size)
+        #             outputs = []
+        #             prev = None
+        #             #   pdb.set_trace()
+        #             state = encoder_state
+        #             for i, inp in enumerate(ans_emb):
+        #                 if loop_function is not None and prev is not None:
+        #                     with tf.variable_scope("loop_function", reuse=True):
+        #                         inp = array_ops.stop_gradient(loop_function(prev, i))
+        #                 if i > 0:
+        #                     tf.get_variable_scope().reuse_variables()
+        #
+        #                 num_emb_in = inp.get_shape()[1]
+        #                 weights_initializer_emb = tf.truncated_normal_initializer(
+        #                     stddev=0.1)
+        #                 regularizer_emb = tf.contrib.layers.l2_regularizer(0.1)
+        #                 weights_emb = tf.get_variable('weights',
+        #                                               shape=[num_emb_in, self._embedding_size / 2],
+        #                                               initializer=weights_initializer_emb,
+        #                                               regularizer=regularizer_emb)
+        #                 biases_emb = tf.get_variable('biases',
+        #                                              shape=[self._embedding_size / 2],
+        #                                              initializer=tf.zeros_initializer)
+        #                 inp = tf.nn.xw_plus_b(inp, weights_emb, biases_emb)
+        #                 #inp = tf.concat([inp, speaker_embedding], 1)
+        #                 inp = linear([inp] + attns, self._embedding_size, True)
+        #                 output, state = cell_de(inp, state)
+        #                 # pdb.set_trace()
+        #                 attns = attention(state)
+        #
+        #                 with tf.variable_scope('AttnOutputProjecton'):
+        #                     output = linear([output] + attns, self._vocab.vocab_size, True)
+        #                 outputs.append(output)
+        #                 if loop_function is not None:
+        #                     prev = array_ops.stop_gradient(output)
+        #
+        #         outputs = tf.transpose(outputs, perm=[1, 0, 2])
+        #         return outputs
+        # # pdb.set_trace()
 
-                # pdb.set_trace()
-                def attention(query):
-                    ds = []
-                    if nest.is_sequence(query):
-                        query_list = nest.flatten(query)
-                        for q in query_list:
-                            ndims = q.get_shape().ndims
-                            if ndims:
-                                assert ndims == 2
-                        query = array_ops.concat(query_list, 1)
-                    for a in range(num_heads):
-                        with tf.variable_scope('Attention_%d' % a):
-                            y = linear(query, attention_vec_size, True)
-                            y = array_ops.reshape(y, [-1, 1, 1, attention_vec_size])
-                            s = math_ops.reduce_sum(v[a] * math_ops.tanh(hidden_features[a] + y),
-                                                    [2, 3])  # shape=(128, 20)
-                            a = nn_ops.softmax(s)  # shape=(128, 20)
-                            d = math_ops.reduce_sum(array_ops.reshape(a, [-1, attn_length, 1, 1]) * hidden,
-                                                    [1, 2])  # (128,100)
-                            ds.append(array_ops.reshape(d, [-1, attn_size]))
-                            # pdb.set_trace()
-                    return ds
-
-                def extract_argmax_and_embed(prev, _):
-                    """Loop_function that extracts the symbol from prev and embeds it."""
-                    prev_symbol = array_ops.stop_gradient(math_ops.argmax(prev, 1))
-                    return embedding_ops.embedding_lookup(self._word_embedding, prev_symbol)
-
-                if model_type == 'test':
-                    loop_function = extract_argmax_and_embed
-                else:
-                    loop_function = None
-
-                linear = core_rnn_cell._linear
-                batch_attn_size = array_ops.stack([batch_size, attn_size])
-                attns = [array_ops.zeros(batch_attn_size, dtype=tf.float32) for _ in range(num_heads)]
-                # pdb.set_trace()
-                for a in attns:
-                    a.set_shape([None, attn_size])
-
-                with tf.variable_scope("rnn_decoder"):
-                    # single_cell_de = tf.nn.rnn_cell.GRUCell(self._embedding_size)
-                    # cell_de = tf.nn.rnn_cell.MultiRNNCell([single_cell_de] * self._layers)
-                    # $ cell_de = single_cell_de
-                    # if self._layers > 1:
-                    single_cell = [tf.nn.rnn_cell.GRUCell(self._embedding_size) for n in range(self._layers)]
-                    cell_de =tf.nn.rnn_cell.MultiRNNCell(single_cell)
-                    cell_de = tf.contrib.rnn.DropoutWrapper(cell_de, 0.5, 1, 0.5)
-                    # cell_de = core_rnn_cell.OutputProjectionWrapper(cell_de, self._vocab_size)
-                    outputs = []
-                    prev = None
-                    #   pdb.set_trace()
-                    state = encoder_state
-                    for i, inp in enumerate(ans_emb):
-                        if loop_function is not None and prev is not None:
-                            with tf.variable_scope("loop_function", reuse=True):
-                                inp = array_ops.stop_gradient(loop_function(prev, i))
-                        if i > 0:
-                            tf.get_variable_scope().reuse_variables()
-
-                        num_emb_in = inp.get_shape()[1]
-                        weights_initializer_emb = tf.truncated_normal_initializer(
-                            stddev=0.1)
-                        regularizer_emb = tf.contrib.layers.l2_regularizer(0.1)
-                        weights_emb = tf.get_variable('weights',
-                                                      shape=[num_emb_in, self._embedding_size / 2],
-                                                      initializer=weights_initializer_emb,
-                                                      regularizer=regularizer_emb)
-                        biases_emb = tf.get_variable('biases',
-                                                     shape=[self._embedding_size / 2],
-                                                     initializer=tf.zeros_initializer)
-                        inp = tf.nn.xw_plus_b(inp, weights_emb, biases_emb)
-                        #inp = tf.concat([inp, speaker_embedding], 1)
-                        inp = linear([inp] + attns, self._embedding_size, True)
-                        output, state = cell_de(inp, state)
-                        # pdb.set_trace()
-                        attns = attention(state)
-
-                        with tf.variable_scope('AttnOutputProjecton'):
-                            output = linear([output] + attns, self._vocab.vocab_size, True)
-                        outputs.append(output)
-                        if loop_function is not None:
-                            prev = array_ops.stop_gradient(output)
-
-                outputs = tf.transpose(outputs, perm=[1, 0, 2])
-                return outputs
-        # pdb.set_trace()
-
-        response_txt = decoder_txt_atten(question_state, encoder_txt_output, response_emb,self.model_type)
+        # response_txt = decoder_txt_atten(question_state, encoder_txt_output, response_emb,self.model_type)
 
 
         def deconv2d(input_, output_shape,k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02,name="deconv2d", with_w=False):
@@ -224,12 +224,12 @@ class seq_pic2seq_pic():
             s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
             y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
             encoder_pic_output_reshape=tf.reshape(encoder_pic_output,[self._batch_size,-1])
-            response_txt_reshape=tf.reshape(response_txt,[self._batch_size,-1])
-            encoder_txt_output_reshape=tf.reshape(encoder_txt_output,[self._batch_size,-1])
-            all_infor=tf.concat([encoder_pic_output_reshape,response_txt_reshape,encoder_txt_output_reshape],1)
+            # response_txt_reshape=tf.reshape(response_txt,[self._batch_size,-1])
+            # encoder_txt_output_reshape=tf.reshape(encoder_txt_output,[self._batch_size,-1])
+            # all_infor=tf.concat([encoder_pic_output_reshape,response_txt_reshape,encoder_txt_output_reshape],1)
             #try more input method to replace all_infor # test1
             # pdb.set_trace()
-            reduced_text_embedding = lrelu(linear(all_infor, self._embedding_size, 'g_embedding'))
+            reduced_text_embedding = lrelu(linear(encoder_pic_output_reshape, self._embedding_size, 'g_embedding'))
             z_concat = tf.concat([self._random_z, reduced_text_embedding],1)
             z_ = linear(z_concat, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
             h0 = tf.reshape(z_, [-1, s16, y16, self._cov_size * 8])
@@ -262,25 +262,25 @@ class seq_pic2seq_pic():
             pic_loss=tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._output_pic,predict_pic),name='pic_loss'),[1,2,3]))
             pic_loss=tf.reduce_mean(pic_loss,name='l2_mean_loss_pic')
 
-        with tf.variable_scope('loss_function_txt'):
-            # with tf.device('/device:GPU:1'):
-            # Our targets are decoder inputs shifted by one.
-            # targets = [self.decoder_inputs[i + 1]
-            #           for i in xrange(len(self.decoder_inputs) - 1)]
-            _, labels = tf.split(self._response, [1, -1], 1) # sign 'go' for train decoder
-            labels = tf.concat([labels, _], axis=1) # remove 'go' to compute loss
+        # with tf.variable_scope('loss_function_txt'):
+        #     # with tf.device('/device:GPU:1'):
+        #     # Our targets are decoder inputs shifted by one.
+        #     # targets = [self.decoder_inputs[i + 1]
+        #     #           for i in xrange(len(self.decoder_inputs) - 1)]
+        #     _, labels = tf.split(self._response, [1, -1], 1) # sign 'go' for train decoder
+        #     labels = tf.concat([labels, _], axis=1) # remove 'go' to compute loss
+        #
+        #     cross_entropy_sentence = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=response_txt,
+        #                                                                             labels=labels,
+        #                                                                             name="cross_entropy_sents")
+        #     cross_entropy_sentence = tf.multiply(cross_entropy_sentence, self._weight)  # batch_size * sents_size
+        #
+        #     cross_entropy_sentence = tf.reduce_sum(cross_entropy_sentence, axis=1)
+        #     weight_sum = tf.reduce_sum(self._weight, axis=1)
+        #     cross_entropy_sentence = cross_entropy_sentence / weight_sum
+        #     txt_loss = tf.reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
 
-            cross_entropy_sentence = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=response_txt,
-                                                                                    labels=labels,
-                                                                                    name="cross_entropy_sents")
-            cross_entropy_sentence = tf.multiply(cross_entropy_sentence, self._weight)  # batch_size * sents_size
-
-            cross_entropy_sentence = tf.reduce_sum(cross_entropy_sentence, axis=1)
-            weight_sum = tf.reduce_sum(self._weight, axis=1)
-            cross_entropy_sentence = cross_entropy_sentence / weight_sum
-            txt_loss = tf.reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
-
-        all_loss=pic_loss + txt_loss
+        all_loss=pic_loss #+ txt_loss
         self.loss=all_loss
         # pdb.set_trace()
         grads_and_vars=self._opt.compute_gradients(all_loss)
@@ -292,7 +292,7 @@ class seq_pic2seq_pic():
         self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
         with tf.variable_scope('output_information'):
             self.predict_pic = predict_pic
-            self.predict_txt = tf.argmax(response_txt, axis=2)
+            # self.predict_txt = tf.argmax(response_txt, axis=2)
 
 
     def add_gradient_noise(self,t, stddev=1e-3, name=None):
@@ -305,9 +305,9 @@ class seq_pic2seq_pic():
             return tf.add(t, gn, name=name)
 
     def _build_inputs(self):
-        self._question = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Question')
-        self._response = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Response')
-        self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
+        # self._question = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Question')
+        # self._response = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Response')
+        # self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
         self._input_pic= tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,3], name='frame_input')
         self._output_pic=tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,3], name='frame_output')
         self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
@@ -315,16 +315,16 @@ class seq_pic2seq_pic():
 
     def steps(self, sess, data_dict,noise, step_type='train'):
         self.model_type = step_type
-        input_batch_txt=data_dict[0]
-        output_batch_txt=data_dict[1]
+        # input_batch_txt=data_dict[0]
+        # output_batch_txt=data_dict[1]
         input_batch_pic=data_dict[2]
         output_batch_pic=data_dict[3]
         weight_batch_txt=data_dict[4]
         # pdb.set_trace()
-        feed_dict = {self._response: output_batch_txt,
-                     self._question: input_batch_txt,
-                     self._weight:weight_batch_txt,
-                     self._input_pic:input_batch_pic,
+        # feed_dict = {self._response: output_batch_txt,
+        #              self._question: input_batch_txt,
+        #              self._weight:weight_batch_txt,
+        feed_dict = {    self._input_pic:input_batch_pic,
                      self._output_pic:output_batch_pic,
                      self._random_z:noise}
 
@@ -337,12 +337,12 @@ class seq_pic2seq_pic():
             return loss, _
 
         if step_type == 'test':
-            output_list = [self.loss, self.predict_pic,self.predict_txt]
+            output_list = [self.loss, self.predict_pic]#,self.predict_txt]
             try:
-                loss, pic,txt = sess.run(output_list, feed_dict=feed_dict)
+                loss, pic = sess.run(output_list, feed_dict=feed_dict)
             except:
                 pdb.set_trace()
-            return loss, pic,txt
+            return loss, pic
 
         print('step_type is wrong!>>>')
         return None

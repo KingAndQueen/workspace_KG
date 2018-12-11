@@ -59,7 +59,7 @@ def train_model(sess, model, train_data, valid_data):
             z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
 
             for i in range(len(valid_data)):
-                eval_loss, _ ,_= model.steps(sess, random.choice(valid_data), z_noise,step_type='test')
+                eval_loss, _ = model.steps(sess, random.choice(valid_data), z_noise,step_type='test')
                 eval_losses+=eval_loss
 
             print('evaluation loss:', eval_losses/len(valid_data))
@@ -81,14 +81,14 @@ def test_model(sess, model, test_data, vocab,times):
     pred_pics,pred_txts = [],[]
     z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
     for batch_id, data_test in enumerate(test_data):
-        loss, pred_pic,pred_txt = model.steps(sess, data_test,z_noise, step_type='test')
+        loss, pred_pic = model.steps(sess, data_test,z_noise, step_type='test')
         test_loss += loss
 
         pred_pics.append(pred_pic)
-        pred_txts.append(pred_txt)
+        # pred_txts.append(pred_txt)
 
     Analysis.drew_seq(times,pred_pics,'./result/')
-    Analysis.write_sents(times,pred_txts,'./result/',vocab)
+    # Analysis.write_sents(times,pred_txts,'./result/',vocab)
     test_loss=test_loss / len(test_data)
     print('test total loss:', test_loss)
 
