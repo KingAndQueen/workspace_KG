@@ -315,8 +315,9 @@ class seq_pic2seq_pic():
 
         # all_loss = pic_loss + 0.0*txt_loss
         # pdb.set_trace()
-        loss_=tf.concat([tf.expand_dims(G_loss,-1),tf.expand_dims(cross_entropy_sentence,-1)],1)
-        all_loss=linear(loss_,1)
+        all_loss=G_loss+cross_entropy_sentence
+        # loss_=tf.concat([tf.expand_dims(G_loss,-1),tf.expand_dims(cross_entropy_sentence,-1)],1)
+        # all_loss=linear(loss_,1)
 
         self.loss = all_loss
         # pdb.set_trace()
