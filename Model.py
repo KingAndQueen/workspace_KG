@@ -277,22 +277,22 @@ class seq_pic2seq_pic():
             # cov_output=convolution.deeplab_v3(self._output_pic)
             # sp=self.img_size_x
 
-            vgg_real = build_vgg19(self._real_pic)
-            vgg_fake = build_vgg19(predict_pic, reuse=True)
-            p0 = compute_error(vgg_real['input'], vgg_fake['input'])
-            p1 = compute_error(vgg_real['conv1_2'], vgg_fake['conv1_2']) / 1.6
-            p2 = compute_error(vgg_real['conv2_2'], vgg_fake['conv2_2']) / 2.3
-            p3 = compute_error(vgg_real['conv3_2'], vgg_fake['conv3_2']) / 1.8
-            p4 = compute_error(vgg_real['conv4_2'], vgg_fake['conv4_2']) / 2.8
-            p5 = compute_error(vgg_real['conv5_2'],
-                               vgg_fake['conv5_2']) * 10 / 0.8  # weights lambda are collected at 100th epoch
-            content_loss = p0 + p1 + p2 + p3 + p4 + p5
+            # vgg_real = build_vgg19(self._real_pic)
+            # vgg_fake = build_vgg19(predict_pic, reuse=True)
+            # p0 = compute_error(vgg_real['input'], vgg_fake['input'])
+            # p1 = compute_error(vgg_real['conv1_2'], vgg_fake['conv1_2']) / 1.6
+            # p2 = compute_error(vgg_real['conv2_2'], vgg_fake['conv2_2']) / 2.3
+            # p3 = compute_error(vgg_real['conv3_2'], vgg_fake['conv3_2']) / 1.8
+            # p4 = compute_error(vgg_real['conv4_2'], vgg_fake['conv4_2']) / 2.8
+            # p5 = compute_error(vgg_real['conv5_2'],
+            #                    vgg_fake['conv5_2']) * 10 / 0.8  # weights lambda are collected at 100th epoch
+            # content_loss = p0 + p1 + p2 + p3 + p4 + p5
+            #
+            # # pdb.set_trace()
+            # G_loss = tf.reduce_sum(tf.reduce_min(content_loss)) * 0.999 + tf.reduce_sum(
+            #     tf.reduce_mean(content_loss)) * 0.001
 
-            # pdb.set_trace()
-            G_loss = tf.reduce_sum(tf.reduce_min(content_loss)) * 0.999 + tf.reduce_sum(
-                tf.reduce_mean(content_loss)) * 0.001
-
-            # pic_loss=tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._real_pic,predict_pic),name='pic_loss'),[1,2,3]))
+            pic_loss=tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._real_pic,predict_pic),name='pic_loss'),[1,2,3]))
             # pic_loss=tf.reduce_mean(pic_loss,name='l2_mean_loss_pic')
 
         with tf.variable_scope('loss_function_txt'):
@@ -311,15 +311,15 @@ class seq_pic2seq_pic():
             cross_entropy_sentence = tf.reduce_sum(cross_entropy_sentence, axis=1)
             weight_sum = tf.reduce_sum(self._weight, axis=1)
             cross_entropy_sentence = cross_entropy_sentence / weight_sum
-            txt_loss = tf .reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
+            txt_loss = tf.reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
 
         # all_loss = pic_loss + 0.0*txt_loss
         # pdb.set_trace()
-        all_loss=G_loss+txt_loss
-        # loss_=tf.concat([tf.expand_dims(G_loss,-1),tf.expand_dims(cross_entropy_sentence,-1)],1)
-        # all_loss=linear(loss_,1)
+        # all_loss=G_loss+txt_loss
+        loss_=tf.concat([tf.expand_dims(pic_loss,-1),tf.expand_dims(cross_entropy_sentence,-1)],1)
+        all_loss=linear(loss_,1)
 
-        self.loss = all_loss
+        self.loss = tf.reduce_mean(all_loss)
         # pdb.set_trace()
         grads_and_vars = self._opt.compute_gradients(all_loss)
         # pdb.set_trace()
