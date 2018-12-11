@@ -423,10 +423,10 @@ def resnet_v2(inputs,
                     net = tf.squeeze(net, [1, 2], name='SpatialSqueeze')
                     end_points[sc.name + '/spatial_squeeze'] = net
                 end_points['predictions'] = slim.softmax(net, scope='predictions')
+            # pdb.set_trace()
             return net, end_points
 
-
-resnet_v2.default_image_size = 480
+resnet_v2.default_image_size = 160
 
 
 def resnet_v2_block(scope, base_depth, num_units, stride):
@@ -453,7 +453,7 @@ def resnet_v2_block(scope, base_depth, num_units, stride):
     }])
 
 
-resnet_v2.default_image_size = 224
+resnet_v2.default_image_size = 160
 
 
 def resnet_v2_50(inputs,
@@ -469,7 +469,7 @@ def resnet_v2_50(inputs,
     blocks = [
         resnet_v2_block('block1', base_depth=64, num_units=3, stride=2),
         resnet_v2_block('block2', base_depth=128, num_units=4, stride=2),
-        resnet_v2_block('block3', base_depth=256, num_units=6, stride=2),
+        resnet_v2_block('block3', base_depth=256, num_units=6, stride=1),
         resnet_v2_block('block4', base_depth=512, num_units=3, stride=1),
     ]
     # pdb.set_trace()
