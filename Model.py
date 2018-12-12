@@ -286,8 +286,8 @@ class seq_pic2seq_pic():
         # pdb.set_trace()
         grads_and_vars=self._opt.compute_gradients(pic_loss)
         # pdb.set_trace()
-        grads_and_vars = [(tf.clip_by_norm(g, self._max_grad_norm), v) for g, v in grads_and_vars]
-        grads_and_vars = [(self.add_gradient_noise(g), v) for g, v in grads_and_vars]
+        # grads_and_vars = [(tf.clip_by_norm(g, self._max_grad_norm), v) for g, v in grads_and_vars if g is not None]
+        # grads_and_vars = [(self.add_gradient_noise(g), v) for g, v in grads_and_vars]
 
         self.train_op = self._opt.apply_gradients(grads_and_vars=grads_and_vars, name='train_op')
         self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
