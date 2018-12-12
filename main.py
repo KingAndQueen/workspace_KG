@@ -29,7 +29,7 @@ tf.flags.DEFINE_string("model_type", "train", "whether to train or test model")
 tf.flags.DEFINE_integer('img_size_x',160,'generate pic size in X')
 tf.flags.DEFINE_integer('img_size_y',320,'generate pic size in Y')
 tf.flags.DEFINE_integer('noise_dim',100,'dim in noise')
-tf.flags.DEFINE_integer('convolution_dim',64,'dim in the first layer pic decoder')
+tf.flags.DEFINE_integer('convolution_dim',256,'dim in the first layer pic decoder')
 
 
 config = tf.flags.FLAGS

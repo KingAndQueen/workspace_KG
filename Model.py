@@ -71,7 +71,8 @@ class seq_pic2seq_pic():
             with tf.variable_scope('encoding_frame_' + name):
                 #resident net
                 resnet_output,end_points=convolution.resnet_v2_50(frame)
-                # resnet_output=end_points['resnet_v2_50' + '/block4'] # test2 to check the full connections effect
+                # pdb.set_trace()
+                resnet_output=end_points['encoding_frame_' +name + '/resnet_v2_50/block4'] # test2 to check the full connections effect
                 return resnet_output
 
         encoder_pic_output=_encoding_pic_frame(self._input_pic)
@@ -223,16 +224,16 @@ class seq_pic2seq_pic():
             y=self.img_size_y
             s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
             y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
-            encoder_pic_output_reshape=tf.reshape(encoder_pic_output,[self._batch_size,-1])
+            # encoder_pic_output_reshape=tf.reshape(encoder_pic_output,[self._batch_size,-1])
             # response_txt_reshape=tf.reshape(response_txt,[self._batch_size,-1])
             # encoder_txt_output_reshape=tf.reshape(encoder_txt_output,[self._batch_size,-1])
             # all_infor=tf.concat([encoder_pic_output_reshape,response_txt_reshape,encoder_txt_output_reshape],1)
             #try more input method to replace all_infor # test1
-            # pdb.set_trace()
-            reduced_text_embedding = lrelu(linear(encoder_pic_output_reshape, self._embedding_size, 'g_embedding'))
-            z_concat = tf.concat([self._random_z, reduced_text_embedding],1)
-            z_ = linear(z_concat, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
-            h0 = tf.reshape(z_, [-1, s16, y16, self._cov_size * 8])
+            pdb.set_trace()
+            # reduced_text_embedding = lrelu(linear(encoder_pic_output_reshape, self._embedding_size, 'g_embedding'))
+            # z_concat = tf.concat([self._random_z, reduced_text_embedding],1)
+            # z_ = linear(z_concat, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
+            h0 = tf.reshape(encoder_pic_output, [-1, s16, y16, self._cov_size * 8])
             h0 = tf.nn.relu(self.g_bn0(h0,type=self.model_type))
 
             h1 = deconv2d(h0, [self._batch_size, s8, y8, self._cov_size * 4], name='g_h1')
@@ -259,7 +260,7 @@ class seq_pic2seq_pic():
             # cov_input=convolution.deeplab_v3(predict_pic)
             # cov_output=convolution.deeplab_v3(self._output_pic)
 
-            pic_loss=tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._output_pic,predict_pic),name='pic_loss'),[1,2,3]))
+            pic_loss=tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._output_pic,predict_pic),name='pic_loss')))
             pic_loss=tf.reduce_mean(pic_loss,name='l2_mean_loss_pic')
 
         # with tf.variable_scope('loss_function_txt'):
@@ -280,10 +281,10 @@ class seq_pic2seq_pic():
         #     cross_entropy_sentence = cross_entropy_sentence / weight_sum
         #     txt_loss = tf.reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
 
-        all_loss=pic_loss #+ txt_loss
-        self.loss=all_loss
+        # all_loss=pic_loss + txt_loss
+        self.loss=pic_loss
         # pdb.set_trace()
-        grads_and_vars=self._opt.compute_gradients(all_loss)
+        grads_and_vars=self._opt.compute_gradients(pic_loss)
         # pdb.set_trace()
         grads_and_vars = [(tf.clip_by_norm(g, self._max_grad_norm), v) for g, v in grads_and_vars]
         grads_and_vars = [(self.add_gradient_noise(g), v) for g, v in grads_and_vars]
@@ -319,12 +320,12 @@ class seq_pic2seq_pic():
         # output_batch_txt=data_dict[1]
         input_batch_pic=data_dict[2]
         output_batch_pic=data_dict[3]
-        weight_batch_txt=data_dict[4]
+        # weight_batch_txt=data_dict[4]
         # pdb.set_trace()
         # feed_dict = {self._response: output_batch_txt,
         #              self._question: input_batch_txt,
         #              self._weight:weight_batch_txt,
-        feed_dict = {    self._input_pic:input_batch_pic,
+        feed_dict = {self._input_pic:input_batch_pic,
                      self._output_pic:output_batch_pic,
                      self._random_z:noise}
 
