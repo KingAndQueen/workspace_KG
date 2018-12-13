@@ -245,7 +245,7 @@ class seq_pic2seq_pic():
             h3 = deconv2d(h2, [self._batch_size, s2, y2, self._cov_size * 1], name='g_h3')
             h3 = tf.nn.relu(self.g_bn3(h3, type=self.model_type))
 
-            h4 = deconv2d(h3, [self._batch_size, s, y, 3], name='g_h4')
+            h4 = deconv2d(h3, [self._batch_size, s, y, 1], name='g_h4')
 
             predict_pic=tf.tanh(h4) / 2. + 0.5
 
@@ -309,8 +309,8 @@ class seq_pic2seq_pic():
         # self._question = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Question')
         # self._response = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Response')
         # self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
-        self._input_pic= tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,3], name='frame_input')
-        self._output_pic=tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,3], name='frame_output')
+        self._input_pic= tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,1], name='frame_input')
+        self._output_pic=tf.placeholder(tf.float32, [self._batch_size,self.img_size_x,self.img_size_y,1], name='frame_output')
         self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
 
