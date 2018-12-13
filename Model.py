@@ -261,7 +261,7 @@ class seq_pic2seq_pic():
             # cov_output=convolution.deeplab_v3(self._output_pic)
 
             pic_loss=tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._output_pic,predict_pic),name='pic_loss')))
-            pic_loss=tf.reduce_mean(pic_loss,name='l2_mean_loss_pic')
+            # pic_loss=tf.reduce_mean(pic_loss,name='l2_mean_loss_pic')
 
         # with tf.variable_scope('loss_function_txt'):
         #     # with tf.device('/device:GPU:1'):
