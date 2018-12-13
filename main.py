@@ -17,7 +17,7 @@ tf.flags.DEFINE_integer("evaluation_interval", 10, "Evaluate and print results e
 tf.flags.DEFINE_integer("batch_size", 4, "Batch size for training.")  # should consider the size of validation set
 tf.flags.DEFINE_integer("head", 3, "head number of attention")
 tf.flags.DEFINE_integer("epochs", 1000, "Number of epochs to train for.")
-tf.flags.DEFINE_integer('check_epoch',50, 'evaluation times')
+tf.flags.DEFINE_integer('check_epoch',200, 'evaluation times')
 tf.flags.DEFINE_integer("layers", 3, "the num layers of RNN.")
 tf.flags.DEFINE_integer("recurrent_dim", 64, "Embedding size for neural networks.")
 tf.flags.DEFINE_string("data_dir", "data/", "Directory containing tasks")
