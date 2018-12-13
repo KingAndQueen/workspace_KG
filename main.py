@@ -8,7 +8,7 @@ import Model
 import random
 import Analysis
 # from math import exp
-tf.flags.DEFINE_float("learn_rate", 0.001, "Learning rate for SGD.")
+tf.flags.DEFINE_float("learn_rate", 0.0001, "Learning rate for SGD.")
 # tf.flags.DEFINE_float("anneal_rate", 25, "Number of epochs between halving the learnign rate.")
 # tf.flags.DEFINE_float("anneal_stop_epoch", 50, "Epoch number to end annealed lr schedule.")
 # tf.flags.DEFINE_float("learning_rate_decay_factor", 0.5, 'if loss not decrease, multiple the lr with factor')
@@ -19,7 +19,7 @@ tf.flags.DEFINE_integer("head", 3, "head number of attention")
 tf.flags.DEFINE_integer("epochs", 1000, "Number of epochs to train for.")
 tf.flags.DEFINE_integer('check_epoch',50, 'evaluation times')
 tf.flags.DEFINE_integer("layers", 3, "the num layers of RNN.")
-tf.flags.DEFINE_integer("recurrent_dim", 100, "Embedding size for neural networks.")
+tf.flags.DEFINE_integer("recurrent_dim", 64, "Embedding size for neural networks.")
 tf.flags.DEFINE_string("data_dir", "data/", "Directory containing tasks")
 tf.flags.DEFINE_integer('sentence_size', 30, 'length of word in a sentence')
 tf.flags.DEFINE_integer('stop_limit', 5, 'number of evaluation loss is greater than train loss  ')
@@ -28,9 +28,9 @@ tf.flags.DEFINE_string("checkpoint_path", "./checkpoints/", "Directory to save c
 tf.flags.DEFINE_string("model_type", "train", "whether to train or test model")
 tf.flags.DEFINE_integer('img_size_x',160,'generate pic size in X')
 tf.flags.DEFINE_integer('img_size_y',320,'generate pic size in Y')
-tf.flags.DEFINE_integer('noise_dim',100,'dim in noise')
+tf.flags.DEFINE_integer('noise_dim',64,'dim in noise')
 tf.flags.DEFINE_integer('convolution_dim',256,'dim in the first layer pic decoder')
-
+tf.flags.DEFINE_bool('gray',True,'picture is gray or not, placeholder also should be changed')
 
 config = tf.flags.FLAGS
 
@@ -96,7 +96,7 @@ def test_model(sess, model, test_data, vocab,times):
 
 def main(_):
     vocab = Data_Process.Vocab()
-    input_data_txt, output_data_txt, input_data_pic, output_data_pic,weights,times = Data_Process.get_input_output_data(config.data_dir, vocab, config.sentence_size)
+    input_data_txt, output_data_txt, input_data_pic, output_data_pic,weights,times = Data_Process.get_input_output_data(config.data_dir, vocab, config.sentence_size,config.gray)
     # config.img_size_x =input_data_pic.values()[0].shape[0]
     # config.img_size_y=input_data_pic.values()[0].shape[1]
     # pdb.set_trace()
