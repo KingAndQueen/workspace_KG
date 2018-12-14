@@ -1,11 +1,12 @@
-
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 import time
 import pdb
 import numpy as np
+
 
 def run_tm(func):
     def inner(*N):
@@ -15,7 +16,9 @@ def run_tm(func):
         tm = end - start
         # print('time : %f' % tm)
         return res, tm
+
     return inner
+
 
 def drew_output_pic(data_patch, case_name, save_path, gray=False):
     # pdb.set_trace()
@@ -30,28 +33,31 @@ def drew_output_pic(data_patch, case_name, save_path, gray=False):
     plt.savefig(save_path + str(case_name) + '.png')
     plt.close('all')
 
-def drew_seq(times,data_seq_batch,save_path):
-    data_seq=[]
+
+def drew_seq(times, data_seq_batch, save_path,gray=False):
+    data_seq = []
     for pic_batch in data_seq_batch:
         for pic in pic_batch:
             data_seq.append(pic)
-    assert len(times)==len(data_seq)
-    for idx,pic in enumerate(data_seq):
-        name=times[idx]
-        drew_output_pic(pic,name,save_path)
+    assert len(times) == len(data_seq)
+    for idx, pic in enumerate(data_seq):
+        name = times[idx]
+        drew_output_pic(pic, name, save_path,gray)
 
-def write_sents(times,data_seq_batch,save_path,vocab):
+
+def write_sents(times, data_seq_batch, save_path, vocab):
     data_seq = []
     # pdb.set_trace()
     for txt_batch in data_seq_batch:
         for txt in txt_batch:
             data_seq.append(txt)
 
-    assert len(times)==len(data_seq)
-    f=open(save_path+'test_output.txt','w')
-    for idx,txt2 in enumerate(data_seq):
+    assert len(times) == len(data_seq)
+    f = open(save_path + 'test_output.txt', 'w')
+    for idx, txt2 in enumerate(data_seq):
         # for txt in txt2:
-            sent=[vocab.index_to_word(word) for word in txt2]
-            f.writelines(sent)
-            f.write('\n')
+        sent = [vocab.index_to_word(word) + ' ' for word in txt2]
+        f.writelines(sent)
+        f.write('\n')
     f.close()
+
