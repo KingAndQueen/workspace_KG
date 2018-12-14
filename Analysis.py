@@ -31,7 +31,7 @@ def drew_seq(times,data_seq_batch,save_path):
     data_seq=[]
     for pic_batch in data_seq_batch:
         for pic in pic_batch:
-            data_seq.append(pic)
+            data_seq.append(np.squeeze(pic))
     assert len(times)==len(data_seq)
     for idx,pic in enumerate(data_seq):
         name=times[idx]
