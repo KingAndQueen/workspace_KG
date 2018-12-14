@@ -289,11 +289,11 @@ class seq_pic2seq_pic():
             content_loss = p0 + p1 + p2 + p3 + p4 + p5
 
             # pdb.set_trace()
-            G_loss = tf.reduce_sum(tf.reduce_min(content_loss)) * 0.999 + tf.reduce_sum(
+            vgg_loss = tf.reduce_sum(tf.reduce_min(content_loss)) * 0.999 + tf.reduce_sum(
                 tf.reduce_mean(content_loss)) * 0.001
 
-            # pic_loss=tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._real_pic,predict_pic),name='pic_loss'),[1,2,3]))
-            # pic_loss=tf.reduce_mean(pic_loss,name='l2_mean_loss_pic')
+            pic_loss=tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._real_pic,predict_pic),name='pic_loss'),[1,2,3]))
+            pic_square_loss=tf.reduce_mean(pic_loss,name='l2_mean_loss_pic')
 
         with tf.variable_scope('loss_function_txt'):
             # with tf.device('/device:GPU:1'):
@@ -315,7 +315,7 @@ class seq_pic2seq_pic():
 
         # all_loss = pic_loss + 0.0*txt_loss
         # pdb.set_trace()
-        all_loss=G_loss+cross_entropy_sentence
+        all_loss=pic_square_loss+vgg_loss+cross_entropy_sentence
         # loss_=tf.concat([tf.expand_dims(G_loss,-1),tf.expand_dims(cross_entropy_sentence,-1)],1)
         # all_loss=linear(loss_,1)
 
