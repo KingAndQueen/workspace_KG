@@ -31,7 +31,7 @@ class seq_pic2seq_pic():
         self._noise_dim = config.noise_dim
         self.model_type = config.model_type
         self._build_inputs()
-
+        self._head =config.head
         self.g_bn0 = convolution.batch_norm(name='g_bn0')
         self.g_bn1 = convolution.batch_norm(name='g_bn1')
         self.g_bn2 = convolution.batch_norm(name='g_bn2')
@@ -86,9 +86,8 @@ class seq_pic2seq_pic():
 
 
         # pdb.set_trace()
-        def decoder_txt_atten(encoder_state, attention_states, ans_emb, model_type='train'):
+        def decoder_txt_atten(encoder_state, attention_states, ans_emb, model_type='train',num_heads=1):
             with tf.variable_scope('speaker'):
-                num_heads = 1
                 batch_size = ans_emb[0].get_shape()[0]
                 attn_length = attention_states.get_shape()[1].value
                 attn_size = attention_states.get_shape()[2].value
@@ -192,7 +191,7 @@ class seq_pic2seq_pic():
 
         # pdb.set_trace()
 
-        response_txt = decoder_txt_atten(question_state, encoder_txt_output, response_emb, self.model_type)
+        response_txt = decoder_txt_atten(question_state, encoder_txt_output, response_emb, self.model_type,self._head)
 
         def deconv2d(input_, output_shape, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="deconv2d", with_w=False):
             with tf.variable_scope(name):
