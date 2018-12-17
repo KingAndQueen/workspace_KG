@@ -210,23 +210,23 @@ class seq_pic2seq_pic():
                 else:
                     return deconv
 
-        def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
-            shape = input_.get_shape().as_list()
+        # def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
+        #     shape = input_.get_shape().as_list()
+        #
+        #
+        #     with tf.variable_scope(scope or "Linear"):
+        #         matrix = tf.get_variable("Matrix", [shape[1], output_size], tf.float32,
+        #                                  tf.random_normal_initializer(stddev=stddev))
+        #         bias = tf.get_variable("bias", [output_size],
+        #                                initializer=tf.constant_initializer(bias_start))
+        #         if with_w:
+        #             return tf.matmul(input_, matrix) + bias, matrix, bias
+        #         else:
+        #             # pdb.set_trace()
+        #             return tf.matmul(input_, matrix) + bias
 
-
-            with tf.variable_scope(scope or "Linear"):
-                matrix = tf.get_variable("Matrix", [shape[1], output_size], tf.float32,
-                                         tf.random_normal_initializer(stddev=stddev))
-                bias = tf.get_variable("bias", [output_size],
-                                       initializer=tf.constant_initializer(bias_start))
-                if with_w:
-                    return tf.matmul(input_, matrix) + bias, matrix, bias
-                else:
-                    # pdb.set_trace()
-                    return tf.matmul(input_, matrix) + bias
-
-        def lrelu(x, leak=0.2, name="lrelu"):
-            return tf.maximum(x, leak * x)
+        # def lrelu(x, leak=0.2, name="lrelu"):
+        #     return tf.maximum(x, leak * x)
 
         with tf.variable_scope('decoder_pic'):
             s = self.img_size_x
@@ -321,6 +321,7 @@ class seq_pic2seq_pic():
 
         self.loss = txt_loss+pic_loss
         # pdb.set_trace()
+        # tf.trainable_variables()
         grads_and_vars_txt = self._opt.compute_gradients(txt_loss)
         grads_and_vars_pic =self._opt.compute_gradients(pic_loss)
         # pdb.set_trace()
