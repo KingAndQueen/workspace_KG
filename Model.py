@@ -24,9 +24,9 @@ class seq_pic2seq_pic():
         self.img_size_x=config.img_size_x
         self.img_size_y=config.img_size_y
         # self._gf_dim=config.gf_dim
-        self._max_grad_norm = config.max_grad_norm
+        # self._max_grad_norm = config.max_grad_norm
         self._cov_size=config.convolution_dim
-        self._noise_dim = config.noise_dim
+        # self._noise_dim = config.noise_dim
         self.model_type=config.model_type
         self._build_inputs()
 
@@ -203,18 +203,18 @@ class seq_pic2seq_pic():
                 else:
                     return deconv
 
-        def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
-            shape = input_.get_shape().as_list()
-
-            with tf.variable_scope(scope or "Linear"):
-                matrix = tf.get_variable("Matrix", [shape[1], output_size], tf.float32,
-                                         tf.random_normal_initializer(stddev=stddev))
-                bias = tf.get_variable("bias", [output_size],
-                                       initializer=tf.constant_initializer(bias_start))
-                if with_w:
-                    return tf.matmul(input_, matrix) + bias, matrix, bias
-                else:
-                    return tf.matmul(input_, matrix) + bias
+        # def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
+        #     shape = input_.get_shape().as_list()
+        #
+        #     with tf.variable_scope(scope or "Linear"):
+        #         matrix = tf.get_variable("Matrix", [shape[1], output_size], tf.float32,
+        #                                  tf.random_normal_initializer(stddev=stddev))
+        #         bias = tf.get_variable("bias", [output_size],
+        #                                initializer=tf.constant_initializer(bias_start))
+        #         if with_w:
+        #             return tf.matmul(input_, matrix) + bias, matrix, bias
+        #         else:
+        #             return tf.matmul(input_, matrix) + bias
 
         def lrelu(x,leak=0.2, name="lrelu"):
             return tf.maximum(x, leak * x)
@@ -250,10 +250,10 @@ class seq_pic2seq_pic():
             predict_pic=tf.tanh(h4) / 2. + 0.5
 
         # pdb.set_trace()
-        def compute_error(real, fake, label):
-            return tf.reduce_mean(
-                label * tf.expand_dims(tf.reduce_mean(tf.abs(fake - real), reduction_indices=[3]), -1),
-                reduction_indices=[1, 2])  # diversity loss
+        # def compute_error(real, fake, label):
+        #     return tf.reduce_mean(
+        #         label * tf.expand_dims(tf.reduce_mean(tf.abs(fake - real), reduction_indices=[3]), -1),
+        #         reduction_indices=[1, 2])  # diversity loss
 
         with tf.variable_scope('loss_function_pic'):
             # pdb.set_trace()
@@ -261,7 +261,7 @@ class seq_pic2seq_pic():
             # cov_output=convolution.deeplab_v3(self._output_pic)
 
             pic_loss=tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._output_pic,predict_pic),name='pic_loss')))
-            # pic_loss=tf.reduce_mean(pic_loss,name='l2_mean_loss_pic')
+            pic_loss=tf.reduce_mean(pic_loss,name='l2_mean_loss_pic')
 
         # with tf.variable_scope('loss_function_txt'):
         #     # with tf.device('/device:GPU:1'):
@@ -296,14 +296,14 @@ class seq_pic2seq_pic():
             # self.predict_txt = tf.argmax(response_txt, axis=2)
 
 
-    def add_gradient_noise(self,t, stddev=1e-3, name=None):
-        """
-        Adds gradient noise as described in http://arxiv.org/abs/1511.06807 [2]..
-        """
-        with tf.name_scope("add_gradient_noise") as name:
-            t = tf.convert_to_tensor(t, name="t")
-            gn = tf.random_normal(tf.shape(t), stddev=stddev)
-            return tf.add(t, gn, name=name)
+    # def add_gradient_noise(self,t, stddev=1e-3, name=None):
+    #     """
+    #     Adds gradient noise as described in http://arxiv.org/abs/1511.06807 [2]..
+    #     """
+    #     with tf.name_scope("add_gradient_noise") as name:
+    #         t = tf.convert_to_tensor(t, name="t")
+    #         gn = tf.random_normal(tf.shape(t), stddev=stddev)
+    #         return tf.add(t, gn, name=name)
 
     def _build_inputs(self):
         # self._question = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Question')
