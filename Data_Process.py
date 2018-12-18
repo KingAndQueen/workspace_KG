@@ -202,7 +202,7 @@ def read_txt_file_1E(data_path, vocabulary, sentence_size):
             weight.append(1)
             sent_idx.append(idx)
         sent_idx.append(vocabulary.word_to_index('<eos>'))
-        weight.append(0)
+        weight.append(1)
         padding_len = max(sentence_size - len(sent_idx), 0)
         for i in range(padding_len):
             weight.append(0)
@@ -239,7 +239,14 @@ def read_pic_file_1E(data_path,gray=False):
     # pdb.set_trace()
     return pic_output,sorted_keys
 
-
+def _insert_go(output_data_txt,weights,vocabulary):
+    for sents in output_data_txt:
+        # pdb.set_trace()
+        sents.insert(0,vocabulary.word_to_index('<go>'))
+        _=sents.pop()
+    for weight in weights:
+        weight.insert(0,1)
+        _=weight.pop()
 def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
     files_name=os.listdir(data_path)
     dir_list=[]
@@ -257,24 +264,25 @@ def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
     txt,weights=read_txt_file_1E(data_path_txt,vocabulary,sentence_size)
     pic,times=read_pic_file_1E(files_list,gray)
     input_data_txt=copy.copy(txt)
-    # _=input_data_txt.pop()  ################ test the deCNN process
+    _=input_data_txt.pop()
     output_data_txt = copy.copy(txt)
-    # _=output_data_txt.pop(0)
-
+    _=output_data_txt.pop(0)
+    _insert_go(output_data_txt,weights,vocabulary)
+    # pdb.set_trace()
     output_weights=copy.copy(weights)
-    # output_weights.pop(0)
+    output_weights.pop(0)
 
     input_data_pic=copy.copy(pic)
-    # _=input_data_pic.pop()
+    _=input_data_pic.pop()################ test the deCNN process
     output_data_pic=copy.copy(pic)
-    # _=output_data_pic.pop(0)
+    _=output_data_pic.pop(0)################ test the deCNN process
     # pdb.set_trace()
     assert len(output_weights)==len(output_data_txt)
     assert len(output_data_pic)==len(input_data_pic)
     assert len(input_data_txt)==len(output_data_txt)
 
     output_times=copy.copy(times)
-    # output_times.pop(0)
+    output_times.pop(0)
     assert len(output_times) == len(output_data_txt)
 
     return input_data_txt,output_data_txt,input_data_pic,output_data_pic, output_weights,output_times
