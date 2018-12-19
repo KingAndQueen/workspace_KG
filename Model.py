@@ -75,25 +75,25 @@ class seq_pic2seq_pic():
         # encoder_txt_output, question_state = _encoding_txt_sentence(question_emb,name='question')  # monica_sate.shape=layers*[batch_size,neurons]
         # pdb.set_trace()
 
-        # def _encoding_pic_frame(frame, name='', GPU_id=0):
-        #     with tf.variable_scope('encoding_frame_' + name):
-        #         # resident net
-        #         resnet_output, end_points = convolution.resnet_v2_50(frame)
-        #         # pdb.set_trace()
-        #         resnet_output = end_points[
-        #             'encoding_frame_' + name + '/resnet_v2_50/block4']  # test2 to check the full connections effect
-        #         return resnet_output
-        #
-        # encoder_pic_output = _encoding_pic_frame(self._input_pic)
+        def _encoding_pic_frame(frame, name='', GPU_id=0):
+            with tf.variable_scope('encoding_frame_' + name):
+                # resident net
+                resnet_output, end_points = convolution.resnet_v2_50(frame)
+                # pdb.set_trace()
+                resnet_output = end_points[
+                    'encoding_frame_' + name + '/resnet_v2_50/block4']  # test2 to check the full connections effect
+                return resnet_output
+
+        encoder_pic_output = _encoding_pic_frame(self._input_pic)
 
         def conv2d(input_, output_shape, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="conv2d", with_w=False):
             with tf.variable_scope(name):
                 # pdb.set_trace()
                 # filter : [height, width, output_channels, in_channels]
-                w = tf.get_variable('w', [k_h, k_w,input_.get_shape()[-1], output_shape[-1]],
+                w = tf.get_variable('w', [k_h, k_w, input_.get_shape()[-1], output_shape[-1]],
                                     initializer=tf.random_normal_initializer(stddev=stddev))
 
-                deconv = tf.nn.conv2d(input_, filter=w,strides=[1, d_h, d_w, 1],padding="SAME")
+                deconv = tf.nn.conv2d(input_, filter=w, strides=[1, d_h, d_w, 1], padding="SAME")
 
                 biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
                 deconv = tf.reshape(tf.nn.bias_add(deconv, biases), deconv.get_shape())
@@ -103,27 +103,28 @@ class seq_pic2seq_pic():
                 else:
                     return deconv
 
-        with tf.variable_scope('encoder_pic'):
-            s = self.img_size_x
-            y = self.img_size_y
-            s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
-            y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
-            # pdb.set_trace()
-            h0_e = conv2d(self._input_pic, [self._batch_size,s, y,self._cov_size * 1],name='e_h0')
-            # h0_e = tf.nn.relu(self.e_bn0(h0_e, type=self.model_type))
+        # with tf.variable_scope('encoder_pic'):
+        #     s = self.img_size_x
+        #     y = self.img_size_y
+        #     s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
+        #     y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
+        #     # pdb.set_trace()
+        #     h0_e = conv2d(self._input_pic, [self._batch_size,s, y,self._cov_size * 1],name='e_h0')
+        #     h0_e = tf.nn.relu(self.e_bn0(h0_e, type=self.model_type))
+        #
+        #     h1_e = conv2d(h0_e, [self._batch_size, s2, y2, self._cov_size * 2], name='e_h1')
+        #     h1_e = tf.nn.relu(self.e_bn1(h1_e, type=self.model_type))
+        #
+        #     h2_e = conv2d(h1_e, [self._batch_size, s4, y4, self._cov_size * 4], name='e_h2')
+        #     h2_e = tf.nn.relu(self.e_bn2(h2_e, type=self.model_type))
+        #
+        #     h3_e = conv2d(h2_e, [self._batch_size, s8, y8, self._cov_size * 8], name='e_h3')
+        #     h3_e = tf.nn.relu(self.e_bn3(h3_e, type=self.model_type))
+        #
+        #     h4_e = tf.reshape(h3_e, [self._batch_size, -1], name='e_h4')
+        #     # pdb.set_trace()
+        #     encoder_pic_output = h4_e
 
-            h1_e = conv2d(h0_e, [self._batch_size, s2, y2, self._cov_size * 2], name='e_h1')
-            # h1_e = tf.nn.relu(self.e_bn1(h1_e, type=self.model_type))
-
-            h2_e = conv2d(h1_e, [self._batch_size, s4, y4, self._cov_size * 4], name='e_h2')
-            # h2_e = tf.nn.relu(self.e_bn2(h2_e, type=self.model_type))
-
-            h3_e = conv2d(h2_e, [self._batch_size, s8, y8, self._cov_size * 8], name='e_h3')
-            # h3_e = tf.nn.relu(self.e_bn3(h3_e, type=self.model_type))
-
-            h4_e = tf.reshape(h3_e, [self._batch_size, -1], name='e_h4')
-            # pdb.set_trace()
-            encoder_pic_output = h4_e
         # def decoder_txt_atten(encoder_state, attention_states, ans_emb,model_type='train'):
         #     with tf.variable_scope('speaker'):
         #         num_heads = 1
@@ -266,10 +267,10 @@ class seq_pic2seq_pic():
         #     return tf.maximum(x, leak * x)
 
         with tf.variable_scope('decoder_pic'):
-            # s = self.img_size_x
-            # y = self.img_size_y
-            # s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
-            # y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
+            s = self.img_size_x
+            y = self.img_size_y
+            s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
+            y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
             # encoder_pic_output_reshape=tf.reshape(encoder_pic_output,[self._batch_size,-1])
             # response_txt_reshape=tf.reshape(response_txt,[self._batch_size,-1])
             # encoder_txt_output_reshape=tf.reshape(encoder_txt_output,[self._batch_size,-1])
@@ -280,34 +281,50 @@ class seq_pic2seq_pic():
             # z_concat = tf.concat([self._random_z, reduced_text_embedding],1)
             # z_ = linear(z_concat, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
             h0 = tf.reshape(encoder_pic_output, [-1, s16, y16, self._cov_size * 8])
-            # h0 = tf.nn.relu(self.g_bn0(h0, type=self.model_type))
+            h0 = tf.nn.relu(self.g_bn0(h0, type=self.model_type))
 
             h1 = deconv2d(h0, [self._batch_size, s8, y8, self._cov_size * 4], name='g_h1')
-            # h1 = tf.nn.relu(self.g_bn1(h1, type=self.model_type))
+            h1 = tf.nn.relu(self.g_bn1(h1, type=self.model_type))
 
             h2 = deconv2d(h1, [self._batch_size, s4, y4, self._cov_size * 2], name='g_h2')
-            # h2 = tf.nn.relu(self.g_bn2(h2, type=self.model_type))
+            h2 = tf.nn.relu(self.g_bn2(h2, type=self.model_type))
 
             h3 = deconv2d(h2, [self._batch_size, s2, y2, self._cov_size * 1], name='g_h3')
-            # h3 = tf.nn.relu(self.g_bn3(h3, type=self.model_type))
+            h3 = tf.nn.relu(self.g_bn3(h3, type=self.model_type))
 
             h4 = deconv2d(h3, [self._batch_size, s, y, 1], name='g_h4')
 
-            predict_pic = h4#tf.tanh(h4) / 2. + 0.5
+            predict_pic = tf.tanh(h4) / 2. + 0.5
 
         # pdb.set_trace()
-        # def compute_error(real, fake, label):
-        #     return tf.reduce_mean(
-        #         label * tf.expand_dims(tf.reduce_mean(tf.abs(fake - real), reduction_indices=[3]), -1),
-        #         reduction_indices=[1, 2])  # diversity loss
+        def compute_error(real, fake, label):
+            return tf.reduce_mean(
+                label * tf.expand_dims(tf.reduce_mean(tf.abs(fake - real), reduction_indices=[3]), -1),
+                reduction_indices=[1, 2])  # diversity loss
 
         with tf.variable_scope('loss_function_pic'):
             # pdb.set_trace()
             # cov_input=convolution.deeplab_v3(predict_pic)
             # cov_output=convolution.deeplab_v3(self._output_pic)
+            # sp=self.img_size_x
 
-            pic_loss = tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._output_pic, predict_pic), name='pic_loss')))
-            pic_loss = tf.reduce_mean(pic_loss, name='l2_mean_loss_pic')
+            vgg_real = build_vgg19(self._real_pic)
+            vgg_fake = build_vgg19(predict_pic, reuse=True)
+            p0 = compute_error(vgg_real['input'], vgg_fake['input'])
+            p1 = compute_error(vgg_real['conv1_2'], vgg_fake['conv1_2']) / 1.6
+            p2 = compute_error(vgg_real['conv2_2'], vgg_fake['conv2_2']) / 2.3
+            p3 = compute_error(vgg_real['conv3_2'], vgg_fake['conv3_2']) / 1.8
+            p4 = compute_error(vgg_real['conv4_2'], vgg_fake['conv4_2']) / 2.8
+            p5 = compute_error(vgg_real['conv5_2'],
+                               vgg_fake['conv5_2']) * 10 / 0.8  # weights lambda are collected at 100th epoch
+            content_loss = p0 + p1 + p2 + p3 + p4 + p5
+
+            # pdb.set_trace()
+            vgg_loss = tf.reduce_sum(tf.reduce_min(content_loss)) * 0.999 + tf.reduce_sum(
+                tf.reduce_mean(content_loss)) * 0.001
+
+        pic_loss = tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._output_pic, predict_pic), name='pic_loss')))
+        cross_loss = tf.reduce_mean(pic_loss, name='l2_mean_loss_pic')
 
         # with tf.variable_scope('loss_function_txt'):
         #     # with tf.device('/device:GPU:1'):
@@ -328,7 +345,7 @@ class seq_pic2seq_pic():
         #     txt_loss = tf.reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
 
         # all_loss=pic_loss + txt_loss
-        self.loss = pic_loss
+        self.loss = vgg_loss + cross_loss
         # pdb.set_trace()
         grads_and_vars = self._opt.compute_gradients(pic_loss)
         # pdb.set_trace()
@@ -341,14 +358,15 @@ class seq_pic2seq_pic():
             self.predict_pic = predict_pic
             # self.predict_txt = tf.argmax(response_txt, axis=2)
 
-    # def add_gradient_noise(self,t, stddev=1e-3, name=None):
-    #     """
-    #     Adds gradient noise as described in http://arxiv.org/abs/1511.06807 [2]..
-    #     """
-    #     with tf.name_scope("add_gradient_noise") as name:
-    #         t = tf.convert_to_tensor(t, name="t")
-    #         gn = tf.random_normal(tf.shape(t), stddev=stddev)
-    #         return tf.add(t, gn, name=name)
+
+        # def add_gradient_noise(self,t, stddev=1e-3, name=None):
+        #     """
+        #     Adds gradient noise as described in http://arxiv.org/abs/1511.06807 [2]..
+        #     """
+        #     with tf.name_scope("add_gradient_noise") as name:
+        #         t = tf.convert_to_tensor(t, name="t")
+        #         gn = tf.random_normal(tf.shape(t), stddev=stddev)
+        #         return tf.add(t, gn, name=name)
 
     def _build_inputs(self):
         # self._question = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Question')
@@ -358,7 +376,9 @@ class seq_pic2seq_pic():
                                          name='frame_input')
         self._output_pic = tf.placeholder(tf.float32, [self._batch_size, self.img_size_x, self.img_size_y, 1],
                                           name='frame_output')
-        # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
+
+    # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
+
 
     def steps(self, sess, data_dict, noise, step_type='train'):
         self.model_type = step_type
