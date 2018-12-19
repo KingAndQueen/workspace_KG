@@ -297,10 +297,9 @@ class seq_pic2seq_pic():
             predict_pic = tf.tanh(h4) / 2. + 0.5
 
         # pdb.set_trace()
-        def compute_error(real, fake, label):
-            return tf.reduce_mean(
-                label * tf.expand_dims(tf.reduce_mean(tf.abs(fake - real), reduction_indices=[3]), -1),
-                reduction_indices=[1, 2])  # diversity loss
+        def compute_error(real, fake):
+            return tf.reduce_mean(tf.abs(fake - real))
+            # diversity loss
 
         with tf.variable_scope('loss_function_pic'):
             # pdb.set_trace()
