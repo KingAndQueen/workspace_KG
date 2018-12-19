@@ -110,16 +110,16 @@ class seq_pic2seq_pic():
             y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
             # pdb.set_trace()
             h0_e = conv2d(self._input_pic, [self._batch_size,s, y,self._cov_size * 1],name='e_h0')
-            h0_e = tf.nn.relu(self.e_bn0(h0_e, type=self.model_type))
+            # h0_e = tf.nn.relu(self.e_bn0(h0_e, type=self.model_type))
 
             h1_e = conv2d(h0_e, [self._batch_size, s2, y2, self._cov_size * 2], name='e_h1')
-            h1_e = tf.nn.relu(self.e_bn1(h1_e, type=self.model_type))
+            # h1_e = tf.nn.relu(self.e_bn1(h1_e, type=self.model_type))
 
             h2_e = conv2d(h1_e, [self._batch_size, s4, y4, self._cov_size * 4], name='e_h2')
-            h2_e = tf.nn.relu(self.e_bn2(h2_e, type=self.model_type))
+            # h2_e = tf.nn.relu(self.e_bn2(h2_e, type=self.model_type))
 
             h3_e = conv2d(h2_e, [self._batch_size, s8, y8, self._cov_size * 8], name='e_h3')
-            h3_e = tf.nn.relu(self.e_bn3(h3_e, type=self.model_type))
+            # h3_e = tf.nn.relu(self.e_bn3(h3_e, type=self.model_type))
 
             h4_e = tf.reshape(h3_e, [self._batch_size, -1], name='e_h4')
             # pdb.set_trace()
