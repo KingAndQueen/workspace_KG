@@ -311,11 +311,11 @@ class seq_pic2seq_pic():
             cross_entropy_sentence = tf.reduce_sum(cross_entropy_sentence, axis=1)
             weight_sum = tf.reduce_sum(self._weight, axis=1)
             cross_entropy_sentence = cross_entropy_sentence / weight_sum
-            # txt_loss = tf.reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
+            txt_loss = tf.reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
 
         # all_loss = pic_loss + 0.0*txt_loss
         # pdb.set_trace()
-        all_loss=0.2*pic_square_loss+0.3*vgg_loss+0.5*cross_entropy_sentence
+        all_loss=0.2*pic_square_loss+0.3*vgg_loss+0.5*txt_loss
         # loss_=tf.concat([tf.expand_dims(G_loss,-1),tf.expand_dims(cross_entropy_sentence,-1)],1)
         # all_loss=linear(loss_,1)
 
