@@ -308,7 +308,7 @@ class seq_pic2seq_pic():
             # cov_output=convolution.deeplab_v3(self._output_pic)
             # sp=self.img_size_x
 
-            vgg_real = build_vgg19(self._real_pic)
+            vgg_real = build_vgg19(self._output_pic)
             vgg_fake = build_vgg19(predict_pic, reuse=True)
             p0 = compute_error(vgg_real['input'], vgg_fake['input'])
             p1 = compute_error(vgg_real['conv1_2'], vgg_fake['conv1_2']) / 1.6
