@@ -19,7 +19,7 @@ class seq_pic2seq_pic():
         self._learn_rate = tf.Variable(float(config.learn_rate), trainable=False, dtype=tf.float32, name='learn_rate')
 
         # self._opt = tf.train.GradientDescentOptimizer(learning_rate=self._learn_rate)
-        self._opt = tf.train.AdamOptimizer(learning_rate=self._learn_rate)
+        self._opt = tf.train.AdamOptimizer(learning_rate=self._learn_rate,beta1=0.5)
 
         self._embedding_size = config.recurrent_dim
         self._layers = config.layers
@@ -75,27 +75,27 @@ class seq_pic2seq_pic():
         # encoder_txt_output, question_state = _encoding_txt_sentence(question_emb,name='question')  # monica_sate.shape=layers*[batch_size,neurons]
         # pdb.set_trace()
 
-        def _encoding_pic_frame(frame, name='', GPU_id=0):
-            with tf.variable_scope('encoding_frame_' + name):
-                # resident net
-                resnet_output, end_points = convolution.resnet_v2_50(frame)
-                # pdb.set_trace()
-                resnet_output = end_points[
-                    'encoding_frame_' + name + '/resnet_v2_50/block4']  # test2 to check the full connections effect
-                return resnet_output
+        # def _encoding_pic_frame(frame, name='', GPU_id=0):
+        #     with tf.variable_scope('encoding_frame_' + name):
+        #         # resident net
+        #         resnet_output, end_points = convolution.resnet_v2_50(frame)
+        #         # pdb.set_trace()
+        #         resnet_output = end_points[
+        #             'encoding_frame_' + name + '/resnet_v2_50/block4']  # test2 to check the full connections effect
+        #         return resnet_output
+        #
+        # encoder_pic_output = _encoding_pic_frame(self._input_pic)
 
-        encoder_pic_output = _encoding_pic_frame(self._input_pic)
-
-        def conv2d(input_, output_shape, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="conv2d", with_w=False):
+        def conv2d(input_, output_dim, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="conv2d", with_w=False):
             with tf.variable_scope(name):
                 # pdb.set_trace()
                 # filter : [height, width, output_channels, in_channels]
-                w = tf.get_variable('w', [k_h, k_w, input_.get_shape()[-1], output_shape[-1]],
+                w = tf.get_variable('w', [k_h, k_w, input_.get_shape()[-1], output_dim],
                                     initializer=tf.random_normal_initializer(stddev=stddev))
 
                 deconv = tf.nn.conv2d(input_, filter=w, strides=[1, d_h, d_w, 1], padding="SAME")
 
-                biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
+                biases = tf.get_variable('biases', [output_dim], initializer=tf.constant_initializer(0.0))
                 deconv = tf.reshape(tf.nn.bias_add(deconv, biases), deconv.get_shape())
 
                 if with_w:
@@ -103,27 +103,39 @@ class seq_pic2seq_pic():
                 else:
                     return deconv
 
-        # with tf.variable_scope('encoder_pic'):
-        #     s = self.img_size_x
-        #     y = self.img_size_y
-        #     s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
-        #     y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
-        #     # pdb.set_trace()
-        #     h0_e = conv2d(self._input_pic, [self._batch_size,s, y,self._cov_size * 1],name='e_h0')
-        #     h0_e = tf.nn.relu(self.e_bn0(h0_e, type=self.model_type))
-        #
-        #     h1_e = conv2d(h0_e, [self._batch_size, s2, y2, self._cov_size * 2], name='e_h1')
-        #     h1_e = tf.nn.relu(self.e_bn1(h1_e, type=self.model_type))
-        #
-        #     h2_e = conv2d(h1_e, [self._batch_size, s4, y4, self._cov_size * 4], name='e_h2')
-        #     h2_e = tf.nn.relu(self.e_bn2(h2_e, type=self.model_type))
-        #
-        #     h3_e = conv2d(h2_e, [self._batch_size, s8, y8, self._cov_size * 8], name='e_h3')
-        #     h3_e = tf.nn.relu(self.e_bn3(h3_e, type=self.model_type))
-        #
-        #     h4_e = tf.reshape(h3_e, [self._batch_size, -1], name='e_h4')
-        #     # pdb.set_trace()
-        #     encoder_pic_output = h4_e
+        def lrelu(x,leak=0.2, name='lrelu'):
+            return tf.maximum(x, leak * x)
+        def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
+            shape = input_.get_shape().as_list()
+
+            with tf.variable_scope(scope or "Linear"):
+                matrix = tf.get_variable("Matrix", [shape[1], output_size], tf.float32,
+                                         tf.random_normal_initializer(stddev=stddev))
+                bias = tf.get_variable("bias", [output_size],
+                                       initializer=tf.constant_initializer(bias_start))
+                if with_w:
+                    return tf.matmul(input_, matrix) + bias, matrix, bias
+                else:
+                    return tf.matmul(input_, matrix) + bias
+
+        with tf.variable_scope('encoder_pic'):
+            # pdb.set_trace()
+            h0_e = conv2d(self._input_pic, self._cov_size * 1,name='e_h0')
+            h0_e = lrelu(h0_e)
+
+            h1_e = conv2d(h0_e,  self._cov_size * 2, name='e_h1')
+            h1_e = lrelu(self.e_bn1(h1_e, type=self.model_type))
+
+            h2_e = conv2d(h1_e, self._cov_size * 4, name='e_h2')
+            h2_e = lrelu(self.e_bn2(h2_e, type=self.model_type))
+
+            h3_e = conv2d(h2_e, self._cov_size * 8, name='e_h3')
+            h3_e = lrelu(self.e_bn3(h3_e, type=self.model_type))
+
+            h4_e = tf.reshape(h3_e, [self._batch_size, -1], name='e_h4')
+            h4_e = linear(h4_e,1 ,'d_h4_lin')
+            # pdb.set_trace()
+            encoder_pic_output = tf.nn.sigmoid(h4_e)
 
         # def decoder_txt_atten(encoder_state, attention_states, ans_emb,model_type='train'):
         #     with tf.variable_scope('speaker'):
@@ -250,21 +262,9 @@ class seq_pic2seq_pic():
                 else:
                     return deconv
 
-        # def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
-        #     shape = input_.get_shape().as_list()
-        #
-        #     with tf.variable_scope(scope or "Linear"):
-        #         matrix = tf.get_variable("Matrix", [shape[1], output_size], tf.float32,
-        #                                  tf.random_normal_initializer(stddev=stddev))
-        #         bias = tf.get_variable("bias", [output_size],
-        #                                initializer=tf.constant_initializer(bias_start))
-        #         if with_w:
-        #             return tf.matmul(input_, matrix) + bias, matrix, bias
-        #         else:
-        #             return tf.matmul(input_, matrix) + bias
 
-        # def lrelu(x,leak=0.2, name="lrelu"):
-        #     return tf.maximum(x, leak * x)
+
+
 
         with tf.variable_scope('decoder_pic'):
             s = self.img_size_x
@@ -294,7 +294,7 @@ class seq_pic2seq_pic():
 
             h4 = deconv2d(h3, [self._batch_size, s, y, 1], name='g_h4')
 
-            predict_pic = tf.tanh(h4) / 2. + 0.5
+            predict_pic = tf.tanh(h4)
 
         # pdb.set_trace()
         def compute_error(real, fake):
@@ -321,6 +321,18 @@ class seq_pic2seq_pic():
             # pdb.set_trace()
             vgg_loss = tf.reduce_sum(tf.reduce_min(content_loss)) * 0.999 + tf.reduce_sum(
                 tf.reduce_mean(content_loss)) * 0.001
+
+        def sigmoid_cross_entropy_with_logits(x, y):
+            try:
+                return tf.nn.sigmoid_cross_entropy_with_logits(logits=x, labels=y)
+            except:
+                return tf.nn.sigmoid_cross_entropy_with_logits(logits=x, targets=y)
+
+        self.d_loss_real = tf.reduce_mean(
+            sigmoid_cross_entropy_with_logits(encoder_pic_output, tf.ones_like(h4_e)))
+        self.d_loss_fake = tf.reduce_mean(
+            sigmoid_cross_entropy_with_logits(self._output_pic, tf.zeros_like(h4_e)))
+        self.d_loss = self.d_loss_real + self.d_loss_fake
 
         pic_loss = tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._output_pic, predict_pic), name='pic_loss')))
         cross_loss = tf.reduce_mean(pic_loss, name='l2_mean_loss_pic')
