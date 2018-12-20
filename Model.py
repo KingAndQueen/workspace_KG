@@ -322,17 +322,15 @@ class seq_pic2seq_pic():
             vgg_loss = tf.reduce_sum(tf.reduce_min(content_loss)) * 0.999 + tf.reduce_sum(
                 tf.reduce_mean(content_loss)) * 0.001
 
-        def sigmoid_cross_entropy_with_logits(x, y):
-            try:
-                return tf.nn.sigmoid_cross_entropy_with_logits(logits=x, labels=y)
-            except:
-                pdb.set_trace()
-
-        self.d_loss_real = tf.reduce_mean(
-            sigmoid_cross_entropy_with_logits(encoder_pic_output, tf.ones_like(h4_e)))
-        self.d_loss_fake = tf.reduce_mean(
-            sigmoid_cross_entropy_with_logits(self._output_pic, tf.zeros_like(h4_e)))
-        self.d_loss = self.d_loss_real + self.d_loss_fake
+        # def sigmoid_cross_entropy_with_logits(x, y):
+        #     return tf.nn.sigmoid_cross_entropy_with_logits(logits=x, labels=y)
+        #
+        #
+        # self.d_loss_real = tf.reduce_mean(
+        #     sigmoid_cross_entropy_with_logits(encoder_pic_output, tf.ones_like(h4_e)))
+        # self.d_loss_fake = tf.reduce_mean(
+        #     sigmoid_cross_entropy_with_logits(self._output_pic, tf.zeros_like(h4_e)))
+        # self.d_loss = self.d_loss_real + self.d_loss_fake
 
         pic_loss = tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._output_pic, predict_pic), name='pic_loss')))
         cross_loss = tf.reduce_mean(pic_loss, name='l2_mean_loss_pic')
