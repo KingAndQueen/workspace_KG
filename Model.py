@@ -133,7 +133,7 @@ class seq_pic2seq_pic():
             h3_e = lrelu(self.e_bn3(h3_e, type=self.model_type))
 
             h4_e = tf.reshape(h3_e, [self._batch_size, -1], name='e_h4')
-            h4_e = linear(h4_e,1 ,'d_h4_lin')
+            # h4_e = linear(h4_e,1 ,'d_h4_lin')
             # pdb.set_trace()
             encoder_pic_output = tf.nn.sigmoid(h4_e)
 
@@ -326,7 +326,7 @@ class seq_pic2seq_pic():
             try:
                 return tf.nn.sigmoid_cross_entropy_with_logits(logits=x, labels=y)
             except:
-                return tf.nn.sigmoid_cross_entropy_with_logits(logits=x, targets=y)
+                pdb.set_trace()
 
         self.d_loss_real = tf.reduce_mean(
             sigmoid_cross_entropy_with_logits(encoder_pic_output, tf.ones_like(h4_e)))
