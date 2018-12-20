@@ -135,7 +135,7 @@ class seq_pic2seq_pic():
             h4_e = tf.reshape(h3_e, [self._batch_size, -1], name='e_h4')
             # h4_e = linear(h4_e,1 ,'d_h4_lin')
             # pdb.set_trace()
-            encoder_pic_output = tf.nn.sigmoid(h4_e)
+            encoder_pic_output = h4_e#tf.nn.sigmoid(h4_e)
 
         # def decoder_txt_atten(encoder_state, attention_states, ans_emb,model_type='train'):
         #     with tf.variable_scope('speaker'):
@@ -278,9 +278,9 @@ class seq_pic2seq_pic():
             # try more input method to replace all_infor # test1
             # pdb.set_trace()
             # reduced_text_embedding = lrelu(linear(encoder_pic_output_reshape, self._embedding_size, 'g_embedding'))
-            z_concat = tf.concat([self._random_z, encoder_pic_output],1)
-            z_ = linear(z_concat, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
-            h0 = tf.reshape(z_, [-1, s16, y16, self._cov_size * 8])
+            # z_concat = tf.concat([self._random_z, encoder_pic_output],1)
+            # z_ = linear(z_concat, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
+            h0 = tf.reshape(encoder_pic_output, [-1, s16, y16, self._cov_size * 8])
             h0 = tf.nn.relu(self.g_bn0(h0, type=self.model_type))
 
             h1 = deconv2d(h0, [self._batch_size, s8, y8, self._cov_size * 4], name='g_h1')
@@ -301,26 +301,26 @@ class seq_pic2seq_pic():
             return tf.reduce_mean(tf.abs(fake - real))
             # diversity loss
 
-        with tf.variable_scope('loss_function_pic'):
-            # pdb.set_trace()
-            # cov_input=convolution.deeplab_v3(predict_pic)
-            # cov_output=convolution.deeplab_v3(self._output_pic)
-            # sp=self.img_size_x
-
-            vgg_real = build_vgg19(self._output_pic)
-            vgg_fake = build_vgg19(predict_pic, reuse=True)
-            p0 = compute_error(vgg_real['input'], vgg_fake['input'])
-            p1 = compute_error(vgg_real['conv1_2'], vgg_fake['conv1_2']) / 1.6
-            p2 = compute_error(vgg_real['conv2_2'], vgg_fake['conv2_2']) / 2.3
-            p3 = compute_error(vgg_real['conv3_2'], vgg_fake['conv3_2']) / 1.8
-            p4 = compute_error(vgg_real['conv4_2'], vgg_fake['conv4_2']) / 2.8
-            p5 = compute_error(vgg_real['conv5_2'],
-                               vgg_fake['conv5_2']) * 10 / 0.8  # weights lambda are collected at 100th epoch
-            content_loss = p0 + p1 + p2 + p3 + p4 + p5
-
-            # pdb.set_trace()
-            vgg_loss = tf.reduce_sum(tf.reduce_min(content_loss)) * 0.999 + tf.reduce_sum(
-                tf.reduce_mean(content_loss)) * 0.001
+        # with tf.variable_scope('loss_function_pic'):
+        #     # pdb.set_trace()
+        #     # cov_input=convolution.deeplab_v3(predict_pic)
+        #     # cov_output=convolution.deeplab_v3(self._output_pic)
+        #     # sp=self.img_size_x
+        #
+        #     vgg_real = build_vgg19(self._output_pic)
+        #     vgg_fake = build_vgg19(predict_pic, reuse=True)
+        #     p0 = compute_error(vgg_real['input'], vgg_fake['input'])
+        #     p1 = compute_error(vgg_real['conv1_2'], vgg_fake['conv1_2']) / 1.6
+        #     p2 = compute_error(vgg_real['conv2_2'], vgg_fake['conv2_2']) / 2.3
+        #     p3 = compute_error(vgg_real['conv3_2'], vgg_fake['conv3_2']) / 1.8
+        #     p4 = compute_error(vgg_real['conv4_2'], vgg_fake['conv4_2']) / 2.8
+        #     p5 = compute_error(vgg_real['conv5_2'],
+        #                        vgg_fake['conv5_2']) * 10 / 0.8  # weights lambda are collected at 100th epoch
+        #     content_loss = p0 + p1 + p2 + p3 + p4 + p5
+        #
+        #     # pdb.set_trace()
+        #     vgg_loss = tf.reduce_sum(tf.reduce_min(content_loss)) * 0.999 + tf.reduce_sum(
+        #         tf.reduce_mean(content_loss)) * 0.001
 
         # def sigmoid_cross_entropy_with_logits(x, y):
         #     return tf.nn.sigmoid_cross_entropy_with_logits(logits=x, labels=y)
@@ -354,7 +354,7 @@ class seq_pic2seq_pic():
         #     txt_loss = tf.reduce_mean(cross_entropy_sentence, name="cross_entropy_sentences")
 
         # all_loss=pic_loss + txt_loss
-        self.loss = vgg_loss + cross_loss
+        self.loss =  cross_loss
         # pdb.set_trace()
         grads_and_vars = self._opt.compute_gradients(pic_loss)
         # pdb.set_trace()
@@ -386,7 +386,7 @@ class seq_pic2seq_pic():
         self._output_pic = tf.placeholder(tf.float32, [self._batch_size, self.img_size_x, self.img_size_y, 1],
                                           name='frame_output')
 
-        self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
+        # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
 
     def steps(self, sess, data_dict, noise, step_type='train'):
@@ -401,8 +401,8 @@ class seq_pic2seq_pic():
         #              self._question: input_batch_txt,
         #              self._weight:weight_batch_txt,
         feed_dict = {self._input_pic: input_batch_pic,
-                     self._output_pic: output_batch_pic,
-                     self._random_z:noise}
+                     self._output_pic: output_batch_pic,}
+                     # self._random_z:noise}
 
         if step_type == 'train':
             output_list = [self.loss, self.train_op]
