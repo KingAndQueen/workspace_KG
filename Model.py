@@ -329,7 +329,7 @@ class seq_pic2seq_pic():
         d_loss_real = tf.reduce_mean(
             sigmoid_cross_entropy_with_logits(predict_pic, tf.ones_like(h4)))
         d_loss_fake = tf.reduce_mean(
-            sigmoid_cross_entropy_with_logits(self._output_pic, tf.ones_like(self._output_pic)))
+            sigmoid_cross_entropy_with_logits(self._output_pic, tf.zeros_like(self._output_pic)))
         d_loss =tf.square(d_loss_real - d_loss_fake)
 
         # pic_loss = tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self._output_pic, predict_pic), name='pic_loss')))
