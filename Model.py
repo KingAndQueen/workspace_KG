@@ -267,8 +267,8 @@ class seq_pic2seq_pic():
 
 
         with tf.variable_scope('decoder_pic'):
-            s = self.img_size_x
-            y = self.img_size_y
+            s = self.img_size_x/2
+            y = self.img_size_y/2
             s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
             y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
             # encoder_pic_output_reshape=tf.reshape(encoder_pic_output,[self._batch_size,-1])
