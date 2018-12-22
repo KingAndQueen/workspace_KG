@@ -23,7 +23,7 @@ def run_tm(func):
 def drew_output_pic(data_patch, case_name, save_path, gray=False):
     # pdb.set_trace()
     # for i in range(data_patch.shape[0]):
-    plt.figure(figsize=(16, 32))
+    plt.figure(figsize=(8, 16))
     if gray:
         plt.imshow((np.squeeze(data_patch)+1.)/2, cmap='gray')
     else:
