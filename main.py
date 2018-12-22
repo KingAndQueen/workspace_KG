@@ -118,7 +118,7 @@ def main(_):
         print('Learning rate: ',config.learn_rate)
         train_model(sess, model, train_data, valid_data)
         # config.model_type = 'test'
-        test_model(sess, model, train_data[-len(times_test)], vocab,times_test)### test training process
+        test_model(sess, model, train_data[:len(times_test)/config.batch_size], vocab,times_test)### test training process
 
     if config.model_type == 'test' :
         print('Test model.......')
@@ -129,7 +129,7 @@ def main(_):
         print('Reload model from checkpoints.....')
         ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
         model.saver.restore(sess, ckpt.model_checkpoint_path)
-        test_model(sess, model, train_data[-len(times_test)], vocab,times_test)
+        test_model(sess, model, train_data[:len(times_test)/config.batch_size], vocab,times_test)
 
 if __name__ == "__main__":
     tf.app.run()
