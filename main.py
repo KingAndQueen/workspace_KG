@@ -115,6 +115,7 @@ def main(_):
         print('establish the model...')
         model = Model.seq_pic2seq_pic(config, vocab)
         sess.run(tf.global_variables_initializer())
+        print('Learning rate: ',config.learn_rate)
         train_model(sess, model, train_data, valid_data)
         # config.model_type = 'test'
         test_model(sess, model, train_data[-len(times_test)], vocab,times_test)### test training process
