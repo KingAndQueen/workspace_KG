@@ -86,6 +86,7 @@ def test_model(sess, model, test_data, vocab,times):
 
         pred_pics.append(pred_pic)
         # pred_txts.append(pred_txt)
+    pdb.set_trace()
     Analysis.drew_seq(times, pred_pics, './result/', config.gray)
     # Analysis.write_sents(times,pred_txts,'./result/',vocab)
     test_loss=test_loss / len(test_data)
