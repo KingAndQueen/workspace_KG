@@ -120,21 +120,21 @@ class seq_pic2seq_pic():
 
         with tf.variable_scope('encoder_pic'):
             # pdb.set_trace()
-            h0_e = conv2d(self._input_pic, self._cov_size * 1,name='e_h0')
+            h0_e = conv2d(self._input_pic, self._cov_size / 1,name='e_h0')
             h0_e = lrelu(h0_e)
 
-            h1_e = conv2d(h0_e,  self._cov_size * 2, name='e_h1')
+            h1_e = conv2d(h0_e,  self._cov_size / 2, name='e_h1')
             h1_e = lrelu(self.e_bn1(h1_e, type=self.model_type))
 
-            h2_e = conv2d(h1_e, self._cov_size * 4, name='e_h2')
+            h2_e = conv2d(h1_e, self._cov_size / 4, name='e_h2')
             h2_e = lrelu(self.e_bn2(h2_e, type=self.model_type))
 
-            h3_e = conv2d(h2_e, self._cov_size * 8, name='e_h3')
+            h3_e = conv2d(h2_e, self._cov_size / 8, name='e_h3')
             h3_e = lrelu(self.e_bn3(h3_e, type=self.model_type))
 
             h4_e = tf.reshape(h3_e, [self._batch_size, -1], name='e_h4')
             # h4_e = linear(h4_e,1 ,'d_h4_lin')
-            # pdb.set_trace()
+            pdb.set_trace()
             encoder_pic_output = h4_e#tf.nn.sigmoid(h4_e)
 
         # def decoder_txt_atten(encoder_state, attention_states, ans_emb,model_type='train'):
@@ -277,8 +277,8 @@ class seq_pic2seq_pic():
             # all_infor=tf.concat([encoder_pic_output_reshape,response_txt_reshape,encoder_txt_output_reshape],1)
             # try more input method to replace all_infor # test1
             # pdb.set_trace()
-            # reduced_text_embedding = lrelu(linear(encoder_pic_output_reshape, self._embedding_size, 'g_embedding'))
-            z_concat = tf.concat([self._random_z, encoder_pic_output],1)
+            reduced_text_embedding = lrelu(linear(encoder_pic_output, self._embedding_size, 'g_embedding'))
+            z_concat = tf.concat([self._random_z, reduced_text_embedding],1)
             z_ = linear(z_concat, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
             h0 = tf.reshape(z_, [-1, s16, y16, self._cov_size * 8])
             h0 = tf.nn.relu(self.g_bn0(h0, type=self.model_type))
