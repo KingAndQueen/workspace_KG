@@ -134,7 +134,7 @@ class seq_pic2seq_pic():
 
             h4_e = tf.reshape(h3_e, [self._batch_size, -1], name='e_h4')
             # h4_e = linear(h4_e,1 ,'d_h4_lin')
-            pdb.set_trace()
+            # pdb.set_trace()
             encoder_pic_output = h4_e#tf.nn.sigmoid(h4_e)
 
         # def decoder_txt_atten(encoder_state, attention_states, ans_emb,model_type='train'):
@@ -356,6 +356,7 @@ class seq_pic2seq_pic():
         # all_loss=pic_loss + txt_loss
         self.loss =  d_loss
         # pdb.set_trace()
+        self.loss_sum = tf.summary.scalar("g_loss", self.loss)
         grads_and_vars = self._opt.compute_gradients(d_loss)
         # pdb.set_trace()
         # grads_and_vars = [(tf.clip_by_norm(g, self._max_grad_norm), v) for g, v in grads_and_vars if g is not None]
@@ -363,6 +364,7 @@ class seq_pic2seq_pic():
 
         self.train_op = self._opt.apply_gradients(grads_and_vars=grads_and_vars, name='train_op')
         self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
+
         with tf.variable_scope('output_information'):
             self.predict_pic = predict_pic
             # self.predict_txt = tf.argmax(response_txt, axis=2)
@@ -405,12 +407,12 @@ class seq_pic2seq_pic():
                      self._random_z:noise}
 
         if step_type == 'train':
-            output_list = [self.loss, self.train_op]
+            output_list = [self.loss, self.train_op,self.loss_sum]
             try:
-                loss, _ = sess.run(output_list, feed_dict=feed_dict)
+                loss, _ ,summary= sess.run(output_list, feed_dict=feed_dict)
             except:
                 pdb.set_trace()
-            return loss, _
+            return loss, _,summary
 
         if step_type == 'test':
             output_list = [self.loss, self.predict_pic]  # ,self.predict_txt]
@@ -419,6 +421,7 @@ class seq_pic2seq_pic():
             except:
                 pdb.set_trace()
             return loss, pic
+
 
         print('step_type is wrong!>>>')
         return None

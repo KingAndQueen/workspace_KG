@@ -38,7 +38,7 @@ def train_model(sess, model, train_data, valid_data):
     # train_data, eval_data = model_selection.train_test_split(train_data, test_size=0.2)
     current_step = 1
     train_losses = []
-
+    writer = tf.summary.FileWriter('./logs', sess.graph)
     epoch=config.epochs
     print('training....')
     checkpoint_path = os.path.join(config.checkpoint_path, 'visual_dialog.ckpt')
@@ -48,8 +48,8 @@ def train_model(sess, model, train_data, valid_data):
         for i in range(len(train_data)):
             z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
-            train_loss_, _ = model.steps(sess, random.choice(train_data),z_noise,step_type='train')
-
+            train_loss_, _ ,summary= model.steps(sess, random.choice(train_data),z_noise,step_type='train')
+            writer.add_summary(summary, current_step)
         if current_step % config.check_epoch == 0:
             eval_losses = 0
             train_losses.append(train_loss_)
@@ -72,6 +72,8 @@ def train_model(sess, model, train_data, valid_data):
             # if len(eval_losses_all) > config.stop_limit and eval_loss > sum(eval_losses_all[-1 * config.stop_limit:])/float(config.stop_limit):
             #     print('----End training for evaluation increase----')
             #     break
+
+
 
         current_step += 1
     print(' current step %d finished' % current_step)
