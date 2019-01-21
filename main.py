@@ -24,7 +24,7 @@ tf.flags.DEFINE_string("data_dir", "data/", "Directory containing tasks")
 tf.flags.DEFINE_integer('sentence_size', 30, 'length of word in a sentence')
 tf.flags.DEFINE_integer('stop_limit', 5, 'number of evaluation loss is greater than train loss  ')
 tf.flags.DEFINE_string("checkpoint_path", "./checkpoints/", "Directory to save checkpoints")
-#tf.flags.DEFINE_string("summary_path", "./summary/", "Directory to save summary")
+tf.flags.DEFINE_string("summary_path", "./summary/", "Directory to save summary")
 tf.flags.DEFINE_string("model_type", "train", "whether to train or test model")
 tf.flags.DEFINE_integer('img_size_x',160,'generate pic size in X')
 tf.flags.DEFINE_integer('img_size_y',320,'generate pic size in Y')
@@ -43,14 +43,15 @@ def train_model(sess, model, train_data, valid_data):
     epoch=config.epochs
     print('training....')
     checkpoint_path = os.path.join(config.checkpoint_path, 'visual_dialog.ckpt')
+    train_summary_writer= tf.summary.FileWriter(config.summary_path, sess.graph)
     while current_step <= epoch:
         #  print ('current_step:',current_step)
 
         for i in range(len(train_data)):
             z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
-            train_loss_, _ = model.steps(sess, random.choice(train_data),z_noise,step_type='train')
-
+            train_loss_, summary = model.steps(sess, random.choice(train_data),z_noise,step_type='train')
+            train_summary_writer.add_summary(summary)
         if current_step % config.check_epoch == 0:
             eval_losses = 0
             train_losses.append(train_loss_)
@@ -60,7 +61,7 @@ def train_model(sess, model, train_data, valid_data):
             z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
 
             for i in range(len(valid_data)):
-                eval_loss, _ ,_= model.steps(sess, random.choice(valid_data), z_noise,step_type='test')
+                eval_loss, _ ,= model.steps(sess, random.choice(valid_data), z_noise,step_type='test')
                 eval_losses+=eval_loss
 
             print('evaluation loss:', eval_losses/len(valid_data))

@@ -352,12 +352,12 @@ class seq_pic2seq_pic():
         # self._random_z:noise}
 
         if step_type == 'train':
-            output_list = [self.losses, self.train_ops]
+            output_list = [self.losses, self.train_ops,self.merged]
             try:
-                loss, _ = sess.run(output_list, feed_dict=feed_dict)
+                loss, _,summary = sess.run(output_list, feed_dict=feed_dict)
             except:
                 pdb.set_trace()
-            return loss, _
+            return loss, summary
 
         if step_type == 'test':
             output_list = [self.losses, self.predict_txt]#, self.predict_pic
