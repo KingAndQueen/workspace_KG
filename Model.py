@@ -80,7 +80,7 @@ class seq_pic2seq_pic():
                     self.enc = feedforward(self.enc, num_units=[4 * self._embedding_size, self._embedding_size])
 
         # pdb.set_trace()
-        def _encoding_pic_frame(frame, name='', GPU_id=0):
+        def _encoding_pic_frame(frame, name=''):
             with tf.variable_scope('encoding_frame_' + name):
                 # resident net
                 resnet_output, end_points = convolution.resnet_v2_50(frame)
@@ -208,8 +208,8 @@ class seq_pic2seq_pic():
                     # print '$$$$$$$$$$$$$$$$$$$$'
 
         # pdb.set_trace()
-        def compute_error(real, fake):
-            return tf.reduce_mean(tf.abs(fake - real))
+        # def compute_error(real, fake):
+        #     return tf.reduce_mean(tf.abs(fake - real))
             # diversity loss
 
             # with tf.variable_scope('loss_function_pic'):
@@ -309,10 +309,11 @@ class seq_pic2seq_pic():
         # pdb.set_trace()
         self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
         with tf.variable_scope('output_information'):
-            self.global_step = tf.Variable(0, name='global_step', trainable=False)
+            # self.global_step = tf.Variable(0, name='global_step', trainable=False)
             # optimizer
-            self.train_op = self._opt.minimize(self.losses, global_step=self.global_step)
-
+            # self.train_op = self._opt.minimize(self.losses, global_step=self.global_step)
+            grads_and_vars = self._opt.compute_gradients(self.losses)
+            self.train_ops=self._opt.apply_gradients(grads_and_vars=grads_and_vars, name='train_op')
             tf.summary.scalar('mean_loss', self.losses)
             self.merged = tf.summary.merge_all()
 
@@ -331,8 +332,8 @@ class seq_pic2seq_pic():
         self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
         self._input_pic = tf.placeholder(tf.float32, [self._batch_size, self.img_size_x, self.img_size_y, 1],
                                          name='frame_input')
-        self._real_pic = tf.placeholder(tf.float32, [self._batch_size, self.img_size_x, self.img_size_y, 1],
-                                        name='frame_output')
+        # self._real_pic = tf.placeholder(tf.float32, [self._batch_size, self.img_size_x, self.img_size_y, 1],
+        #                                 name='frame_output')
         # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
     def steps(self, sess, data_dict, noise, step_type='train'):
@@ -340,18 +341,18 @@ class seq_pic2seq_pic():
         input_batch_txt = data_dict[0]
         output_batch_txt = data_dict[1]
         input_batch_pic = data_dict[2]
-        output_batch_pic = data_dict[3]
+        # output_batch_pic = data_dict[3]
         weight_batch_txt = data_dict[4]
         # pdb.set_trace()
         feed_dict = {self._response: output_batch_txt,
                      self._question: input_batch_txt,
                      self._weight: weight_batch_txt,
-                     self._input_pic: input_batch_pic,
-                     self._real_pic: output_batch_pic}
+                     self._input_pic: input_batch_pic}
+                     # self._real_pic: output_batch_pic}
         # self._random_z:noise}
 
         if step_type == 'train':
-            output_list = [self.losses, self.train_op]
+            output_list = [self.losses, self.train_ops]
             try:
                 loss, _ = sess.run(output_list, feed_dict=feed_dict)
             except:
@@ -359,12 +360,12 @@ class seq_pic2seq_pic():
             return loss, _
 
         if step_type == 'test':
-            output_list = [self.losses, self.predict_pic, self.predict_txt]
+            output_list = [self.losses, self.predict_txt]#, self.predict_pic
             try:
-                loss, pic, txt = sess.run(output_list, feed_dict=feed_dict)
+                loss, txt = sess.run(output_list, feed_dict=feed_dict)
             except:
                 pdb.set_trace()
-            return loss, pic, txt
+            return loss, txt
 
         print('step_type is wrong!>>>')
         return None
