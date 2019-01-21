@@ -131,7 +131,7 @@ def main(_):
         print('Reload model from checkpoints.....')
         ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
         model.saver.restore(sess, ckpt.model_checkpoint_path)
-        test_model(sess, model,train_data[:len(times_test)/config.batch_size], vocab,times_test) ################## test_data
+        test_model(sess, model,test_data[:len(times_test)/config.batch_size], vocab,times_test) ################## test_data
 
 if __name__ == "__main__":
     tf.app.run()
