@@ -51,7 +51,7 @@ def train_model(sess, model, train_data, valid_data):
             z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
             train_loss_, summary = model.steps(sess, random.choice(train_data),z_noise,step_type='train')
-            train_summary_writer.add_summary(summary)
+            train_summary_writer.add_summary(summary,i)
         if current_step % config.check_epoch == 0:
             eval_losses = 0
             train_losses.append(train_loss_)
