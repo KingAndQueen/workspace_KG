@@ -120,7 +120,7 @@ def main(_):
         sess.run(tf.global_variables_initializer())
         train_model(sess, model, train_data, valid_data)
         # config.model_type = 'test'
-        test_model(sess, model, train_data[:len(times_test)/config.batch_size], vocab,times_test) ################## test_data
+        test_model(sess, model, test_data[:len(times_test)/config.batch_size], vocab,times_test) ###
 
     if config.model_type == 'test' :
         print('Test model.......')
