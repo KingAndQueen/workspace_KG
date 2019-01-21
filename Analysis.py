@@ -53,7 +53,11 @@ def write_sents(times, data_seq_batch, save_path, vocab):
             data_seq.append(txt)
 
     assert len(times) == len(data_seq)
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
     f = open(save_path + 'test_output.txt', 'w')
+
+
     for idx, txt2 in enumerate(data_seq):
         # for txt in txt2:
         sent = [vocab.index_to_word(word) + ' ' for word in txt2]
