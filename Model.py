@@ -35,10 +35,10 @@ class seq_pic2seq_pic():
         self._num_identical = config.num_identical
         self._build_inputs()
         self._head = config.head
-        self.g_bn0 = convolution.batch_norm(name='g_bn0')
-        self.g_bn1 = convolution.batch_norm(name='g_bn1')
-        self.g_bn2 = convolution.batch_norm(name='g_bn2')
-        self.g_bn3 = convolution.batch_norm(name='g_bn3')
+        # self.g_bn0 = convolution.batch_norm(name='g_bn0')
+        # self.g_bn1 = convolution.batch_norm(name='g_bn1')
+        # self.g_bn2 = convolution.batch_norm(name='g_bn2')
+        # self.g_bn3 = convolution.batch_norm(name='g_bn3')
         if self.model_type == 'train':
             is_training = True
         else:
@@ -87,10 +87,10 @@ class seq_pic2seq_pic():
                 # resnet_output=end_points['resnet_v2_50' + '/block4'] # test2 to check the full connections effect
                 # encode_output=end_points['encoding_frame_'+name+'/resnet_v2_50/block4']
                 # pdb.set_trace()
-                w_pic = tf.get_variable('w', [1, 2048, 64], initializer=tf.random_normal_initializer(stddev=0.02))
+                w_pic = tf.get_variable('w', [1, 2048, self._embedding_size], initializer=tf.random_normal_initializer(stddev=0.02))
                 resnet_output = tf.squeeze(resnet_output, 1)
                 encoding_pic_output = tf.nn.conv1d(resnet_output, w_pic, 1, 'SAME')
-                encoding_pic_output = tf.tile(encoding_pic_output, [1, 30, 1])
+                encoding_pic_output = tf.tile(encoding_pic_output, [1, self._sentence_size, 1])
                 return encoding_pic_output
 
         # pdb.set_trace()
@@ -115,7 +115,7 @@ class seq_pic2seq_pic():
 
         with tf.variable_scope('merge_txt_pic'):
             decoder_input = tf.concat((encoder_pic_output, dec), -1)
-            w_merge = tf.get_variable('w', [1, 128, 64], initializer=tf.random_normal_initializer(stddev=0.02))
+            w_merge = tf.get_variable('w', [1, 2*self._embedding_size, self._embedding_size], initializer=tf.random_normal_initializer(stddev=0.02))
             # pdb.set_trace()
             self.dec =tf.nn.conv1d(decoder_input, w_merge, 1, 'SAME')
 
