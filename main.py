@@ -44,15 +44,15 @@ def train_model(sess, model, train_data, valid_data):
     print('training....')
     checkpoint_path = os.path.join(config.checkpoint_path, 'visual_dialog.ckpt')
     train_summary_writer= tf.summary.FileWriter(config.summary_path, sess.graph)
-    global_steps=0
+    # global_steps=0
     while current_step <= epoch:
         #  print ('current_step:',current_step)
         for i in range(len(train_data)):
             z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
             train_loss_, summary = model.steps(sess, random.choice(train_data),z_noise,step_type='train')
-            global_steps+=1
-            train_summary_writer.add_summary(summary,global_steps)
+            # global_steps+=1
+            train_summary_writer.add_summary(summary,model.global_step)
         if current_step % config.check_epoch == 0:
             eval_losses = 0
             train_losses.append(train_loss_)

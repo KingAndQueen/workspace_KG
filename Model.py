@@ -309,11 +309,11 @@ class seq_pic2seq_pic():
         # pdb.set_trace()
         self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
         with tf.variable_scope('output_information'):
-            # self.global_step = tf.Variable(0, name='global_step', trainable=False)
+            self.global_step = tf.Variable(0, name='global_step', trainable=False)
             # optimizer
-            # self.train_op = self._opt.minimize(self.losses, global_step=self.global_step)
-            grads_and_vars = self._opt.compute_gradients(self.losses)
-            self.train_ops=self._opt.apply_gradients(grads_and_vars=grads_and_vars, name='train_op')
+            self.train_ops = self._opt.minimize(self.losses, global_step=self.global_step)
+            # grads_and_vars = self._opt.compute_gradients(self.losses)
+            # self.train_ops=self._opt.apply_gradients(grads_and_vars=grads_and_vars, name='train_op')
             tf.summary.scalar('mean_loss', self.losses)
             self.merged = tf.summary.merge_all()
 
