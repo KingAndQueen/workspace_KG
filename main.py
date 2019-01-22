@@ -7,6 +7,7 @@ import Data_Process
 import Model
 import random
 import Analysis
+
 # from math import exp
 tf.flags.DEFINE_float("learn_rate", 0.0001, "Learning rate for SGD.")
 # tf.flags.DEFINE_float("anneal_rate", 25, "Number of epochs between halving the learnign rate.")
@@ -83,7 +84,7 @@ def train_model(sess, model, train_data, valid_data):
 
 def test_model(sess, model, test_data, vocab,times):
     test_loss = 0.0
-    pred_pics,pred_txts = [],[]
+    pred_pics,pred_txts,target_txt = [],[],[]
     z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
     for batch_id, data_test in enumerate(test_data):
         loss,pred_txt = model.steps(sess, data_test,z_noise, step_type='test')
@@ -91,9 +92,10 @@ def test_model(sess, model, test_data, vocab,times):
 
         # pred_pics.append(pred_pic)
         pred_txts.append(pred_txt)
+        target_txt.append(data_test[1])
 
     # Analysis.drew_seq(times,pred_pics,'./result/',config.gray)
-    Analysis.write_sents(times,pred_txts,'./result/',vocab)
+    Analysis.write_sents(times,pred_txts,target_txt,'./result/',vocab)
     test_loss=test_loss / len(test_data)
     print('test total loss:', test_loss)
 
