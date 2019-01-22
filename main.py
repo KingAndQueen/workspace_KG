@@ -53,7 +53,7 @@ def train_model(sess, model, train_data, valid_data):
             train_loss_, summary = model.steps(sess, random.choice(train_data),z_noise,step_type='train')
             global_steps+=1
             # g_step = sess.run(model.global_step)
-            if global_steps%100==0:
+            if global_steps%len(train_data)==0:
                 train_summary_writer.add_summary(summary,global_steps)
         if current_step % config.check_epoch == 0:
             eval_losses = 0
