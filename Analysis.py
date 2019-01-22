@@ -82,6 +82,7 @@ def write_sents(times, data_seq_batch,target_sents, save_path, vocab):
         if '<eos>' in sent_pred:
             sent_pred=sent_pred[:sent_pred.index('<eos>')+1]
         f.writelines(sent_pred)
-        f.write('\n')
+        f.write('\n\n')
+
     f.write("Bleu Score = " + str(score))
     f.close()
