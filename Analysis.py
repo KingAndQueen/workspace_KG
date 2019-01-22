@@ -46,7 +46,7 @@ def drew_seq(times, data_seq_batch, save_path,gray=False):
 
 
 def write_sents(times, data_seq_batch,target_sents, save_path, vocab):
-    data_seq_pred,data_seq_target = [],[]
+    data_seq_pred,data_seq_target,data_seq_target_bleu = [],[],[]
     # pdb.set_trace()
     if not len(data_seq_batch)==len(target_sents):
         pdb.set_trace()
@@ -61,10 +61,11 @@ def write_sents(times, data_seq_batch,target_sents, save_path, vocab):
             target_sent = list(target_sent)
             if 1 in target_sent:
                 target_sent=target_sent[:target_sent.index(1)]
-            data_seq_target.append([target_sent])
+            data_seq_target_bleu.append([target_sent])
+            data_seq_target.append(target_sent)
 
 
-    score = corpus_bleu(data_seq_target, data_seq_pred)
+    score = corpus_bleu(data_seq_target_bleu, data_seq_pred)
     print("Bleu Score = " + str(100 * score))
 
 
