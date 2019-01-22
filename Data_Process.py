@@ -132,8 +132,8 @@ if __name__ == "__main__":
 
 class Vocab():
     def __init__(self, word2vec=None, embed_size=0):
-        self.word2idx = {'<eos>': 0, '<go>': 1, '<pad>': 2, '<unk>': 3}
-        self.idx2word = {0: '<eos>', 1: '<go>', 2: '<pad>', 3: '<unk>'}
+        self.word2idx = {'<eos>': 1, '<go>': 2, '<pad>': 0, '<unk>': 3}
+        self.idx2word = {1: '<eos>', 2: '<go>', 0: '<pad>', 3: '<unk>'}
         self.embed_size = embed_size
 
     def add_vocab(self, words):
@@ -266,8 +266,9 @@ def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
     input_data_txt=copy.copy(txt)
     _=input_data_txt.pop()
     output_data_txt = copy.copy(txt)
+
     _=output_data_txt.pop(0)
-    _insert_go(output_data_txt,weights,vocabulary)
+    # _insert_go(output_data_txt,weights,vocabulary)
     # pdb.set_trace()
     output_weights=copy.copy(weights)
     output_weights.pop(0)
