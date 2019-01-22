@@ -53,10 +53,12 @@ def write_sents(times, data_seq_batch,target_sents, save_path, vocab):
 
     for idx,txt_batch in enumerate(data_seq_batch):
         for txt in txt_batch:
+            txt=list(txt)
             if 1 in txt:
                 txt=txt[:txt.index(1)]
             data_seq_pred.append(txt)
         for target_sent in target_sents[idx]:
+            target_sent = list(target_sent)
             if 1 in target_sent:
                 target_sent=target_sent[:target_sent.index(1)]
             data_seq_target.append([target_sent])
