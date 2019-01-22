@@ -66,7 +66,7 @@ def write_sents(times, data_seq_batch,target_sents, save_path, vocab):
 
 
     score = corpus_bleu(data_seq_target_bleu, data_seq_pred)
-    print("Bleu Score = " + str(100 * score))
+    print("Bleu Score = " + str(score))
 
 
     assert len(times) == len(data_seq_pred)
@@ -83,4 +83,5 @@ def write_sents(times, data_seq_batch,target_sents, save_path, vocab):
             sent_pred=sent_pred[:sent_pred.index('<eos>')+1]
         f.writelines(sent_pred)
         f.write('\n')
+    f.write("Bleu Score = " + str(score))
     f.close()
