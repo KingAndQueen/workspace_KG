@@ -209,7 +209,7 @@ class seq_pic2seq_pic():
         # self._random_z:noise}
 
         if step_type == 'train':
-            pdb.set_trace()
+            # pdb.set_trace()
             feed_dict = {self._response: output_batch_txt,
                          self._question: input_batch_txt,
                          # self._weight: weight_batch_txt,
