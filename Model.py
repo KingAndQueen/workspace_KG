@@ -24,15 +24,15 @@ class seq_pic2seq_pic():
         self._max_grad_norm = config.max_grad_norm
         self._cov_size = config.convolution_dim
         self._noise_dim = config.noise_dim
-        self.model_type = config.model_type
+        self.is_training = config.is_training
         self._num_identical = config.num_identical
         self._build_inputs()
         self._head = config.head
 
-        if self.model_type == 'train':
-            is_training = True
-        else:
-            is_training = False
+        # if self.model_type == 'train':
+        #     self.is_training = True
+        # else:
+        #     self.is_training = False
 
         with tf.variable_scope("encode_txt"):
             self.enc = embedding(self._question,
@@ -53,7 +53,7 @@ class seq_pic2seq_pic():
             # Dropout
             self.enc = tf.layers.dropout(self.enc,
                                          rate=0.1,
-                                         training=tf.convert_to_tensor(is_training))
+                                         training=tf.convert_to_tensor(self.is_training))
 
             # Identical
             for i in range(self._num_identical):
@@ -64,7 +64,7 @@ class seq_pic2seq_pic():
                                                    num_units=self._embedding_size,
                                                    num_heads=self._head,
                                                    dropout_rate=0.1,
-                                                   is_training=is_training,
+                                                   is_training=self.is_training,
                                                    causality=False)
 
                     self.enc = feedforward(self.enc, num_units=[4 * self._embedding_size, self._embedding_size])
@@ -114,7 +114,7 @@ class seq_pic2seq_pic():
             # Dropout
             self.dec = tf.layers.dropout(self.dec,
                                          rate=0.1,
-                                         training=tf.convert_to_tensor(is_training))
+                                         training=tf.convert_to_tensor(self.is_training))
             # Identical
             # pdb.set_trace()
 
@@ -126,7 +126,7 @@ class seq_pic2seq_pic():
                                                    num_units=self._embedding_size,
                                                    num_heads=self._head,
                                                    dropout_rate=0.1,
-                                                   is_training=is_training,
+                                                   is_training=self.is_training,
                                                    causality=True,
                                                    scope="self_attention")
 
@@ -136,7 +136,7 @@ class seq_pic2seq_pic():
                                                    num_units=self._embedding_size,
                                                    num_heads=self._head,
                                                    dropout_rate=0.1,
-                                                   is_training=is_training,
+                                                   is_training=self.is_training,
                                                    causality=False,
                                                    scope="vanilla_attention")
 
@@ -194,7 +194,7 @@ class seq_pic2seq_pic():
         # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
     def steps(self, sess, data_dict, noise, step_type='train'):
-        self.model_type = step_type
+        self.is_training = step_type
         input_batch_txt = data_dict[0]
         output_batch_txt = data_dict[1]
         input_batch_pic = data_dict[2]
