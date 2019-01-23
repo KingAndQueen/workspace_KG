@@ -274,9 +274,9 @@ def multihead_attention(queries,
     return outputs
 
 
-def feedforward(inputs,
+def feedforward_position(inputs,
                 num_units=[2048, 512],
-                scope="multihead_attention",
+                scope="feedforward_p",
                 reuse=None):
     '''
     Position-wise feed forward neural network
@@ -315,6 +315,41 @@ def feedforward(inputs,
 
     return outputs
 
+
+def feedforward(inputs,
+                num_units=[2048, 512],
+                scope="feedforward",
+                reuse=None):
+    '''Point-wise feed forward net.
+
+    Args:
+      inputs: A 3d tensor with shape of [N, T, C].
+      num_units: A list of two integers.
+      scope: Optional scope for `variable_scope`.
+      reuse: Boolean, whether to reuse the weights of a previous layer
+        by the same name.
+
+    Returns:
+      A 3d tensor with the same shape and dtype as inputs
+    '''
+    with tf.variable_scope(scope, reuse=reuse):
+        # Inner layer
+        params = {"inputs": inputs, "filters": num_units[0], "kernel_size": 1,
+                  "activation": tf.nn.relu, "use_bias": True}
+        outputs = tf.layers.conv1d(**params)
+
+        # Readout layer
+        params = {"inputs": outputs, "filters": num_units[1], "kernel_size": 1,
+                  "activation": None, "use_bias": True}
+        outputs = tf.layers.conv1d(**params)
+
+        # Residual connection
+        outputs += inputs
+
+        # Normalize
+        outputs = normalize(outputs)
+
+    return outputs
 
 def label_smoothing(inputs, epsilon=0.1):
     '''
