@@ -222,18 +222,22 @@ class seq_pic2seq_pic():
             return loss, summary
 
         if step_type == 'test':
-
             output_batch_txt = np.zeros((self._batch_size, self._sentence_size), dtype=np.int32)
-            feed_dict = {self._response: output_batch_txt,
-                         self._question: input_batch_txt,
-                         # self._weight: weight_batch_txt,
-                         self._input_pic: input_batch_pic}
-            output_list = [self.losses, self.predict_txt]#, self.predict_pic
-            try:
-                loss, txt = sess.run(output_list, feed_dict=feed_dict)
-            except:
-                pdb.set_trace()
-            return loss, txt
+
+            for j in range(self._batch_size):
+                _preds = sess.run(self.predict_txt, feed_dict={self._question: input_batch_txt, self._response: output_batch_txt})
+                output_batch_txt[:, j] = _preds[:, j]
+
+            # feed_dict = {self._response: output_batch_txt,
+            #              self._question: input_batch_txt,
+            #              # self._weight: weight_batch_txt,
+            #              self._input_pic: input_batch_pic}
+            # output_list = [self.losses, self.predict_txt]#, self.predict_pic
+            # try:
+            #     loss, txt = sess.run(output_list, feed_dict=feed_dict)
+            # except:
+            #     pdb.set_trace()
+            return output_batch_txt
 
         print('step_type is wrong!>>>')
         return None
