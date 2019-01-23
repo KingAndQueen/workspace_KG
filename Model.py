@@ -1,4 +1,3 @@
-
 import pdb
 import convolution
 # from VGG import build_vgg19
@@ -77,7 +76,8 @@ class seq_pic2seq_pic():
                 # resnet_output=end_points['resnet_v2_50' + '/block4'] # test2 to check the full connections effect
                 # encode_output=end_points['encoding_frame_'+name+'/resnet_v2_50/block4']
                 # pdb.set_trace()
-                w_pic = tf.get_variable('w', [1, 2048, self._embedding_size], initializer=tf.random_normal_initializer(stddev=0.02))
+                w_pic = tf.get_variable('w', [1, 2048, self._embedding_size],
+                                        initializer=tf.random_normal_initializer(stddev=0.02))
                 resnet_output = tf.squeeze(resnet_output, 1)
                 encoding_pic_output = tf.nn.conv1d(resnet_output, w_pic, 1, 'SAME')
                 encoding_pic_output = tf.tile(encoding_pic_output, [1, self._sentence_size, 1])
@@ -105,10 +105,10 @@ class seq_pic2seq_pic():
 
         with tf.variable_scope('merge_txt_pic'):
             decoder_input = tf.concat((encoder_pic_output, dec), -1)
-            w_merge = tf.get_variable('w', [1, 2*self._embedding_size, self._embedding_size], initializer=tf.random_normal_initializer(stddev=0.02))
+            w_merge = tf.get_variable('w', [1, 2 * self._embedding_size, self._embedding_size],
+                                      initializer=tf.random_normal_initializer(stddev=0.02))
             # pdb.set_trace()
-            self.dec =tf.nn.conv1d(decoder_input, w_merge, 1, 'SAME')
-
+            self.dec = tf.nn.conv1d(decoder_input, w_merge, 1, 'SAME')
 
         with tf.variable_scope('decode_txt'):
             # Dropout
@@ -162,7 +162,7 @@ class seq_pic2seq_pic():
             # loss_=tf.concat([tf.expand_dims(G_loss,-1),tf.expand_dims(cross_entropy_sentence,-1)],1)
             # all_loss=linear(loss_,1)
 
-            self.losses = mean_txt_loss #+ pic_loss
+            self.losses = mean_txt_loss  # + pic_loss
 
         self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
         with tf.variable_scope('output_information'):
@@ -205,7 +205,7 @@ class seq_pic2seq_pic():
         #              self._question: input_batch_txt,
         #              # self._weight: weight_batch_txt,
         #              self._input_pic: input_batch_pic}
-                     # self._real_pic: output_batch_pic}
+        # self._real_pic: output_batch_pic}
         # self._random_z:noise}
 
         if step_type == 'train':
@@ -214,9 +214,9 @@ class seq_pic2seq_pic():
                          self._question: input_batch_txt,
                          # self._weight: weight_batch_txt,
                          self._input_pic: input_batch_pic}
-            output_list = [self.losses, self.train_ops,self.merged]
+            output_list = [self.losses, self.train_ops, self.merged]
             try:
-                loss, _,summary = sess.run(output_list, feed_dict=feed_dict)
+                loss, _, summary = sess.run(output_list, feed_dict=feed_dict)
             except:
                 pdb.set_trace()
             return loss, summary
@@ -225,7 +225,9 @@ class seq_pic2seq_pic():
             output_batch_txt = np.zeros((self._batch_size, self._sentence_size), dtype=np.int32)
 
             for j in range(self._batch_size):
-                _preds = sess.run(self.predict_txt, feed_dict={self._question: input_batch_txt, self._response: output_batch_txt,self._input_pic: input_batch_pic})
+                _preds = sess.run(self.predict_txt,
+                                  feed_dict={self._question: input_batch_txt, self._response: output_batch_txt,
+                                             self._input_pic: input_batch_pic})
                 output_batch_txt[:, j] = _preds[:, j]
 
             # feed_dict = {self._response: output_batch_txt,
