@@ -9,7 +9,7 @@ import random
 import Analysis
 
 # from math import exp
-tf.flags.DEFINE_float("learn_rate", 0.0001, "Learning rate for SGD.")
+tf.flags.DEFINE_float("learn_rate", 0.00001, "Learning rate for SGD.")
 # tf.flags.DEFINE_float("anneal_rate", 25, "Number of epochs between halving the learnign rate.")
 # tf.flags.DEFINE_float("anneal_stop_epoch", 50, "Epoch number to end annealed lr schedule.")
 # tf.flags.DEFINE_float("learning_rate_decay_factor", 0.5, 'if loss not decrease, multiple the lr with factor')
