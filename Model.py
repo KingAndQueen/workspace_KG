@@ -221,6 +221,19 @@ class seq_pic2seq_pic():
                 pdb.set_trace()
             return loss, summary
 
+        # if step_type == 'valid':
+        #     # pdb.set_trace()
+        #     feed_dict = {self._response: output_batch_txt,
+        #                  self._question: input_batch_txt,
+        #                  # self._weight: weight_batch_txt,
+        #                  self._input_pic: input_batch_pic}
+        #     output_list = [self.losses, self.merged]
+        #     try:
+        #         loss,summary = sess.run(output_list, feed_dict=feed_dict)
+        #     except:
+        #         pdb.set_trace()
+        #     return loss, summary
+
         if step_type == 'test':
             output_batch_txt = np.zeros((self._batch_size, self._sentence_size), dtype=np.int32)
 

@@ -65,7 +65,7 @@ def train_model(sess, model, train_data, valid_data):
             z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
 
             for i in range(len(valid_data)):
-                eval_loss, _ ,= model.steps(sess, random.choice(valid_data), z_noise,step_type='test')
+                eval_loss, _ ,= model.steps(sess, random.choice(valid_data), z_noise,step_type='train')
                 eval_losses+=eval_loss
 
             print('evaluation loss:', eval_losses/len(valid_data))
