@@ -114,7 +114,7 @@ class seq_pic2seq_pic():
             # Dropout
             self.dec = tf.layers.dropout(self.dec,
                                          rate=0.1,
-                                         training=tf.convert_to_tensor(self.is_training))
+                                         training=self.is_training)
             # Identical
             # pdb.set_trace()
 
@@ -201,14 +201,19 @@ class seq_pic2seq_pic():
         # output_batch_pic = data_dict[3]
         # weight_batch_txt = data_dict[4]
         # pdb.set_trace()
-        feed_dict = {self._response: output_batch_txt,
-                     self._question: input_batch_txt,
-                     # self._weight: weight_batch_txt,
-                     self._input_pic: input_batch_pic}
+        # feed_dict = {self._response: output_batch_txt,
+        #              self._question: input_batch_txt,
+        #              # self._weight: weight_batch_txt,
+        #              self._input_pic: input_batch_pic}
                      # self._real_pic: output_batch_pic}
         # self._random_z:noise}
 
         if step_type == 'train':
+            pdb.set_trace()
+            feed_dict = {self._response: output_batch_txt,
+                         self._question: input_batch_txt,
+                         # self._weight: weight_batch_txt,
+                         self._input_pic: input_batch_pic}
             output_list = [self.losses, self.train_ops,self.merged]
             try:
                 loss, _,summary = sess.run(output_list, feed_dict=feed_dict)
@@ -217,6 +222,12 @@ class seq_pic2seq_pic():
             return loss, summary
 
         if step_type == 'test':
+
+            output_batch_txt = np.zeros((self._batch_size, self._sentence_size), dtype=np.int32)
+            feed_dict = {self._response: output_batch_txt,
+                         self._question: input_batch_txt,
+                         # self._weight: weight_batch_txt,
+                         self._input_pic: input_batch_pic}
             output_list = [self.losses, self.predict_txt]#, self.predict_pic
             try:
                 loss, txt = sess.run(output_list, feed_dict=feed_dict)

@@ -254,7 +254,7 @@ def multihead_attention(queries,
         outputs *= query_masks
 
         # Dropouts
-        outputs = tf.layers.dropout(outputs, rate=dropout_rate, training=tf.convert_to_tensor(is_training))
+        outputs = tf.layers.dropout(outputs, rate=dropout_rate, training=is_training)
 
         # Weighted sum
         # shape = [N*h, T_q, S/h]
