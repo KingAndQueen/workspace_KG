@@ -89,14 +89,14 @@ class seq_pic2seq_pic():
         with tf.variable_scope('embed_decode_input'):
 
             decoder_input = tf.concat((tf.ones_like(self._response[:, :1]) * 2, self._response[:, :-1]), -1)
-            dec = embedding(self._response,
+            self.dec = embedding(self._response,
                             vocab_size=vocab.vocab_size,
                             num_units=self._embedding_size,
                             scale=True,
                             scope="dec_embed")
 
             # Position Encoding(use range from 0 to len(inpt) to represent position dim)
-            dec += positional_encoding(decoder_input,
+            self.dec += positional_encoding(decoder_input,
                                        vocab_size=self._sentence_size,
                                        num_units=self._embedding_size,
                                        zero_pad=False,
@@ -104,12 +104,12 @@ class seq_pic2seq_pic():
                                        scope="dec_pe")
 
         # with tf.variable_scope('merge_txt_pic'):
-        #     decoder_input = tf.concat((encoder_pic_output, dec), -1)
+        #     decoder_input = tf.concat((encoder_pic_output, self.dec), -1)
         #     w_merge = tf.get_variable('w', [1, 2 * self._embedding_size, self._embedding_size],
         #                               initializer=tf.random_normal_initializer(stddev=0.02))
         #     # pdb.set_trace()
         #     self.dec = tf.nn.conv1d(decoder_input, w_merge, 1, 'SAME')
-            self.dec=dec
+
         with tf.variable_scope('merge_txt_pic'):
             # pdb.set_trace()
             decoder_input = tf.concat((encoder_pic_output, self.enc), -1)

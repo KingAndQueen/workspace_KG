@@ -45,7 +45,7 @@ def drew_seq(times, data_seq_batch, save_path,gray=False):
         drew_output_pic(pic, name, save_path,gray)
 
 
-def write_sents(times, data_seq_batch,target_sents, save_path, vocab):
+def write_sents(times, data_seq_batch,target_sents, save_path, vocab,show_matric=True):
     data_seq_pred,data_seq_target,data_seq_target_bleu = [],[],[]
     # pdb.set_trace()
     if not len(data_seq_batch)==len(target_sents):
@@ -86,3 +86,17 @@ def write_sents(times, data_seq_batch,target_sents, save_path, vocab):
 
     f.write("Bleu Score = " + str(score))
     f.close()
+
+
+    if show_matric:
+        try:
+            # from nlgeval import compute_metrics
+            # metrics_dict = compute_metrics(hypothesis=data_seq_pred,
+            #                                references=data_seq_target_bleu)
+            from nlgeval import NLGEval
+            nlgeval = NLGEval()  # loads the models
+            metrics_dict = nlgeval.compute_metrics(data_seq_target_bleu, data_seq_pred)
+            print(metrics_dict)
+
+        except:
+            print('please install nlgeval first')
