@@ -103,12 +103,19 @@ class seq_pic2seq_pic():
                                        scale=False,
                                        scope="dec_pe")
 
+        # with tf.variable_scope('merge_txt_pic'):
+        #     decoder_input = tf.concat((encoder_pic_output, dec), -1)
+        #     w_merge = tf.get_variable('w', [1, 2 * self._embedding_size, self._embedding_size],
+        #                               initializer=tf.random_normal_initializer(stddev=0.02))
+        #     # pdb.set_trace()
+        #     self.dec = tf.nn.conv1d(decoder_input, w_merge, 1, 'SAME')
+            self.dec=dec
         with tf.variable_scope('merge_txt_pic'):
-            decoder_input = tf.concat((encoder_pic_output, dec), -1)
+            # pdb.set_trace()
+            decoder_input = tf.concat((encoder_pic_output, self.enc), -1)
             w_merge = tf.get_variable('w', [1, 2 * self._embedding_size, self._embedding_size],
                                       initializer=tf.random_normal_initializer(stddev=0.02))
-            # pdb.set_trace()
-            self.dec = tf.nn.conv1d(decoder_input, w_merge, 1, 'SAME')
+            self.enc = tf.nn.conv1d(decoder_input, w_merge, 1, 'SAME')
 
         with tf.variable_scope('decode_txt'):
             # Dropout
