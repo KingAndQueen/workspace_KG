@@ -137,7 +137,7 @@ class seq_pic2seq_pic():
                 #                     initializer=tf.random_normal_initializer(stddev=stddev))
                 # w=tf.transpose(weight_cnn,[0,1,3,2])
                 # pdb.set_trace()
-                biase_cnn = tf.math.negative(biase_cnn)
+                biase_cnn = tf.negative(biase_cnn)
                 input_bias = tf.nn.bias_add(input_, biase_cnn)#, deconv.get_shape())
                 deconv = tf.nn.conv2d_transpose(input_bias, weight_cnn, output_shape=output_shape,strides=[1, d_h, d_w, 1])
 
