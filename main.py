@@ -17,7 +17,7 @@ tf.flags.DEFINE_float("max_grad_norm", 5.0, "Clip gradients to this norm.")
 tf.flags.DEFINE_integer("evaluation_interval", 10, "Evaluate and print results every x epochs")
 tf.flags.DEFINE_integer("batch_size", 4, "Batch size for training.")  # should consider the size of validation set
 tf.flags.DEFINE_integer("head", 8, "head number of attention")
-tf.flags.DEFINE_integer("epochs", 100, "Number of epochs to train for.")
+tf.flags.DEFINE_integer("epochs", 80, "Number of epochs to train for.")
 tf.flags.DEFINE_integer('check_epoch',10, 'evaluation times')
 tf.flags.DEFINE_integer("layers", 3, "the num layers of RNN.")
 tf.flags.DEFINE_integer("recurrent_dim",64, "Embedding size for neural networks.")
@@ -83,18 +83,18 @@ def train_model(sess, model, train_data, valid_data):
     print(' current step %d finished' % current_step)
 
 def test_model(sess, model, test_data, vocab,times):
-    test_loss = 0.0
-    pred_pics,pred_txts,target_txt = [],[],[]
+    # test_loss = 0.0
+    encoding_pics,pred_txts,target_txt = [],[],[]
     z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
     for batch_id, data_test in enumerate(test_data):
-        pred_txt = model.steps(sess, data_test,z_noise, step_type='test')
+        pred_txt,encoding_pic = model.steps(sess, data_test,z_noise, step_type='test')
         # test_loss += loss
 
         # pred_pics.append(pred_pic)
         pred_txts.append(pred_txt)
         target_txt.append(data_test[1])
-
-    # Analysis.drew_seq(times,pred_pics,'./result/',config.gray)
+        encoding_pics.append(encoding_pic)
+    Analysis.drew_seq(times,encoding_pics,'./result/',config.gray)
     Analysis.write_sents(times,pred_txts,target_txt,'./result/',vocab)
     # test_loss=test_loss / len(test_data)
     # print('test total loss:', test_loss)

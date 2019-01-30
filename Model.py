@@ -28,10 +28,15 @@ class seq_pic2seq_pic():
         self._build_inputs()
         self._head = config.head
 
-        # if self.model_type == 'train':
-        #     self.is_training = True
-        # else:
-        #     self.is_training = False
+        self.g_bn0 = convolution.batch_norm(name='g_bn0')
+        self.g_bn1 = convolution.batch_norm(name='g_bn1')
+        self.g_bn2 = convolution.batch_norm(name='g_bn2')
+        self.g_bn3 = convolution.batch_norm(name='g_bn3')
+
+        self.e_bn0 = convolution.batch_norm(name='e_bn0')
+        self.e_bn1 = convolution.batch_norm(name='e_bn1')
+        self.e_bn2 = convolution.batch_norm(name='e_bn2')
+        self.e_bn3 = convolution.batch_norm(name='e_bn3')
 
         with tf.variable_scope("encode_txt"):
             self.enc = embedding(self._question,
@@ -68,40 +73,77 @@ class seq_pic2seq_pic():
 
                     self.enc = feedforward(self.enc, num_units=[4 * self._embedding_size, self._embedding_size])
 
-        # pdb.set_trace()
-        def _encoding_pic_frame(frame, name=''):
-            with tf.variable_scope('encoding_frame_' + name):
-                # resident net
-                resnet_output, end_points = convolution.resnet_v2_50(frame)
-                # resnet_output=end_points['resnet_v2_50' + '/block4'] # test2 to check the full connections effect
-                # encode_output=end_points['encoding_frame_'+name+'/resnet_v2_50/block4']
-                # pdb.set_trace()
-                w_pic = tf.get_variable('w', [1, 2048, self._embedding_size],
-                                        initializer=tf.random_normal_initializer(stddev=0.02))
-                resnet_output = tf.squeeze(resnet_output, 1)
-                encoding_pic_output = tf.nn.conv1d(resnet_output, w_pic, 1, 'SAME')
-                encoding_pic_output = tf.tile(encoding_pic_output, [1, self._sentence_size, 1])
-                return encoding_pic_output
 
-        # pdb.set_trace()
-        encoder_pic_output = _encoding_pic_frame(self._input_pic, 'one')
+        # with tf.variable_scope('encoding_frame_resnet'):
+        #     # resident net
+        #     resnet_output, end_points = convolution.resnet_v2_50(self._input_pic)
+        #     # encode_output=end_points['encoding_frame/resnet_v2_50/block4']
+        #     self.pic_encoding = resnet_output
+        #     w_pic = tf.get_variable('w', [1, 2048, self._embedding_size],
+        #                             initializer=tf.random_normal_initializer(stddev=0.02))
+        #     resnet_output = tf.squeeze(resnet_output, 1)
+        #     encoding_pic_output = tf.nn.conv1d(resnet_output, w_pic, 1, 'SAME')
+        #     encoder_pic_output = tf.tile(encoding_pic_output, [1, self._sentence_size, 1])
+        #     pdb.set_trace()
+        def conv2d(input_, output_shape, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="conv2d", with_w=False):
+            with tf.variable_scope(name):
+                # pdb.set_trace()
+                # filter : [height, width, output_channels, in_channels]
+                w = tf.get_variable('w', [k_h, k_w, input_.get_shape()[-1], output_shape[-1]],
+                                    initializer=tf.random_normal_initializer(stddev=stddev))
+
+                deconv = tf.nn.conv2d(input_, filter=w, strides=[1, d_h, d_w, 1], padding="SAME")
+
+                biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
+                deconv = tf.reshape(tf.nn.bias_add(deconv, biases), deconv.get_shape())
+
+                if with_w:
+                    return deconv, w, biases
+                else:
+                    return deconv
+
+        with tf.variable_scope('encoding_frame_cnn'):
+            s = self.img_size_x
+            y = self.img_size_y
+            s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
+            y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
+            # pdb.set_trace()
+            h0_e,w0,b0 = conv2d(self._input_pic, [self._batch_size, s, y, self._cov_size * 1], name='e_h0',with_w=True)
+            h0_e = tf.nn.relu(self.e_bn0(h0_e, type=self.is_training))
+
+            h1_e,w1,b1 = conv2d(h0_e, [self._batch_size, s2, y2, self._cov_size * 2], name='e_h1',with_w=True)
+            h1_e = tf.nn.relu(self.e_bn1(h1_e, type=self.is_training))
+
+            h2_e,w2,b2 = conv2d(h1_e, [self._batch_size, s4, y4, self._cov_size * 4], name='e_h2',with_w=True)
+            h2_e = tf.nn.relu(self.e_bn2(h2_e, type=self.is_training))
+
+            h3_e,w3,b3 = conv2d(h2_e, [self._batch_size, s8, y8, self._cov_size * 8], name='e_h3',with_w=True)
+            h3_e = tf.nn.relu(self.e_bn3(h3_e, type=self.is_training))
+
+            h4_e= tf.reshape(h3_e, [self._batch_size, -1], name='e_h4')
+            # pdb.set_trace()
+            w_pic = tf.get_variable('w', [1, h4_e.get_shape()[-1], self._embedding_size],
+                                    initializer=tf.random_normal_initializer(stddev=0.02))
+            encoding_pic_output = tf.nn.conv1d(tf.expand_dims(h4_e,1), w_pic, 1, 'SAME')
+            encoder_pic_output = tf.tile(encoding_pic_output, [1, self._sentence_size, 1])
+
 
         with tf.variable_scope('embed_decode_input'):
 
             decoder_input = tf.concat((tf.ones_like(self._response[:, :1]) * 2, self._response[:, :-1]), -1)
             self.dec = embedding(self._response,
-                            vocab_size=vocab.vocab_size,
-                            num_units=self._embedding_size,
-                            scale=True,
-                            scope="dec_embed")
+                                 vocab_size=vocab.vocab_size,
+                                 num_units=self._embedding_size,
+                                 scale=True,
+                                 scope="dec_embed")
 
             # Position Encoding(use range from 0 to len(inpt) to represent position dim)
             self.dec += positional_encoding(decoder_input,
-                                       vocab_size=self._sentence_size,
-                                       num_units=self._embedding_size,
-                                       zero_pad=False,
-                                       scale=False,
-                                       scope="dec_pe")
+                                            vocab_size=self._sentence_size,
+                                            num_units=self._embedding_size,
+                                            zero_pad=False,
+                                            scale=False,
+                                            scope="dec_pe")
 
         # with tf.variable_scope('merge_txt_pic'):
         #     decoder_input = tf.concat((encoder_pic_output, self.dec), -1)
@@ -243,12 +285,12 @@ class seq_pic2seq_pic():
 
         if step_type == 'test':
             output_batch_txt = np.zeros((self._batch_size, self._sentence_size), dtype=np.int32)
-
+            pic_encoding=None
             for j in range(self._batch_size):
-                _preds = sess.run(self.predict_txt,
+                txt_preds,pic_encoding = sess.run([self.predict_txt,self.pic_encoding],
                                   feed_dict={self._question: input_batch_txt, self._response: output_batch_txt,
                                              self._input_pic: input_batch_pic})
-                output_batch_txt[:, j] = _preds[:, j]
+                output_batch_txt[:, j] = txt_preds[:, j]
 
             # feed_dict = {self._response: output_batch_txt,
             #              self._question: input_batch_txt,
@@ -259,7 +301,7 @@ class seq_pic2seq_pic():
             #     loss, txt = sess.run(output_list, feed_dict=feed_dict)
             # except:
             #     pdb.set_trace()
-            return output_batch_txt
+            return output_batch_txt,pic_encoding
 
         print('step_type is wrong!>>>')
         return None

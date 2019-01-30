@@ -16,7 +16,7 @@ class batch_norm(object):
             self.ema = tf.train.ExponentialMovingAverage(decay=self.momentum)
             self.name = name
 
-    def __call__(self, x, type='train'):
+    def __call__(self, x, type=True):
         shape = x.get_shape().as_list()
 
         with tf.variable_scope(self.name) as scope:
@@ -33,7 +33,7 @@ class batch_norm(object):
             ema_apply_op = self.ema.apply([batch_mean, batch_var])
             self.ema_mean, self.ema_var = self.ema.average(batch_mean), self.ema.average(batch_var)
             # pdb.set_trace()
-        if type == 'train':
+        if type:
             with tf.control_dependencies([ema_apply_op]):
                 mean, var = tf.identity(batch_mean), tf.identity(batch_var)
         else:
