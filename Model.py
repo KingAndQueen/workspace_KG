@@ -102,6 +102,9 @@ class seq_pic2seq_pic():
                 else:
                     return deconv
 
+        def lrelu(x, leak=0.2, name="lrelu"):
+            return tf.maximum(x, leak * x)
+
         with tf.variable_scope('encoding_frame_cnn'):
             s = self.img_size_x
             y = self.img_size_y
@@ -109,16 +112,16 @@ class seq_pic2seq_pic():
             y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
             # pdb.set_trace()
             h0_e,w0,b0 = conv2d(self._input_pic, [self._batch_size, s, y, self._cov_size * 1], name='e_h0',with_w=True)
-            h0_e = tf.nn.relu(self.e_bn0(h0_e, type=self.is_training))
+            h0_e = lrelu(self.e_bn0(h0_e, type=self.is_training))
 
             h1_e,w1,b1 = conv2d(h0_e, [self._batch_size, s2, y2, self._cov_size * 2], name='e_h1',with_w=True)
-            h1_e = tf.nn.relu(self.e_bn1(h1_e, type=self.is_training))
+            h1_e = lrelu(self.e_bn1(h1_e, type=self.is_training))
 
             h2_e,w2,b2 = conv2d(h1_e, [self._batch_size, s4, y4, self._cov_size * 4], name='e_h2',with_w=True)
-            h2_e = tf.nn.relu(self.e_bn2(h2_e, type=self.is_training))
+            h2_e = lrelu(self.e_bn2(h2_e, type=self.is_training))
 
             h3_e,w3,b3 = conv2d(h2_e, [self._batch_size, s8, y8, self._cov_size * 8], name='e_h3',with_w=True)
-            h3_e = tf.nn.relu(self.e_bn3(h3_e, type=self.is_training))
+            h3_e = lrelu(self.e_bn3(h3_e, type=self.is_training))
 
             h4_e= tf.reshape(h3_e, [self._batch_size, -1], name='e_h4')
             # pdb.set_trace()
@@ -127,7 +130,37 @@ class seq_pic2seq_pic():
             encoding_pic_output = tf.nn.conv1d(tf.expand_dims(h4_e,1), w_pic, 1, 'SAME')
             encoder_pic_output = tf.tile(encoding_pic_output, [1, self._sentence_size, 1])
 
+        def deconv2d(input_, output_shape,weight_cnn,biase_cnn, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="deconv2d", with_w=False):
+            with tf.variable_scope(name):
+                # filter : [height, width, output_channels, in_channels]
+                # w = tf.get_variable('w', [k_h, k_w, output_shape[-1], input_.get_shape()[-1]],
+                #                     initializer=tf.random_normal_initializer(stddev=stddev))
+                # w=tf.transpose(weight_cnn,[0,1,3,2])
+                # pdb.set_trace()
+                biase_cnn = tf.math.negative(biase_cnn)
+                input_bias = tf.nn.bias_add(input_, biase_cnn)#, deconv.get_shape())
+                deconv = tf.nn.conv2d_transpose(input_bias, weight_cnn, output_shape=output_shape,strides=[1, d_h, d_w, 1])
 
+                # biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
+
+                return deconv
+
+        with tf.variable_scope('decoder_pic'):
+            # h0 = ztf.reshape(h3_e, [-1, s16, y16, self._cov_size * 8])
+            h0 = tf.nn.relu(self.g_bn0(h3_e, type=self.is_training))
+            # pdb.set_trace()
+            h1 = deconv2d(h0, [self._batch_size, s8, y8, self._cov_size * 4],weight_cnn=w3,biase_cnn=b3, name='g_h1')
+            h1 = tf.nn.relu(self.g_bn1(h1, type=self.is_training))
+
+            h2 = deconv2d(h1, [self._batch_size, s4, y4, self._cov_size * 2],weight_cnn=w2,biase_cnn=b2, name='g_h2')
+            h2 = tf.nn.relu(self.g_bn2(h2, type=self.is_training))
+
+            h3 = deconv2d(h2, [self._batch_size, s2, y2, self._cov_size * 1],weight_cnn=w1,biase_cnn=b1, name='g_h3')
+            h3 = tf.nn.relu(self.g_bn3(h3, type=self.is_training))
+
+            h4 = deconv2d(h3, [self._batch_size, s, y, 1],weight_cnn=w0,biase_cnn=b0, name='g_h4')
+
+            self.encoder_pic =  tf.tanh(h4) / 2. + 0.5
         with tf.variable_scope('embed_decode_input'):
 
             decoder_input = tf.concat((tf.ones_like(self._response[:, :1]) * 2, self._response[:, :-1]), -1)
@@ -287,7 +320,7 @@ class seq_pic2seq_pic():
             output_batch_txt = np.zeros((self._batch_size, self._sentence_size), dtype=np.int32)
             pic_encoding=None
             for j in range(self._batch_size):
-                txt_preds,pic_encoding = sess.run([self.predict_txt,self.pic_encoding],
+                txt_preds,pic_encoding = sess.run([self.predict_txt,self.encoder_pic],
                                   feed_dict={self._question: input_batch_txt, self._response: output_batch_txt,
                                              self._input_pic: input_batch_pic})
                 output_batch_txt[:, j] = txt_preds[:, j]
