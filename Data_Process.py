@@ -136,7 +136,7 @@ class Vocab():
         self.idx2word = {1: '<eos>', 2: '<go>', 0: '<pad>', 3: '<unk>'}
         # self.embed_size = embed_size
         self.words_count={'<eos>': self.vocab_size, '<go>': self.vocab_size, '<pad>': self.vocab_size, '<unk>': self.vocab_size}
-
+        # pdb.set_trace()
     def add_vocab(self, words):
         if isinstance(words, (list, np.ndarray)):
             for word in words:
@@ -184,7 +184,7 @@ class Vocab():
 
     @property
     def vocab_size(self):
-        return len(self.idx2word)
+        return len(self.word2idx)
 
 def tokenize(sent):
     '''Return the tokens of a sentence including punctuation.
@@ -280,7 +280,7 @@ def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
 
     build_vocab(vocabulary,data_path_txt)
     vocabulary.clean_words()
-    pdb.set_trace()
+    # pdb.set_trace()
     txt,weights=read_txt_file_1E(data_path_txt,vocabulary,sentence_size)
     pic,times=read_pic_file_1E(files_list,gray)
     input_data_txt=copy.copy(txt)
