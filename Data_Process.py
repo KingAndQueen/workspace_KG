@@ -131,10 +131,11 @@ if __name__ == "__main__":
 
 
 class Vocab():
-    def __init__(self, word2vec=None, embed_size=0):
+    def __init__(self, word2vec=None):
         self.word2idx = {'<eos>': 1, '<go>': 2, '<pad>': 0, '<unk>': 3}
         self.idx2word = {1: '<eos>', 2: '<go>', 0: '<pad>', 3: '<unk>'}
-        self.embed_size = embed_size
+        # self.embed_size = embed_size
+        self.words_count={'<eos>': self.vocab_size, '<go>': self.vocab_size, '<pad>': self.vocab_size, '<unk>': self.vocab_size}
 
     def add_vocab(self, words):
         if isinstance(words, (list, np.ndarray)):
@@ -143,23 +144,38 @@ class Vocab():
                     index = len(self.word2idx)
                     self.word2idx[word] = index
                     self.idx2word[index] = word
+                    self.words_count[words] = 1
+                else:
+                    self.words_count[words] += 1
         else:
             if words not in self.word2idx:
                 # print('adding new word',words)
                 index = len(self.word2idx)
                 self.word2idx[words] = index
                 self.idx2word[index] = words
+                self.words_count[words]=1
+            else:
+                self.words_count[words]+=1
 
     def word_to_index(self, word):
-
-        self.add_vocab(word)
-        return self.word2idx[word]
+        if word in self.word2idx:
+            return self.word2idx[word]
+        else:
+            return self.word2idx['<unk>']
+            # pdb.set_trace()
+            # self.add_vocab(word)
         # for rl
         # if word in self.word2idx:
         #     return self.word2idx[word]
         # else:
         #     return self.word2idx['<unk>']
-
+    def clean_words(self,count_min=1):
+        print('original vocab len:',len(self.word2idx))
+        for key,value in self.words_count.iteritems():
+            # print('clean out ',key)
+            if value<=count_min:
+                self.word2idx.pop(key)
+        print('after cleaning vocab len:', len(self.word2idx))
     def index_to_word(self, index):
         if index in self.idx2word:
             return self.idx2word[index]
@@ -261,6 +277,10 @@ def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
             files_list.append(os.path.join(path_,file_name))
     # pdb.set_trace()
     data_path_txt=[file_name for file_name in files_list if 'txt' in file_name ]
+
+    build_vocab(vocabulary,data_path_txt)
+    vocabulary.clean_words()
+    pdb.set_trace()
     txt,weights=read_txt_file_1E(data_path_txt,vocabulary,sentence_size)
     pic,times=read_pic_file_1E(files_list,gray)
     input_data_txt=copy.copy(txt)
@@ -287,6 +307,24 @@ def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
     assert len(output_times) == len(output_data_txt)
 
     return input_data_txt,output_data_txt,input_data_pic,output_data_pic, output_weights,output_times
+
+def build_vocab(vocabulary,paths):
+    sents = []
+    for data_txt in paths:
+        f = open(data_txt, 'r')
+        sent = f.readlines()
+        sents += sent
+        f.close()
+    for sent in sents:
+        sent = sent.strip()
+        sent = sent.split('\t')
+        sent = sent[-1]
+        # pdb.set_trace()
+        sent = tokenize(sent)
+        # sent = sent[:sentence_size - 1]
+        for word in sent:
+            vocabulary.add_vocab(word)
+            # pdb.set_trace()
 
 def vectorize_batch(input_data_txt,output_data_txt,input_data_pic,output_data_pic,weights,batch_size):
     batches_data=[]
