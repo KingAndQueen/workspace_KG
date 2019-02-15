@@ -33,7 +33,7 @@ tf.flags.DEFINE_integer('noise_dim',64,'dim in noise')
 tf.flags.DEFINE_integer('convolution_dim',256,'dim in the first layer pic decoder')
 tf.flags.DEFINE_bool('gray',True,'picture is gray or not, placeholder also should be changed')
 tf.flags.DEFINE_integer('num_identical',6,'number of encode transformers')
-
+tf.flags.DEFINE_bool('qa_transpose',True,'whether to train model in AQ with QA training')
 config = tf.flags.FLAGS
 
 def train_model(sess, model, train_data, valid_data):
@@ -49,9 +49,9 @@ def train_model(sess, model, train_data, valid_data):
     while current_step <= epoch:
         #  print ('current_step:',current_step)
         for i in range(len(train_data)):
-            z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
+            # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
-            train_loss_, summary = model.steps(sess, random.choice(train_data),z_noise,step_type='train')
+            train_loss_, summary = model.steps(sess, random.choice(train_data),step_type='train',qa_transpose=config.qa_transpose)
             global_steps+=1
             # g_step = sess.run(model.global_step)
             if global_steps%len(train_data)==0:
@@ -62,10 +62,10 @@ def train_model(sess, model, train_data, valid_data):
             print('-------------------------------')
             print('current_step:', current_step)
             print('training loss:', train_loss_)
-            z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
+            # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
 
             for i in range(len(valid_data)):
-                eval_loss, _ ,= model.steps(sess, random.choice(valid_data), z_noise,step_type='train')
+                eval_loss, _ ,= model.steps(sess, random.choice(valid_data),step_type='train')
                 eval_losses+=eval_loss
 
             print('evaluation loss:', eval_losses/len(valid_data))

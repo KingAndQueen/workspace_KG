@@ -137,6 +137,7 @@ class Vocab():
         # self.embed_size = embed_size
         self.words_count={'<eos>': self.vocab_size, '<go>': self.vocab_size, '<pad>': self.vocab_size, '<unk>': self.vocab_size}
         # pdb.set_trace()
+
     def add_vocab(self, words):
         if isinstance(words, (list, np.ndarray)):
             for word in words:
@@ -144,18 +145,20 @@ class Vocab():
                     index = len(self.word2idx)
                     self.word2idx[word] = index
                     self.idx2word[index] = word
-                    self.words_count[words] = 1
+
                 else:
-                    self.words_count[words] += 1
+                    print('already exist word:',word)
+                    # self.words_count[words] += 1
         else:
             if words not in self.word2idx:
                 # print('adding new word',words)
                 index = len(self.word2idx)
                 self.word2idx[words] = index
                 self.idx2word[index] = words
-                self.words_count[words]=1
+
             else:
-                self.words_count[words]+=1
+                print('already exist word:',words)
+
 
     def word_to_index(self, word):
         if word in self.word2idx:
@@ -169,12 +172,18 @@ class Vocab():
         #     return self.word2idx[word]
         # else:
         #     return self.word2idx['<unk>']
-    def clean_words(self,count_min=1):
-        print('original vocab len:',len(self.word2idx))
+    def count_word(self,word):
+        if word in self.words_count:
+            self.words_count[word]+=1
+        else:
+            self.words_count[word]=1
+
+    def build_vocab_with_words_count(self,count_min):
+        print('original vocab len:',len(self.words_count))
         for key,value in self.words_count.iteritems():
             # print('clean out ',key)
-            if value<=count_min:
-                self.word2idx.pop(key)
+            if value>count_min:
+                self.add_vocab(key)
         print('after cleaning vocab len:', len(self.word2idx))
     def index_to_word(self, index):
         if index in self.idx2word:
@@ -214,7 +223,8 @@ def read_txt_file_1E(data_path, vocabulary, sentence_size):
         sent=sent[:sentence_size-1]
         for word in sent:
             idx=vocabulary.word_to_index(word)
-            # pdb.set_trace()
+            # if idx >337:
+            #     pdb.set_trace()
             weight.append(1)
             sent_idx.append(idx)
         sent_idx.append(vocabulary.word_to_index('<eos>'))
@@ -255,14 +265,14 @@ def read_pic_file_1E(data_path,gray=False):
     # pdb.set_trace()
     return pic_output,sorted_keys
 
-def _insert_go(output_data_txt,weights,vocabulary):
-    for sents in output_data_txt:
-        # pdb.set_trace()
-        sents.insert(0,vocabulary.word_to_index('<go>'))
-        _=sents.pop()
-    for weight in weights:
-        weight.insert(0,1)
-        _=weight.pop()
+# def _insert_go(output_data_txt,weights,vocabulary):
+#     for sents in output_data_txt:
+#         # pdb.set_trace()
+#         sents.insert(0,vocabulary.word_to_index('<go>'))
+#         _=sents.pop()
+#     for weight in weights:
+#         weight.insert(0,1)
+#         _=weight.pop()
 def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
     files_name=os.listdir(data_path)
     dir_list=[]
@@ -278,8 +288,8 @@ def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
     # pdb.set_trace()
     data_path_txt=[file_name for file_name in files_list if 'txt' in file_name ]
 
-    build_vocab(vocabulary,data_path_txt)
-    vocabulary.clean_words()
+    count_words(vocabulary,data_path_txt)
+    vocabulary.build_vocab_with_words_count(count_min=1)
     # pdb.set_trace()
     txt,weights=read_txt_file_1E(data_path_txt,vocabulary,sentence_size)
     pic,times=read_pic_file_1E(files_list,gray)
@@ -308,7 +318,7 @@ def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
 
     return input_data_txt,output_data_txt,input_data_pic,output_data_pic, output_weights,output_times
 
-def build_vocab(vocabulary,paths):
+def count_words(vocabulary,paths):
     sents = []
     for data_txt in paths:
         f = open(data_txt, 'r')
@@ -323,7 +333,7 @@ def build_vocab(vocabulary,paths):
         sent = tokenize(sent)
         # sent = sent[:sentence_size - 1]
         for word in sent:
-            vocabulary.add_vocab(word)
+            vocabulary.count_word(word)
             # pdb.set_trace()
 
 def vectorize_batch(input_data_txt,output_data_txt,input_data_pic,output_data_pic,weights,batch_size):

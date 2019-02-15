@@ -275,12 +275,12 @@ class seq_pic2seq_pic():
         #                                 name='frame_output')
         # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
-    def steps(self, sess, data_dict, noise, step_type='train'):
-        self.is_training = step_type
+    def steps(self, sess, data_dict, noise=None, step_type='train',qa_transpose=False):
+        # self.is_training = step_type
         input_batch_txt = data_dict[0]
         output_batch_txt = data_dict[1]
         input_batch_pic = data_dict[2]
-        # output_batch_pic = data_dict[3]
+        output_batch_pic = data_dict[3]
         # weight_batch_txt = data_dict[4]
         # pdb.set_trace()
         # feed_dict = {self._response: output_batch_txt,
@@ -301,6 +301,17 @@ class seq_pic2seq_pic():
                 loss, _, summary = sess.run(output_list, feed_dict=feed_dict)
             except:
                 pdb.set_trace()
+
+            if qa_transpose:
+                feed_dict = {self._response: input_batch_txt,
+                             self._question: output_batch_txt,
+                             # self._weight: weight_batch_txt,
+                             self._input_pic: output_batch_pic}
+                try:
+                    loss_t, _, summary = sess.run(output_list, feed_dict=feed_dict)
+                    loss=(loss+loss_t)/2
+                except:
+                        pdb.set_trace()
             return loss, summary
 
         # if step_type == 'valid':
