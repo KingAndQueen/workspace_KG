@@ -33,7 +33,7 @@ tf.flags.DEFINE_integer('noise_dim',64,'dim in noise')
 tf.flags.DEFINE_integer('convolution_dim',256,'dim in the first layer pic decoder')
 tf.flags.DEFINE_bool('gray',True,'picture is gray or not, placeholder also should be changed')
 tf.flags.DEFINE_integer('num_identical',6,'number of encode transformers')
-tf.flags.DEFINE_bool('qa_transpose',True,'whether to train model in AQ with QA training')
+tf.flags.DEFINE_bool('qa_transpose',False,'whether to train model in AQ with QA training')
 config = tf.flags.FLAGS
 
 def train_model(sess, model, train_data, valid_data):
@@ -95,7 +95,7 @@ def test_model(sess, model, test_data, vocab,times):
         target_txt.append(data_test[1])
         encoding_pics.append(encoding_pic)
     Analysis.drew_seq(times,encoding_pics,'./result/',config.gray)
-    Analysis.write_sents(times,pred_txts,target_txt,'./result/',vocab)
+    Analysis.write_sents(times,pred_txts,target_txt,'./result/',vocab,show_matric=False)
     # test_loss=test_loss / len(test_data)
     # print('test total loss:', test_loss)
     print('test is finished!')
