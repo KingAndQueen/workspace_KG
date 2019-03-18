@@ -366,3 +366,86 @@ def get_vocab(data_path):
         print('<<<<<<< vocab is not exist >>>>>>>')
         vocab = None
     return vocab
+
+def read_pretrain_txt(data_txt,vocabulary,sentence_size):
+    f = open(data_txt, 'r')
+    sents = f.readlines()
+    f.close()
+    sents_idx = []
+    weights = []
+    # pdb.set_trace()
+    for no,sent in enumerate(sents):
+        if no%2==0:
+            sent_idx = []
+            weight = []
+            sent = sent.strip()
+            # pdb.set_trace()
+            sent = tokenize(sent)
+            sent = sent[:sentence_size - 1]
+            for word in sent:
+                idx = vocabulary.word_to_index(word)
+                # if idx >337:
+                #     pdb.set_trace()
+                weight.append(1)
+                sent_idx.append(idx)
+            sent_idx.append(vocabulary.word_to_index('<eos>'))
+            weight.append(1)
+            padding_len = max(sentence_size - len(sent_idx), 0)
+            for i in range(padding_len):
+                weight.append(0)
+                sent_idx.append(vocabulary.word_to_index('<pad>'))
+
+            sents_idx.append(copy.copy(sent_idx))
+            weights.append(copy.copy(weight))
+    return sents_idx, weights
+
+
+def read_pretrain_pic(pic_path, pic_len,gray):
+    pic_output = []
+    try:
+        if gray:
+            img = np.asarray(Image.open(pic_path).convert('L'))
+            img = np.expand_dims(img, -1)
+        else:
+            img = np.asarray(Image.open(pic_path))
+    except:
+        pdb.set_trace()
+        # print(img.shape)
+        # pdb.set_trace()
+    for i in range(pic_len):
+        pic_output.append(img)
+    return pic_output
+
+def get_pretrain_data(data_path, vocabulary,sentence_size,gray=False):
+    data_path_txt='./data/pretrain/train.txt'
+    data_path_pic='./data/pretrain/default.jpg'
+    count_words(vocabulary, [data_path_txt])
+    vocabulary.build_vocab_with_words_count(count_min=3)
+    txt, weights = read_pretrain_txt(data_path_txt, vocabulary, sentence_size)
+    # pdb.set_trace()
+    print('pretrain sentences count:',len(txt))
+    pic = read_pretrain_pic(data_path_pic,len(txt), gray)
+    input_data_txt = copy.copy(txt)
+    _ = input_data_txt.pop()
+    output_data_txt = copy.copy(txt)
+
+    _ = output_data_txt.pop(0)
+    # _insert_go(output_data_txt,weights,vocabulary)
+    # pdb.set_trace()
+    output_weights = copy.copy(weights)
+    output_weights.pop(0)
+
+    input_data_pic = copy.copy(pic)
+    _ = input_data_pic.pop()  ################ test the deCNN process
+    output_data_pic = copy.copy(pic)
+    _ = output_data_pic.pop(0)  ################ test the deCNN process
+    # pdb.set_trace()
+    assert len(output_weights) == len(output_data_txt)
+    assert len(output_data_pic) == len(input_data_pic)
+    assert len(input_data_txt) == len(output_data_txt)
+
+    # output_times = copy.copy(times)
+    # output_times.pop(0)
+    # assert len(output_times) == len(output_data_txt)
+
+    return input_data_txt, output_data_txt, input_data_pic, output_data_pic, output_weights #output_times

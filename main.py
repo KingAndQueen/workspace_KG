@@ -34,6 +34,8 @@ tf.flags.DEFINE_integer('convolution_dim',256,'dim in the first layer pic decode
 tf.flags.DEFINE_bool('gray',True,'picture is gray or not, placeholder also should be changed')
 tf.flags.DEFINE_integer('num_identical',6,'number of encode transformers')
 tf.flags.DEFINE_bool('qa_transpose',False,'whether to train model in AQ with QA training')
+tf.flags.DEFINE_bool('pre_training',True,'whether to train model in AQ with QA training')
+
 config = tf.flags.FLAGS
 
 def train_model(sess, model, train_data, valid_data):
@@ -100,9 +102,41 @@ def test_model(sess, model, test_data, vocab,times):
     # print('test total loss:', test_loss)
     print('test is finished!')
 
+def pretrain_model(sess, model, train_data):
+    current_step = 1
+    train_losses = []
+
+    epoch = config.epochs
+    print('pre-training....')
+    train_summary_writer = tf.summary.FileWriter(config.summary_path, sess.graph)
+    global_steps = 0
+    while current_step <= epoch:
+        #  print ('current_step:',current_step)
+        for i in range(len(train_data)):
+            # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
+            # pdb.set_trace()
+            train_loss_, summary = model.steps(sess, random.choice(train_data), step_type='train',
+                                               qa_transpose=config.qa_transpose)
+            global_steps += 1
+            # g_step = sess.run(model.global_step)
+            if global_steps % len(train_data) == 0:
+                train_summary_writer.add_summary(summary, global_steps)
+        if current_step % config.check_epoch == 0:
+            train_losses.append(train_loss_)
+            print('-------------------------------')
+            print('pre-train current_step:', current_step)
+            print('pre-training loss:', train_loss_)
+            # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
+        current_step += 1
+    print(' pre-train current step %d finished' % current_step)
+
 
 def main(_):
     vocab = Data_Process.Vocab()
+    if config.pre_training:
+        input_data_txt_p,output_data_txt_p, input_data_pic_p, output_data_pic_p,weights_p, = Data_Process.get_pretrain_data(config.data_dir,vocab,config.sentence_size,config.gray)
+        prtrain_batches_data = Data_Process.vectorize_batch(input_data_txt_p, output_data_txt_p, input_data_pic_p, output_data_pic_p,
+                                                    weights_p, config.batch_size)
 
     input_data_txt, output_data_txt, input_data_pic, output_data_pic,weights,times = Data_Process.get_input_output_data(config.data_dir, vocab, config.sentence_size,config.gray)
     # config.img_size_x =input_data_pic.values()[0].shape[0]
@@ -126,6 +160,8 @@ def main(_):
         model = Model.seq_pic2seq_pic(config, vocab)
         # pdb.set_trace()
         sess.run(tf.global_variables_initializer())
+        if config.pre_training:
+            pretrain_model(sess, model,prtrain_batches_data)
         train_model(sess, model, train_data, valid_data)
         # config.model_type = 'test'
         test_model(sess, model, test_data[:len(times_test)/config.batch_size], vocab,times_test) ###
