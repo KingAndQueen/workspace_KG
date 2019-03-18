@@ -417,7 +417,7 @@ def read_pretrain_pic(pic_path, pic_len,gray):
     return pic_output
 
 def get_pretrain_data(data_path, vocabulary,sentence_size,gray=False):
-    data_path_txt='./data/pretrain/train.txt'
+    data_path_txt='./data/pretrain/subtitle/train.txt'
     data_path_pic='./data/pretrain/default.jpg'
     count_words(vocabulary, [data_path_txt])
     vocabulary.build_vocab_with_words_count(count_min=3)
