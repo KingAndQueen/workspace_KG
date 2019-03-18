@@ -156,8 +156,8 @@ class Vocab():
                 self.word2idx[words] = index
                 self.idx2word[index] = words
 
-            else:
-                print('already exist word:',words)
+            # else:
+            #     print('already exist word:',words)
 
 
     def word_to_index(self, word):
