@@ -35,7 +35,7 @@ tf.flags.DEFINE_bool('gray',True,'picture is gray or not, placeholder also shoul
 tf.flags.DEFINE_integer('num_identical',6,'number of encode transformers')
 tf.flags.DEFINE_bool('qa_transpose',False,'whether to train model in AQ with QA training')
 tf.flags.DEFINE_bool('pre_training',True,'whether to train model in AQ with QA training')
-
+tf.flags.DEFINE_integer('pretrain_epochs',10,'epoch for pre-training')
 config = tf.flags.FLAGS
 
 def train_model(sess, model, train_data, valid_data):
@@ -106,7 +106,7 @@ def pretrain_model(sess, model, train_data):
     current_step = 1
     train_losses = []
 
-    epoch = config.epochs
+    epoch = config.pretrain_epochs
     print('pre-training....')
     train_summary_writer = tf.summary.FileWriter(config.summary_path, sess.graph)
     global_steps = 0
