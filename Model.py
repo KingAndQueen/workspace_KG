@@ -163,7 +163,7 @@ class seq_pic2seq_pic():
             self.encoder_pic =  tf.tanh(h4) / 2. + 0.5
 
         with tf.variable_scope('embed_decode_input'):
-            pdb.set_trace()
+            # pdb.set_trace()
             decoder_input = tf.concat((tf.ones_like(self._response[:, :1]) * 2, self._response[:, :-1]), -1) ## add 'go' sign
             self.dec = embedding(decoder_input,                   #self._response,
                                  vocab_size=vocab.vocab_size,
