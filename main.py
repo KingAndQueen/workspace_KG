@@ -34,7 +34,7 @@ tf.flags.DEFINE_integer('convolution_dim',256,'dim in the first layer pic decode
 tf.flags.DEFINE_bool('gray',True,'picture is gray or not, placeholder also should be changed')
 tf.flags.DEFINE_integer('num_identical',6,'number of encode transformers')
 tf.flags.DEFINE_bool('qa_transpose',False,'whether to train model in AQ with QA training')
-tf.flags.DEFINE_bool('pre_training',True,'whether to train model in AQ with QA training')
+tf.flags.DEFINE_bool('pre_training',False,'whether to train model in AQ with QA training')
 tf.flags.DEFINE_integer('pretrain_epochs',10,'epoch for pre-training')
 config = tf.flags.FLAGS
 
