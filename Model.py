@@ -165,14 +165,14 @@ class seq_pic2seq_pic():
         with tf.variable_scope('embed_decode_input'):
             # pdb.set_trace()
             decoder_input = tf.concat((tf.ones_like(self._response[:, :1]) * 2, self._response[:, :-1]), -1) ## add 'go' sign
-            self.dec = embedding(decoder_input,                   #self._response,
+            dec_input = embedding(decoder_input,                   #self._response,
                                  vocab_size=vocab.vocab_size,
                                  num_units=self._embedding_size,
                                  scale=True,
                                  scope="dec_embed")
 
             # Position Encoding(use range from 0 to len(inpt) to represent position dim)
-            self.dec += positional_encoding(decoder_input,
+            dec_input += positional_encoding(decoder_input,
                                             vocab_size=self._sentence_size,
                                             num_units=self._embedding_size,
                                             zero_pad=False,
@@ -195,7 +195,7 @@ class seq_pic2seq_pic():
 
         with tf.variable_scope('decode_txt'):
             # Dropout
-            self.dec = tf.layers.dropout(self.dec,
+            dec_input = tf.layers.dropout(dec_input,
                                          rate=0.1,
                                          training=self.is_training)
             # Identical
@@ -204,8 +204,8 @@ class seq_pic2seq_pic():
             for i in range(self._num_identical):
                 with tf.variable_scope("num_identical_{}".format(i)):
                     # Multi-head Attention(self-attention)
-                    self.dec = multihead_attention(queries=self.dec,
-                                                   keys=self.dec,
+                    dec_input = multihead_attention(queries=dec_input,
+                                                   keys=dec_input,
                                                    num_units=self._embedding_size,
                                                    num_heads=self._head,
                                                    dropout_rate=0.1,
@@ -214,7 +214,7 @@ class seq_pic2seq_pic():
                                                    scope="self_attention")
 
                     # Multi-head Attention(vanilla-attention)
-                    self.dec = multihead_attention(queries=self.dec,
+                    self.dec_output = multihead_attention(queries=dec_input,
                                                    keys=self.enc,
                                                    num_units=self._embedding_size,
                                                    num_heads=self._head,
@@ -223,11 +223,11 @@ class seq_pic2seq_pic():
                                                    causality=False,
                                                    scope="vanilla_attention")
 
-                    self.dec = feedforward(self.dec, num_units=[4 * self._embedding_size, self._embedding_size])
+                    self.dec_output = feedforward(self.dec_output, num_units=[4 * self._embedding_size, self._embedding_size])
 
         with tf.variable_scope('loss_function_txt'):
 
-            self.logits = tf.layers.dense(self.dec, vocab.vocab_size)
+            self.logits = tf.layers.dense(self.dec_output, vocab.vocab_size)
             preds = tf.to_int32(tf.argmax(self.logits, axis=-1))
             self.predict_txt = preds
             self.istarget = tf.to_float(tf.not_equal(self._response, 0))
@@ -331,7 +331,7 @@ class seq_pic2seq_pic():
         if step_type == 'test':
             output_batch_txt = np.zeros((self._batch_size, self._sentence_size), dtype=np.int32)
             pic_encoding=None
-            for j in range(self._batch_size):
+            for j in range(self._sentence_size):
                 txt_preds,pic_encoding = sess.run([self.predict_txt,self.encoder_pic],
                                   feed_dict={self._question: input_batch_txt, self._response: output_batch_txt,
                                              self._input_pic: input_batch_pic})

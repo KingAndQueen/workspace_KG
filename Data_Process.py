@@ -132,8 +132,8 @@ if __name__ == "__main__":
 
 class Vocab():
     def __init__(self, word2vec=None):
-        self.word2idx = {'<eos>': 1, '<go>': 2, '<pad>': 0, '<unk>': 3}
-        self.idx2word = {1: '<eos>', 2: '<go>', 0: '<pad>', 3: '<unk>'}
+        self.word2idx = {'<pad>': 0,'<eos>': 1, '<go>': 2, '<unk>': 3}
+        self.idx2word = { 0: '<pad>',1: '<eos>', 2: '<go>', 3: '<unk>'}
         # self.embed_size = embed_size
         self.words_count={'<eos>': self.vocab_size, '<go>': self.vocab_size, '<pad>': self.vocab_size, '<unk>': self.vocab_size}
         # pdb.set_trace()
