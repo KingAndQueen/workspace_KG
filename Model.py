@@ -6,6 +6,10 @@ from transformer import *
 
 class seq_pic2seq_pic():
     def __init__(self, config, vocab):
+        if config.gray:
+            self._color_size = 1
+        else:
+            self._color_size = 3
         self._vocab = vocab
         self._batch_size = config.batch_size
         self._sentence_size = config.sentence_size
@@ -130,7 +134,7 @@ class seq_pic2seq_pic():
             encoding_pic_output = tf.nn.conv1d(tf.expand_dims(h4_e,1), w_pic, 1, 'SAME')
             encoder_pic_output = tf.tile(encoding_pic_output, [1, self._sentence_size, 1])
 
-        def deconv2d(input_, output_shape,weight_cnn,biase_cnn, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="deconv2d", with_w=False):
+        def deconv2d(input_, output_shape,weight_cnn,biase_cnn, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="deconv2d",color_size=1, with_w=False):
             with tf.variable_scope(name):
                 # filter : [height, width, output_channels, in_channels]
                 # w = tf.get_variable('w', [k_h, k_w, output_shape[-1], input_.get_shape()[-1]],
@@ -139,7 +143,7 @@ class seq_pic2seq_pic():
                 # pdb.set_trace()
                 biase_cnn = tf.negative(biase_cnn)
                 input_bias = tf.nn.bias_add(input_, biase_cnn)#, deconv.get_shape())
-                deconv = tf.nn.conv2d_transpose(input_bias, weight_cnn, output_shape=output_shape,strides=[1, d_h, d_w, 1])
+                deconv = tf.nn.conv2d_transpose(input_bias, weight_cnn, output_shape=output_shape,strides=[1, d_h, d_w,1])
 
                 # biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
 
@@ -158,7 +162,7 @@ class seq_pic2seq_pic():
             h3 = deconv2d(h2, [self._batch_size, s2, y2, self._cov_size * 1],weight_cnn=w1,biase_cnn=b1, name='g_h3')
             h3 = tf.nn.relu(self.g_bn3(h3, type=self.is_training))
 
-            h4 = deconv2d(h3, [self._batch_size, s, y, 1],weight_cnn=w0,biase_cnn=b0, name='g_h4')
+            h4 = deconv2d(h3, [self._batch_size, s, y, self._color_size],weight_cnn=w0,biase_cnn=b0, name='g_h4')
 
             self.encoder_pic =  tf.tanh(h4) / 2. + 0.5
 
@@ -270,7 +274,7 @@ class seq_pic2seq_pic():
         self._question = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Question')
         self._response = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Response')
         # self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
-        self._input_pic = tf.placeholder(tf.float32, [self._batch_size, self.img_size_x, self.img_size_y, 1],
+        self._input_pic = tf.placeholder(tf.float32, [self._batch_size, self.img_size_x, self.img_size_y, self._color_size],
                                          name='frame_input')
         # self._real_pic = tf.placeholder(tf.float32, [self._batch_size, self.img_size_x, self.img_size_y, 1],
         #                                 name='frame_output')
