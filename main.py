@@ -17,7 +17,7 @@ tf.flags.DEFINE_float("max_grad_norm", 5.0, "Clip gradients to this norm.")
 tf.flags.DEFINE_integer("evaluation_interval", 10, "Evaluate and print results every x epochs")
 tf.flags.DEFINE_integer("batch_size", 4, "Batch size for training.")  # should consider the size of validation set
 tf.flags.DEFINE_integer("head", 8, "head number of attention")
-tf.flags.DEFINE_integer("epochs", 80, "Number of epochs to train for.")
+tf.flags.DEFINE_integer("epochs", 200, "Number of epochs to train for.")
 tf.flags.DEFINE_integer('check_epoch',10, 'evaluation times')
 tf.flags.DEFINE_integer("layers", 3, "the num layers of RNN.")
 tf.flags.DEFINE_integer("recurrent_dim",64, "Embedding size for neural networks.")
@@ -35,7 +35,7 @@ tf.flags.DEFINE_bool('gray',True,'picture is gray or not, placeholder also shoul
 tf.flags.DEFINE_integer('num_identical',6,'number of encode transformers')
 tf.flags.DEFINE_bool('qa_transpose',False,'whether to train model in AQ with QA training')
 tf.flags.DEFINE_bool('pre_training',False,'whether to train model in AQ with QA training')
-tf.flags.DEFINE_integer('pretrain_epochs',10,'epoch for pre-training')
+tf.flags.DEFINE_integer('pretrain_epochs',100,'epoch for pre-training')
 config = tf.flags.FLAGS
 
 def train_model(sess, model, train_data, valid_data):
@@ -108,19 +108,19 @@ def pretrain_model(sess, model, train_data):
 
     epoch = config.pretrain_epochs
     print('pre-training....')
-    train_summary_writer = tf.summary.FileWriter(config.summary_path, sess.graph)
-    global_steps = 0
+    # train_summary_writer = tf.summary.FileWriter(config.summary_path, sess.graph)
+    # global_steps = 0
     while current_step <= epoch:
         #  print ('current_step:',current_step)
         for i in range(len(train_data)):
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
-            train_loss_, summary = model.steps(sess, random.choice(train_data), step_type='train',
+            train_loss_, _ = model.steps(sess, random.choice(train_data), step_type='train',
                                                qa_transpose=config.qa_transpose)
-            global_steps += 1
+            # global_steps += 1
             # g_step = sess.run(model.global_step)
-            if global_steps % len(train_data) == 0:
-                train_summary_writer.add_summary(summary, global_steps)
+            # if global_steps % len(train_data) == 0:
+            #     train_summary_writer.add_summary(summary, global_steps)
         if current_step % config.check_epoch == 0:
             train_losses.append(train_loss_)
             print('-------------------------------')
