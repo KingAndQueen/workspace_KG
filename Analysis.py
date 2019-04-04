@@ -101,14 +101,15 @@ def write_sents(times, data_seq_batch,target_sents, save_path, vocab,show_matric
         except:
             print('please install nlgeval first')
 
-def write_process(times, data_seq_batch, save_path, vocab):
+def write_process(times, data_seq_batch, save_path, vocab,batch_size):
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     pdb.set_trace()
-    for idx,[text, image] in enumerate(data_seq_batch):
-        time=[]
-        assert len(text)==len(image)
-        for i in range(len(text)):
-            time.append(times[idx])
-        write_sents(time, text,text, save_path, vocab)
-        drew_seq(time, image, save_path)
+    for id_batch,batch_data in enumerate(data_seq_batch):
+        for id_sents,[sents,images] in enumerate(batch_data):
+            time=[]
+            assert len(sents)==len(images)
+            for i in range(len(sents)):
+                time.append(times[id_batch*batch_size+id_sents])
+            write_sents(time, sents,sents, save_path, vocab)
+            drew_seq(time, images, save_path)

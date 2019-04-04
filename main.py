@@ -99,7 +99,7 @@ def test_model(sess, model, test_data, vocab,times):
         processing_data.append(word_defined_image)
     Analysis.drew_seq(times,encoding_pics,'./result/',config.gray)
     Analysis.write_sents(times,pred_txts,target_txt,'./result/',vocab,show_matric=False)
-    Analysis.write_process(times,processing_data,'./result/process/',vocab)
+    Analysis.write_process(times,processing_data,'./result/process/',vocab,batch_size=config.batch_size)
     # test_loss=test_loss / len(test_data)
     # print('test total loss:', test_loss)
     print('test is finished!')
