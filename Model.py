@@ -2,7 +2,7 @@ import pdb
 import convolution
 # from VGG import build_vgg19
 from transformer import *
-
+import copy
 
 class seq_pic2seq_pic():
     def __init__(self, config, vocab):
@@ -335,6 +335,7 @@ class seq_pic2seq_pic():
         if step_type == 'test':
             output_batch_txt = np.zeros((self._batch_size, self._sentence_size), dtype=np.int32)
             pic_encoding=None
+            word_defined_image=[]
             for j in range(self._sentence_size):
                 txt_preds,pic_encoding = sess.run([self.predict_txt,self.encoder_pic],
                                   feed_dict={self._question: input_batch_txt, self._response: output_batch_txt,
@@ -350,7 +351,8 @@ class seq_pic2seq_pic():
             #     loss, txt = sess.run(output_list, feed_dict=feed_dict)
             # except:
             #     pdb.set_trace()
-            return output_batch_txt,pic_encoding
+                word_defined_image.append([copy.copy(output_batch_txt),copy.copy(pic_encoding)])
+            return output_batch_txt,pic_encoding,word_defined_image
 
         print('step_type is wrong!>>>')
         return None
