@@ -104,6 +104,7 @@ def write_sents(times, data_seq_batch,target_sents, save_path, vocab,show_matric
 def write_process(times, data_seq_batch, save_path, vocab):
     if not os.path.exists(save_path):
         os.makedirs(save_path)
+    pdb.set_trace()
     for idx,[text, image] in enumerate(data_seq_batch):
         time=[]
         assert len(text)==len(image)
