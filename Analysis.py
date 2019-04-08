@@ -121,7 +121,7 @@ def write_sents_1(times, data_seq_batch, save_path, vocab):
 def drew_seq_1(times, data_seq_batch, save_path, gray=False):
     assert len(times) == len(data_seq_batch)
     for idx, pic in enumerate(data_seq_batch):
-        name = times[idx]
+        name = str(times[idx])+'_'+str(idx)
         drew_output_pic(pic, name, save_path, gray)
 
 
@@ -134,6 +134,6 @@ def write_process(times, data_seq_batch, save_path, vocab, batch_size):
             assert len(sents) == len(images)
             for i in range(len(sents)):
                 time.append(times[id_batch * batch_size + id_sents])
-            pdb.set_trace()
+            # pdb.set_trace()
             write_sents_1(time, sents, save_path, vocab)
             drew_seq_1(time, images, save_path)
