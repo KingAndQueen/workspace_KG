@@ -8,6 +8,7 @@ import pdb
 import numpy as np
 from nltk.translate.bleu_score import corpus_bleu
 
+
 def run_tm(func):
     def inner(*N):
         start = time.time()
@@ -34,7 +35,7 @@ def drew_output_pic(data_patch, case_name, save_path, gray=False):
     plt.close('all')
 
 
-def drew_seq(times, data_seq_batch, save_path,gray=False):
+def drew_seq(times, data_seq_batch, save_path, gray=False):
     data_seq = []
     for pic_batch in data_seq_batch:
         for pic in pic_batch:
@@ -42,32 +43,30 @@ def drew_seq(times, data_seq_batch, save_path,gray=False):
     assert len(times) == len(data_seq)
     for idx, pic in enumerate(data_seq):
         name = times[idx]
-        drew_output_pic(pic, name, save_path,gray)
+        drew_output_pic(pic, name, save_path, gray)
 
 
-def write_sents(times, data_seq_batch,target_sents, save_path, vocab,show_matric=True):
-    data_seq_pred,data_seq_target,data_seq_target_bleu = [],[],[]
+def write_sents(times, data_seq_batch, target_sents, save_path, vocab, show_matric=True):
+    data_seq_pred, data_seq_target, data_seq_target_bleu = [], [], []
     # pdb.set_trace()
-    if not len(data_seq_batch)==len(target_sents):
+    if not len(data_seq_batch) == len(target_sents):
         pdb.set_trace()
 
-    for idx,txt_batch in enumerate(data_seq_batch):
+    for idx, txt_batch in enumerate(data_seq_batch):
         for txt in txt_batch:
-            txt=list(txt)
+            txt = list(txt)
             if 1 in txt:
-                txt=txt[:txt.index(1)]
+                txt = txt[:txt.index(1)]
             data_seq_pred.append(txt)
         for target_sent in target_sents[idx]:
             target_sent = list(target_sent)
             if 1 in target_sent:
-                target_sent=target_sent[:target_sent.index(1)]
+                target_sent = target_sent[:target_sent.index(1)]
             data_seq_target_bleu.append([target_sent])
             data_seq_target.append(target_sent)
 
-
     score = corpus_bleu(data_seq_target_bleu, data_seq_pred)
     print("Bleu Score = " + str(score))
-
 
     assert len(times) == len(data_seq_pred)
     if not os.path.exists(save_path):
@@ -76,17 +75,16 @@ def write_sents(times, data_seq_batch,target_sents, save_path, vocab,show_matric
     for idx, txt2 in enumerate(data_seq_pred):
         # for txt in txt2:
         sent_pred = [vocab.index_to_word(word) + ' ' for word in txt2]
-        sent_target=[vocab.index_to_word(word) + ' ' for word in data_seq_target[idx]]
+        sent_target = [vocab.index_to_word(word) + ' ' for word in data_seq_target[idx]]
         f.writelines(sent_target)
         f.write('\n')
         if '<eos>' in sent_pred:
-            sent_pred=sent_pred[:sent_pred.index('<eos>')+1]
+            sent_pred = sent_pred[:sent_pred.index('<eos>') + 1]
         f.writelines(sent_pred)
         f.write('\n\n')
 
     f.write("Bleu Score = " + str(score))
     f.close()
-
 
     if show_matric:
         try:
@@ -101,15 +99,41 @@ def write_sents(times, data_seq_batch,target_sents, save_path, vocab,show_matric
         except:
             print('please install nlgeval first')
 
-def write_process(times, data_seq_batch, save_path, vocab,batch_size):
+
+def write_sents_1(times, data_seq_batch, save_path, vocab):
+    data_seq_pred = []
+    for idx, txt_batch in enumerate(data_seq_batch):
+        txt = list(txt_batch)
+        if 1 in txt:
+            txt = txt[:txt.index(1)]
+        data_seq_pred.append(txt)
+
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-    for id_batch,batch_data in enumerate(data_seq_batch):
-        for id_sents,[sents,images] in enumerate(batch_data):
-            time=[]
-            assert len(sents)==len(images)
+    f = open(save_path + 'test_output.txt', 'w')
+    for idx, txt2 in enumerate(data_seq_pred):
+        sent_pred = [vocab.index_to_word(word) + ' ' for word in txt2]
+        f.writelines(sent_pred)
+        f.write('\n')
+    f.close()
+
+
+def drew_seq_1(times, data_seq_batch, save_path, gray=False):
+    assert len(times) == len(data_seq_batch)
+    for idx, pic in enumerate(data_seq_batch):
+        name = times[idx]
+        drew_output_pic(pic, name, save_path, gray)
+
+
+def write_process(times, data_seq_batch, save_path, vocab, batch_size):
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    for id_batch, batch_data in enumerate(data_seq_batch):
+        for id_sents, [sents, images] in enumerate(batch_data):
+            time = []
+            assert len(sents) == len(images)
             for i in range(len(sents)):
-                time.append(times[id_batch*batch_size+id_sents])
+                time.append(times[id_batch * batch_size + id_sents])
             pdb.set_trace()
-            write_sents(time, sents,sents, save_path, vocab)
-            drew_seq(time, images, save_path)
+            write_sents_1(time, sents, save_path, vocab)
+            drew_seq_1(time, images, save_path)
