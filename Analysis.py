@@ -100,7 +100,7 @@ def write_sents(times, data_seq_batch, target_sents, save_path, vocab, show_matr
             print('please install nlgeval first')
 
 
-def write_sents_1(times, data_seq_batch, save_path, vocab):
+def write_sents_1(batch_id,sents_id, data_seq_batch, save_path, vocab,times,batch_size):
     data_seq_pred = []
     for idx, txt_batch in enumerate(data_seq_batch):
         txt = list(txt_batch)
@@ -110,18 +110,20 @@ def write_sents_1(times, data_seq_batch, save_path, vocab):
 
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-    f = open(save_path + 'test_output.txt', 'w')
+    f = open(save_path + 'test_output.txt', 'a+')
     for idx, txt2 in enumerate(data_seq_pred):
+        name = str(times[batch_id * batch_size + idx]) + '_sID' + str(sents_id)
         sent_pred = [vocab.index_to_word(word) + ' ' for word in txt2]
+        f.write(name+':')
         f.writelines(sent_pred)
         f.write('\n')
     f.close()
 
 
-def drew_seq_1(times, data_seq_batch, save_path, gray=False):
-    assert len(times) == len(data_seq_batch)
+def drew_seq_1(batch_id,sents_id, data_seq_batch, save_path,times,batch_size, gray=False):
+    # assert len(times) == len(data_seq_batch)
     for idx, pic in enumerate(data_seq_batch):
-        name = str(times[idx])+'_'+str(idx)
+        name = str(times[batch_id*batch_size+idx])+'_sID'+str(sents_id)
         drew_output_pic(pic, name, save_path, gray)
 
 
@@ -130,10 +132,10 @@ def write_process(times, data_seq_batch, save_path, vocab, batch_size):
         os.makedirs(save_path)
     for id_batch, batch_data in enumerate(data_seq_batch):
         for id_sents, [sents, images] in enumerate(batch_data):
-            time = []
+            # time = []
             assert len(sents) == len(images)
-            for i in range(len(sents)):
-                time.append(times[id_batch * batch_size + id_sents])
+            # for i in range(len(sents)):
+            #     time.append(times[id_batch * batch_size + id_sents]+'_sID'+str(id_sents))
             # pdb.set_trace()
-            write_sents_1(time, sents, save_path, vocab)
-            drew_seq_1(time, images, save_path)
+            write_sents_1(id_batch,id_sents, sents, save_path, vocab,times,batch_size)
+            drew_seq_1(id_batch,id_sents, images, save_path,times,batch_size)
