@@ -135,13 +135,13 @@ class seq_pic2seq_pic():
             encoding_pic_output = tf.nn.conv1d(tf.expand_dims(h4_e,1), w_pic, 1, 'SAME')
             encoder_pic_output = tf.tile(encoding_pic_output, [1, self._sentence_size, 1])
 
-        def deconv2d(input_, output_shape,weight_cnn,biase_cnn, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="deconv2d", with_w=False):
+        def deconv2d(input_, output_shape,weight_cnn,biase_cnn=None, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="deconv2d", with_w=False):
             with tf.variable_scope(name):
                 # filter : [height, width, output_channels, in_channels]
                 # w = tf.get_variable('w', [k_h, k_w, output_shape[-1], input_.get_shape()[-1]],
                 #                     initializer=tf.random_normal_initializer(stddev=stddev))
                 # w=tf.transpose(weight_cnn,[0,1,3,2])
-                pdb.set_trace()
+                # pdb.set_trace()
 
                 # biase_cnn = tf.negative(biase_cnn)
                 # input_bias = tf.nn.bias_add(input_, biase_cnn)
