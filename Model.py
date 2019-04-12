@@ -141,30 +141,33 @@ class seq_pic2seq_pic():
                 # w = tf.get_variable('w', [k_h, k_w, output_shape[-1], input_.get_shape()[-1]],
                 #                     initializer=tf.random_normal_initializer(stddev=stddev))
                 # w=tf.transpose(weight_cnn,[0,1,3,2])
-                # pdb.set_trace()
+                pdb.set_trace()
 
                 # biase_cnn = tf.negative(biase_cnn)
                 # input_bias = tf.nn.bias_add(input_, biase_cnn)
                 deconv = tf.nn.conv2d_transpose(input_, weight_cnn, output_shape=output_shape,strides=[1, d_h, d_w,1])
-
+                if biase_cnn is None:
+                    return deconv
+                biase_cnn = tf.negative(biase_cnn)
+                deconv_output = tf.nn.bias_add(deconv, biase_cnn)
                 # biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
 
-                return deconv
+                return deconv_output
 
         with tf.variable_scope('decoder_pic'):
             # h0 = ztf.reshape(h3_e, [-1, s16, y16, self._cov_size * 8])
             h0 = tf.nn.relu(self.g_bn0(h3_e, type=self.is_training))
             # pdb.set_trace()
-            h1 = deconv2d(h0, [self._batch_size, s8, y8, self._cov_size * 4],weight_cnn=w3,biase_cnn=b3, name='g_h1')
+            h1 = deconv2d(h0, [self._batch_size, s8, y8, self._cov_size * 4],weight_cnn=w3,biase_cnn=b2, name='g_h1')
             h1 = tf.nn.relu(self.g_bn1(h1, type=self.is_training))
 
-            h2 = deconv2d(h1, [self._batch_size, s4, y4, self._cov_size * 2],weight_cnn=w2,biase_cnn=b2, name='g_h2')
+            h2 = deconv2d(h1, [self._batch_size, s4, y4, self._cov_size * 2],weight_cnn=w2,biase_cnn=b1, name='g_h2')
             h2 = tf.nn.relu(self.g_bn2(h2, type=self.is_training))
 
-            h3 = deconv2d(h2, [self._batch_size, s2, y2, self._cov_size * 1],weight_cnn=w1,biase_cnn=b1, name='g_h3')
+            h3 = deconv2d(h2, [self._batch_size, s2, y2, self._cov_size * 1],weight_cnn=w1,biase_cnn=b0, name='g_h3')
             h3 = tf.nn.relu(self.g_bn3(h3, type=self.is_training))
 
-            h4 = deconv2d(h3, [self._batch_size, s, y, self._color_size],weight_cnn=w0,biase_cnn=b0, name='g_h4')
+            h4 = deconv2d(h3, [self._batch_size, s, y, self._color_size],weight_cnn=w0, name='g_h4')
 
             self.encoder_pic =  tf.tanh(h4) / 2. + 0.5
 
