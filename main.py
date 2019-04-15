@@ -86,6 +86,7 @@ def train_model(sess, model, train_data, valid_data):
 
 def test_model(sess, model, test_data, vocab,times):
     # test_loss = 0.0
+    print('begin testing...')
     encoding_pics,pred_txts,target_txt,processing_data = [],[],[],[]
     z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
     for batch_id, data_test in enumerate(test_data):
