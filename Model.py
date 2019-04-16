@@ -285,11 +285,17 @@ class seq_pic2seq_pic():
         #                                 name='frame_output')
         # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
-    def steps(self, sess, data_dict, noise=None, step_type='train',qa_transpose=False):
+    def steps(self, sess, data_dict, noise=None, step_type='train',qa_transpose=False, img_affect_testing=None):
         # self.is_training = step_type
         input_batch_txt = data_dict[0]
         output_batch_txt = data_dict[1]
         input_batch_pic = data_dict[2]
+        if isinstance(img_affect_testing ,int):
+            input_batch_pic_temp=[]
+            for idx,pic in enumerate(input_batch_pic):
+                id=idx+img_affect_testing%len(input_batch_pic)
+                input_batch_pic_temp.append(input_batch_pic[id])
+            input_batch_txt=input_batch_pic_temp
         output_batch_pic = data_dict[3]
         # weight_batch_txt = data_dict[4]
         # pdb.set_trace()
