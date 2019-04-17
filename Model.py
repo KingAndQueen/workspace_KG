@@ -5,12 +5,13 @@ from transformer import *
 import copy
 
 class seq_pic2seq_pic():
-    def __init__(self, config, vocab):
+    def __init__(self, config, vocab,img_numb):
         if config.gray:
             self._color_size = 1
         else:
             self._color_size = 3
         self._vocab = vocab
+        self._img_numb=img_numb
         self._batch_size = config.batch_size
         self._sentence_size = config.sentence_size
         self._learn_rate = tf.Variable(float(config.learn_rate), trainable=False, dtype=tf.float32, name='learn_rate')
@@ -234,6 +235,32 @@ class seq_pic2seq_pic():
 
                     self.dec_output = feedforward(self.dec_output, num_units=[4 * self._embedding_size, self._embedding_size])
 
+        with tf.variable_scope('img_classification'):
+            VGG_candidate_output=None
+            classfy_input = tf.concat((tf.expand_dims(encoder_pic_output,-1), tf.expand_dims(self.enc,-1),tf.expand_dims(self.dec_output,-1)), -1)
+
+            with tf.variable_scope('text_input_cnn_classify'):
+                # pdb.set_trace()
+                w = tf.get_variable('w', [5, 5, 3,self._cov_size],
+                                    initializer=tf.random_normal_initializer(stddev=0.02))
+
+                conv = tf.nn.conv2d(classfy_input, filter=w, strides=[1, 2, 2, 1], padding="SAME")
+
+                biases = tf.get_variable('biases', [self._cov_size], initializer=tf.constant_initializer(0.0))
+                conv = tf.reshape(tf.nn.bias_add(conv, biases), conv.get_shape())
+
+            conv_classfy=tf.reshape(conv, [self._batch_size, -1], name='classify_reshape')
+
+            # feedforward(conv_classfy,num_units=[conv_classfy.get_shape()[-1],self._cov_size],scope='classify_ff')
+            self.logits_img = tf.layers.dense(conv_classfy, self._img_numb)
+            self.predict_img = tf.to_int32(tf.argmax(self.logits_img, axis=-1))
+            self.acc_img = tf.reduce_sum(tf.to_float(tf.equal(self.predict_img, self._real_pic)))
+            tf.summary.scalar('acc_img', self.acc_img)
+            self.img_real_smoothed = label_smoothing(tf.one_hot(self._real_pic, depth=self._img_numb))
+            img_loss = tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.logits_img, labels=self.img_real_smoothed)
+            mean_img_loss=tf.reduce_mean(img_loss)
+            self.losses_img=mean_img_loss
+
         with tf.variable_scope('loss_function_txt'):
 
             self.logits = tf.layers.dense(self.dec_output, vocab.vocab_size)
@@ -254,7 +281,7 @@ class seq_pic2seq_pic():
             # loss_=tf.concat([tf.expand_dims(G_loss,-1),tf.expand_dims(cross_entropy_sentence,-1)],1)
             # all_loss=linear(loss_,1)
 
-            self.losses = mean_txt_loss  # + pic_loss
+            self.losses = mean_txt_loss+ self.losses_img # + pic_loss
 
         self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
         with tf.variable_scope('output_information'):
@@ -281,7 +308,7 @@ class seq_pic2seq_pic():
         # self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
         self._input_pic = tf.placeholder(tf.float32, [self._batch_size, self.img_size_x, self.img_size_y, self._color_size],
                                          name='frame_input')
-        self._real_pic = tf.placeholder(tf.float32, [self._batch_size],
+        self._real_pic = tf.placeholder(tf.int32, [self._batch_size],
                                         name='frame_output')
         # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
@@ -311,7 +338,9 @@ class seq_pic2seq_pic():
             feed_dict = {self._response: output_batch_txt,
                          self._question: input_batch_txt,
                          # self._weight: weight_batch_txt,
-                         self._input_pic: input_batch_pic}
+                         self._input_pic: input_batch_pic,
+                         self._real_pic:output_batch_pic
+                         }
             output_list = [self.losses, self.train_ops, self.merged]
             try:
                 loss, _, summary = sess.run(output_list, feed_dict=feed_dict)

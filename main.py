@@ -145,6 +145,8 @@ def main(_):
     # config.img_size_x =input_data_pic.values()[0].shape[0]
     # config.img_size_y=input_data_pic.values()[0].shape[1]
     # pdb.set_trace()
+    img_numb=len(output_data_pic)
+    print('total imgs:',img_numb)
     print('total sentences:',len(input_data_txt))
     batches_data=Data_Process.vectorize_batch(input_data_txt,output_data_txt,input_data_pic,output_data_pic,weights,config.batch_size)
     print('data processed,vocab size:', vocab.vocab_size)
@@ -160,7 +162,7 @@ def main(_):
     # pdb.set_trace()
     if config.is_training:
         print('establish the model...')
-        model = Model.seq_pic2seq_pic(config, vocab)
+        model = Model.seq_pic2seq_pic(config, vocab,img_numb)
         # pdb.set_trace()
         sess.run(tf.global_variables_initializer())
         if config.pre_training:
@@ -174,7 +176,7 @@ def main(_):
         print('establish the model...')
         # config.batch_size = len(test_data)
 
-        model = Model.seq_pic2seq_pic(config, vocab)
+        model = Model.seq_pic2seq_pic(config, vocab,img_numb)
         print('Reload model from checkpoints.....')
         ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
         model.saver.restore(sess, ckpt.model_checkpoint_path)

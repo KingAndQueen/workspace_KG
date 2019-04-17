@@ -305,7 +305,7 @@ def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
 
     input_data_pic=copy.copy(pic)
     _=input_data_pic.pop()################ test the deCNN process
-    output_data_pic=copy.copy(pic)
+    output_data_pic=[i for i in range(len(pic))]
     _=output_data_pic.pop(0)################ test the deCNN process
     # pdb.set_trace()
     assert len(output_weights)==len(output_data_txt)
