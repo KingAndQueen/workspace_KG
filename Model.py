@@ -281,8 +281,8 @@ class seq_pic2seq_pic():
         # self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
         self._input_pic = tf.placeholder(tf.float32, [self._batch_size, self.img_size_x, self.img_size_y, self._color_size],
                                          name='frame_input')
-        # self._real_pic = tf.placeholder(tf.float32, [self._batch_size, self.img_size_x, self.img_size_y, 1],
-        #                                 name='frame_output')
+        self._real_pic = tf.placeholder(tf.float32, [self._batch_size],
+                                        name='frame_output')
         # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
     def steps(self, sess, data_dict, noise=None, step_type='train',qa_transpose=False, img_affect_testing=None):
