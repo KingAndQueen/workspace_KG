@@ -87,10 +87,10 @@ def train_model(sess, model, train_data, valid_data):
 def test_model(sess, model, test_data, vocab,times):
     # test_loss = 0.0
     print('begin testing...')
-    encoding_pics,pred_txts,target_txt,processing_data = [],[],[],[]
+    encoding_pics,pred_txts,target_txt,processing_data,acc_pics = [],[],[],[],[]
     z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
     for batch_id, data_test in enumerate(test_data):
-        pred_txt,encoding_pic,word_defined_image = model.steps(sess, data_test,z_noise, step_type='test',img_affect_testing=5)
+        pred_txt,encoding_pic,word_defined_image,acc_img = model.steps(sess, data_test,z_noise, step_type='test',img_affect_testing=5)
         # test_loss += loss
 
         # pred_pics.append(pred_pic)
@@ -98,6 +98,8 @@ def test_model(sess, model, test_data, vocab,times):
         target_txt.append(data_test[1])
         encoding_pics.append(encoding_pic)
         # processing_data.append(word_defined_image)
+        acc_pics.append(acc_img)
+    print('img choosing accuracy:', np.mean(acc_pics))
     Analysis.drew_seq(times,encoding_pics,'./result/',config.gray)
     Analysis.write_sents(times,pred_txts,target_txt,'./result/',vocab,show_matric=False)
     # Analysis.write_process(times,processing_data,'./result/process/',vocab,batch_size=config.batch_size)

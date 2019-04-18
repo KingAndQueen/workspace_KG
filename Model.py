@@ -374,10 +374,10 @@ class seq_pic2seq_pic():
 
         if step_type == 'test':
             output_batch_txt = np.zeros((self._batch_size, self._sentence_size), dtype=np.int32)
-            pic_encoding=None
+            pic_encoding,acc_img=None,None
             word_defined_image=[]
             for j in range(self._sentence_size):
-                txt_preds,pic_encoding = sess.run([self.predict_txt,self.encoder_pic],
+                txt_preds,pic_encoding,acc_img = sess.run([self.predict_txt,self.encoder_pic,self.acc_img],
                                   feed_dict={self._question: input_batch_txt, self._response: output_batch_txt,
                                              self._input_pic: input_batch_pic})
                 output_batch_txt[:, j] = txt_preds[:, j]
@@ -392,7 +392,7 @@ class seq_pic2seq_pic():
             # except:
             #     pdb.set_trace()
                 word_defined_image.append([copy.copy(output_batch_txt),copy.copy(pic_encoding)])
-            return output_batch_txt,pic_encoding,word_defined_image
+            return output_batch_txt,pic_encoding,word_defined_image,acc_img
 
         print('step_type is wrong!>>>')
         return None
