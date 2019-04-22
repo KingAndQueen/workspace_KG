@@ -379,7 +379,7 @@ class seq_pic2seq_pic():
             for j in range(self._sentence_size):
                 txt_preds,pic_encoding,acc_img = sess.run([self.predict_txt,self.encoder_pic,self.acc_img],
                                   feed_dict={self._question: input_batch_txt, self._response: output_batch_txt,
-                                             self._input_pic: input_batch_pic})
+                                             self._input_pic: input_batch_pic,self._real_pic:output_batch_pic})
                 output_batch_txt[:, j] = txt_preds[:, j]
 
             # feed_dict = {self._response: output_batch_txt,
