@@ -293,7 +293,7 @@ class seq_pic2seq_pic():
         if isinstance(img_affect_testing ,int):
             input_batch_pic_temp=[]
             for idx,pic in enumerate(input_batch_pic):
-                id=idx+img_affect_testing%len(input_batch_pic)
+                id=(idx+img_affect_testing)%len(input_batch_pic)
                 input_batch_pic_temp.append(input_batch_pic[id])
             input_batch_txt=input_batch_pic_temp
         output_batch_pic = data_dict[3]
