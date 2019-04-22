@@ -241,7 +241,7 @@ class seq_pic2seq_pic():
 
             with tf.variable_scope('text_input_cnn_classify'):
                 # pdb.set_trace()
-                w = tf.get_variable('w', [5, 5, 64],
+                w = tf.get_variable('w', [5, 5,3, 64],
                                     initializer=tf.random_normal_initializer(stddev=0.02))
 
                 conv = tf.nn.conv2d(classfy_input, filter=w, strides=[1, 2, 2, 1], padding="SAME")
