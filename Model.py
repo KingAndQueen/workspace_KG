@@ -241,12 +241,12 @@ class seq_pic2seq_pic():
 
             with tf.variable_scope('text_input_cnn_classify'):
                 # pdb.set_trace()
-                w = tf.get_variable('w', [5, 5, 3,1],
+                w = tf.get_variable('w', [5, 5, 64],
                                     initializer=tf.random_normal_initializer(stddev=0.02))
 
                 conv = tf.nn.conv2d(classfy_input, filter=w, strides=[1, 2, 2, 1], padding="SAME")
 
-                biases = tf.get_variable('biases', [1], initializer=tf.constant_initializer(0.0))
+                biases = tf.get_variable('biases', [64], initializer=tf.constant_initializer(0.0))
                 conv = tf.reshape(tf.nn.bias_add(conv, biases), conv.get_shape())
 
             conv_classfy=tf.reshape(conv, [self._batch_size, -1], name='classify_reshape')
