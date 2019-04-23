@@ -87,19 +87,17 @@ def train_model(sess, model, train_data, valid_data):
 def test_model(sess, model, test_data, vocab,times):
     # test_loss = 0.0
     print('begin testing...')
-    encoding_pics,pred_txts,target_txt,processing_data = [],[],[],[]
+    encoding_pics,pred_txts,processing_data = [],[],[]
     z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
     for batch_id, data_test in enumerate(test_data):
         pred_txt,encoding_pic,word_defined_image = model.steps(sess, data_test,z_noise, step_type='test')
         # test_loss += loss
-
         # pred_pics.append(pred_pic)
         pred_txts.append(pred_txt)
-        target_txt.append(data_test[1])
         encoding_pics.append(encoding_pic)
         # processing_data.append(word_defined_image)
     Analysis.drew_seq(times,encoding_pics,'./result/',config.gray)
-    Analysis.write_sents(times,pred_txts,target_txt,'./result/',vocab,show_matric=False,test_data=test_data)
+    Analysis.write_sents(times,pred_txts,'./result/',vocab,show_matric=False,test_data=test_data)
     # Analysis.write_process(times,processing_data,'./result/process/',vocab,batch_size=config.batch_size)
     # test_loss=test_loss / len(test_data)
     # print('test total loss:', test_loss)

@@ -46,11 +46,9 @@ def drew_seq(times, data_seq_batch, save_path, gray=False):
         drew_output_pic(pic, name, save_path, gray)
 
 
-def write_sents(times, data_seq_batch, target_sents, save_path, vocab, show_matric=True,test_data=None):
+def write_sents(times, data_seq_batch, save_path, vocab, show_matric=True,test_data=None):
     data_seq_pred, data_seq_target, data_seq_target_bleu ,test_questions= [], [], [],[]
     # pdb.set_trace()
-    if not len(data_seq_batch) == len(target_sents):
-        pdb.set_trace()
 
     for idx, txt_batch in enumerate(data_seq_batch):
         for txt in txt_batch:
@@ -58,18 +56,16 @@ def write_sents(times, data_seq_batch, target_sents, save_path, vocab, show_matr
             if 1 in txt:
                 txt = txt[:txt.index(1)]
             data_seq_pred.append(txt)
-        for target_sent in target_sents[idx]:
+        for target_sent in test_data[idx][1]:
             target_sent = list(target_sent)
             if 1 in target_sent:
                 target_sent = target_sent[:target_sent.index(1)]
             data_seq_target_bleu.append([target_sent])
             data_seq_target.append(target_sent)
-        for test in test_data[idx]:
-            test_txt_question=test[0]
-
-            if 1 in test_txt_question:
-                test_txt_question=test_txt_question[:test_txt_question.index(1)]
-            test_questions.append(test_txt_question)
+        for test in test_data[idx][0]:
+            if 1 in test:
+                test=test[:test.index(1)]
+            test_questions.append(test)
 
     score = corpus_bleu(data_seq_target_bleu, data_seq_pred)
     print("Bleu Score = " + str(score))
