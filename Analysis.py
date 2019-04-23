@@ -46,8 +46,8 @@ def drew_seq(times, data_seq_batch, save_path, gray=False):
         drew_output_pic(pic, name, save_path, gray)
 
 
-def write_sents(times, data_seq_batch, target_sents, save_path, vocab, show_matric=True):
-    data_seq_pred, data_seq_target, data_seq_target_bleu = [], [], []
+def write_sents(times, data_seq_batch, target_sents, save_path, vocab, show_matric=True,test_data=None):
+    data_seq_pred, data_seq_target, data_seq_target_bleu ,test_questions= [], [], [],[]
     # pdb.set_trace()
     if not len(data_seq_batch) == len(target_sents):
         pdb.set_trace()
@@ -64,6 +64,12 @@ def write_sents(times, data_seq_batch, target_sents, save_path, vocab, show_matr
                 target_sent = target_sent[:target_sent.index(1)]
             data_seq_target_bleu.append([target_sent])
             data_seq_target.append(target_sent)
+        for test in test_data[idx]:
+            test_txt_question=test[0]
+
+            if 1 in test_txt_question:
+                test_txt_question=test_txt_question[:test_txt_question.index(1)]
+            test_questions.append(test_txt_question)
 
     score = corpus_bleu(data_seq_target_bleu, data_seq_pred)
     print("Bleu Score = " + str(score))
@@ -74,8 +80,11 @@ def write_sents(times, data_seq_batch, target_sents, save_path, vocab, show_matr
     f = open(save_path + 'test_output.txt', 'w')
     for idx, txt2 in enumerate(data_seq_pred):
         # for txt in txt2:
+        sent_que=[vocab.index_to_word(word) + ' ' for word in test_questions[idx]]
         sent_pred = [vocab.index_to_word(word) + ' ' for word in txt2]
         sent_target = [vocab.index_to_word(word) + ' ' for word in data_seq_target[idx]]
+        f.writelines(sent_que)
+        f.write('\n')
         f.writelines(sent_target)
         f.write('\n')
         if '<eos>' in sent_pred:
