@@ -5,13 +5,14 @@ from transformer import *
 import copy
 
 class seq_pic2seq_pic():
-    def __init__(self, config, vocab,img_numb):
+    def __init__(self, config, vocab,img_numb,candidates_vector_len):
         if config.gray:
             self._color_size = 1
         else:
             self._color_size = 3
         self._vocab = vocab
         self._img_numb=img_numb
+        self._candidates_vector_len=candidates_vector_len
         self._batch_size = config.batch_size
         self._sentence_size = config.sentence_size
         self._learn_rate = tf.Variable(float(config.learn_rate), trainable=False, dtype=tf.float32, name='learn_rate')
@@ -236,7 +237,9 @@ class seq_pic2seq_pic():
                     self.dec_output = feedforward(self.dec_output, num_units=[4 * self._embedding_size, self._embedding_size])
 
         with tf.variable_scope('img_classification'):
-            VGG_candidate_output=None
+
+            VGG_candidate_output = self._pic_candidates
+
             classfy_input = tf.concat((tf.expand_dims(encoder_pic_output,-1), tf.expand_dims(self.enc,-1),tf.expand_dims(self.dec_output,-1)), -1)
 
             with tf.variable_scope('text_input_cnn_classify'):
@@ -252,7 +255,9 @@ class seq_pic2seq_pic():
             conv_classfy=tf.reshape(conv, [self._batch_size, -1], name='classify_reshape')
 
             # feedforward(conv_classfy,num_units=[conv_classfy.get_shape()[-1],self._cov_size],scope='classify_ff')
-            self.logits_img = tf.layers.dense(conv_classfy, self._img_numb)
+            context_img = tf.layers.dense(conv_classfy, self._img_numb)
+            context_img_vgg=tf.sparse_softmax(context_img * self._candidates_pool)
+            self.logits_img = tf.layers.dense(context_img_vgg, self._img_numb)
             self.predict_img = tf.to_int32(tf.argmax(self.logits_img, axis=-1))
             self.acc_img = tf.reduce_sum(tf.to_float(tf.equal(self.predict_img, self._real_pic)))
             tf.summary.scalar('acc_img', self.acc_img)
@@ -310,9 +315,11 @@ class seq_pic2seq_pic():
                                          name='frame_input')
         self._real_pic = tf.placeholder(tf.int32, [self._batch_size],
                                         name='frame_output')
+        self._candidates_pool=tf.placeholder(tf.float32, [self._img_numb,self._candidates_vector_len],
+                                         name='candidates_pool')
         # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
-    def steps(self, sess, data_dict, noise=None, step_type='train',qa_transpose=False, img_affect_testing=None):
+    def steps(self, sess, data_dict,candidates_pool, noise=None, step_type='train',qa_transpose=False, img_affect_testing=None):
         # self.is_training = step_type
         input_batch_txt = data_dict[0]
         output_batch_txt = data_dict[1]
@@ -339,7 +346,8 @@ class seq_pic2seq_pic():
                          self._question: input_batch_txt,
                          # self._weight: weight_batch_txt,
                          self._input_pic: input_batch_pic,
-                         self._real_pic:output_batch_pic
+                         self._real_pic:output_batch_pic,
+                         self._candidates_pool:candidates_pool
                          }
             output_list = [self.losses, self.train_ops, self.merged]
             try:
