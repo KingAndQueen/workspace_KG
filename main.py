@@ -149,10 +149,10 @@ def main(_):
 
     # train_data,valid_test_data=model_selection.train_test_split(batches_data,test_size=0.2,shuffle=False)
     # valid_data, test_data = model_selection.train_test_split(valid_test_data, test_size=0.5, shuffle=False)
-    train_data, valid_test_data =batches_data[:int(0.8*len(batches_data))],batches_data[-int(0.2*len(batches_data)):]
-    valid_data, test_data =valid_test_data[:int(0.5*len(valid_test_data))],valid_test_data[-int(0.5*len(valid_test_data))]
+    train_data, valid_test_data =batches_data[:int(round(0.8*len(batches_data)))],batches_data[-int(round(0.2*len(batches_data))):]
+    valid_data, test_data =valid_test_data[:int(round(0.5*len(valid_test_data)))],valid_test_data[-int(round(0.5*len(valid_test_data))):]
 
-    # pdb.set_trace()
+    pdb.set_trace()
     sess = tf.Session()
     test_ignore_len=len(times)-len(batches_data)*config.batch_size
     if test_ignore_len>0:
