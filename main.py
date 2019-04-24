@@ -168,11 +168,13 @@ def main(_):
     valid_data, test_data = model_selection.train_test_split(valid_test_data, test_size=0.5, shuffle=False)
 
     if os.path.exists('./data/candidates_pool.pkl'):
+        print('load the candidates pool...')
         f = open('./data/candidates_pool.pkl', 'r')
         candidates_pool = pkl.load(f)
         f.close()
     else:
         # vgg_rawnet = scipy.io.loadmat('./data/imagenet-vgg-verydeep-19.mat')
+        print('build a candidates pool...')
         candidates_pool = run_candidates(input_data_pic)
         f = open('./data/candidates_pool.pkl', 'w+')
         pkl.dump(candidates_pool, f)
