@@ -7,9 +7,10 @@ import Data_Process
 import Model
 import random
 import Analysis
-from VGG import build_vgg19
+from VGG import run_candidates
 import pickle as pkl
 import scipy.io
+
 # from math import exp
 tf.flags.DEFINE_float("learn_rate", 0.00001, "Learning rate for SGD.")
 # tf.flags.DEFINE_float("anneal_rate", 25, "Number of epochs between halving the learnign rate.")
@@ -165,26 +166,19 @@ def main(_):
     print('data processed,vocab size:', vocab.vocab_size)
     train_data, valid_test_data = model_selection.train_test_split(batches_data, test_size=0.2, shuffle=False)
     valid_data, test_data = model_selection.train_test_split(valid_test_data, test_size=0.5, shuffle=False)
-    sess = tf.Session()
 
-    candidates_pool = []
     if os.path.exists('./data/candidates_pool.pkl'):
         f = open('./data/candidates_pool.pkl', 'r')
         candidates_pool = pkl.load(f)
         f.close()
     else:
-        with sess.as_default():
-            # vgg_rawnet = scipy.io.loadmat('./data/imagenet-vgg-verydeep-19.mat')
-            for pic in input_data_pic:
-                pic = tf.cast(pic, dtype=tf.float32)
-                tensor = build_vgg19(pic, reuse=True)['pool5']
-                tensor = tf.reshape(tensor, [-1])
-                candidates_pool.append(tensor.eval())
-                # pdb.set_trace()
+        # vgg_rawnet = scipy.io.loadmat('./data/imagenet-vgg-verydeep-19.mat')
+        candidates_pool = run_candidates(input_data_pic)
         f = open('./data/candidates_pool.pkl', 'w+')
         pkl.dump(candidates_pool, f)
         f.close()
     pdb.set_trace()
+    sess = tf.Session()
     candidates_vector_len = len(candidates_pool[0])
     test_ignore_len = len(times) - len(batches_data) * config.batch_size
     if test_ignore_len > 0:
