@@ -177,7 +177,7 @@ def main(_):
         f = open('./data/candidates_pool.pkl', 'w+')
         pkl.dump(candidates_pool, f)
         f.close()
-    pdb.set_trace()
+    # pdb.set_trace()
     sess = tf.Session()
     candidates_vector_len = len(candidates_pool[0])
     test_ignore_len = len(times) - len(batches_data) * config.batch_size
