@@ -57,11 +57,12 @@ def run_candidates(input_data_pic):
     img_z=len(input_data_pic[0][0][0])
     sess = tf.Session()
     input = tf.placeholder(tf.float32, [img_x,img_y,img_z], name='input_img')
-    output_list=build_vgg19(input, reuse=True)
+    output_list=build_vgg19(input, reuse=True)['pool5']
+    output_vector=tf.reshape(output_list,[-1])
     candidates_pool = []
     for pic in input_data_pic:
-        output=sess.run(output_list,feed_dict={input:pic})
-        candidates_pool.append(output['pool5'])
+        output=sess.run(output_vector,feed_dict={input:pic})
+        candidates_pool.append(output)
     # pdb.set_trace()
     return candidates_pool
         # pdb.set_trace()
