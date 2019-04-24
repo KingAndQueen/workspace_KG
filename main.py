@@ -180,7 +180,7 @@ def main(_):
                 tensor = build_vgg19(pic,vgg_rawnet, reuse=True)['pool5']
                 tensor = tf.reshape(tensor, [-1])
                 candidates_pool.append(tensor.eval())
-                pdb.set_trace()
+                # pdb.set_trace()
         f = open('./data/candidates_pool.pkl', 'w+')
         pkl.dump(candidates_pool, f)
         f.close()
