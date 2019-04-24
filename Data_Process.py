@@ -338,8 +338,11 @@ def count_words(vocabulary,paths):
 
 def vectorize_batch(input_data_txt,output_data_txt,input_data_pic,output_data_pic,weights,batch_size):
     batches_data=[]
+    ignore_number=0
     for _ in range(0, len(input_data_txt), batch_size):
-        if _+batch_size>len(input_data_txt):continue
+        if _+batch_size>len(input_data_txt):
+            ignore_number=len(input_data_txt)-_
+            continue
         input_batch_txt=input_data_txt[_:_+batch_size]
         output_batch_txt=output_data_txt[_:_+batch_size]
         input_batch_pic=input_data_pic[_:_+batch_size]
@@ -347,7 +350,7 @@ def vectorize_batch(input_data_txt,output_data_txt,input_data_pic,output_data_pi
         weight_batch_txt=weights[_:_+batch_size]
         batches_data.append([input_batch_txt,output_batch_txt,input_batch_pic,output_batch_pic,weight_batch_txt])
     # pdb.set_trace()
-    return batches_data
+    return batches_data,ignore_number
 
 def store_vocab(vocab, data_path):
     data_path = data_path + 'vocab.pkl'

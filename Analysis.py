@@ -79,6 +79,8 @@ def write_sents(times, data_seq_batch, save_path, vocab, show_matric=True,test_d
         sent_que=[vocab.index_to_word(word) + ' ' for word in test_questions[idx]]
         sent_pred = [vocab.index_to_word(word) + ' ' for word in txt2]
         sent_target = [vocab.index_to_word(word) + ' ' for word in data_seq_target[idx]]
+        f.writelines(times[idx])
+        f.write('\n')
         f.writelines(sent_que)
         f.write('\n')
         f.writelines(sent_target)
