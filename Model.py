@@ -254,7 +254,7 @@ class seq_pic2seq_pic():
 
             # feedforward(conv_classfy,num_units=[conv_classfy.get_shape()[-1],self._cov_size],scope='classify_ff')
             context_img = tf.layers.dense(conv_classfy, self._img_numb)
-            context_img_vgg=tf.sparse_softmax(tf.matmul(context_img, self._candidates_pool))
+            context_img_vgg=tf.nn.softmax(tf.matmul(context_img, self._candidates_pool))
             self.logits_img = tf.layers.dense(context_img_vgg, self._img_numb)
             self.predict_img = tf.to_int32(tf.argmax(self.logits_img, axis=-1))
             self.acc_img = tf.reduce_sum(tf.to_float(tf.equal(self.predict_img, self._real_pic)))
