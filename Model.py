@@ -238,8 +238,6 @@ class seq_pic2seq_pic():
 
         with tf.variable_scope('img_classification'):
 
-            VGG_candidate_output = self._pic_candidates
-
             classfy_input = tf.concat((tf.expand_dims(encoder_pic_output,-1), tf.expand_dims(self.enc,-1),tf.expand_dims(self.dec_output,-1)), -1)
 
             with tf.variable_scope('text_input_cnn_classify'):
