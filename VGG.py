@@ -18,11 +18,11 @@ def get_weight_bias(vgg_layers,i):
     return weights,bias
 
 
-def build_vgg19(input,vgg_rawnet,reuse=False):
+def build_vgg19(input,reuse=False):
     if reuse:
         tf.get_variable_scope().reuse_variables()
     net={}
-    # vgg_rawnet=scipy.io.loadmat('./data/imagenet-vgg-verydeep-19.mat')
+    vgg_rawnet=scipy.io.loadmat('./data/imagenet-vgg-verydeep-19.mat')
     vgg_layers=vgg_rawnet['layers'][0]
     net['input']=input-np.array([123.6800, 116.7790, 103.9390]).reshape((1,1,1,3))
     net['conv1_1']=build_net('conv',net['input'],get_weight_bias(vgg_layers,0),name='vgg_conv1_1')

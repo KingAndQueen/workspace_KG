@@ -174,10 +174,10 @@ def main(_):
         f.close()
     else:
         with sess.as_default():
-            vgg_rawnet = scipy.io.loadmat('./data/imagenet-vgg-verydeep-19.mat')
+            # vgg_rawnet = scipy.io.loadmat('./data/imagenet-vgg-verydeep-19.mat')
             for pic in input_data_pic:
                 pic = tf.cast(pic, dtype=tf.float32)
-                tensor = build_vgg19(pic,vgg_rawnet, reuse=True)['pool5']
+                tensor = build_vgg19(pic, reuse=True)['pool5']
                 tensor = tf.reshape(tensor, [-1])
                 candidates_pool.append(tensor.eval())
                 # pdb.set_trace()
