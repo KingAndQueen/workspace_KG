@@ -33,7 +33,7 @@ class seq_pic2seq_pic():
         self._num_identical = config.num_identical
         self._build_inputs()
         self._head = config.head
-        self._candidates_pool = tf.convert_to_tensor(np.array(candidates_pool),name='candidates_pool')#, shape=[self._img_numb, self._candidates_vector_len]
+        self._candidates_pool = tf.constant(np.array(candidates_pool),name='candidates_pool')#, shape=[self._img_numb, self._candidates_vector_len]
 
         self.g_bn0 = convolution.batch_norm(name='g_bn0')
         self.g_bn1 = convolution.batch_norm(name='g_bn1')
