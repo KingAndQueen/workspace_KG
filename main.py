@@ -190,9 +190,9 @@ def main(_):
     # pdb.set_trace()
     if config.is_training:
         print('establish the model...')
-        model = Model.seq_pic2seq_pic(config, vocab, img_numb, candidates_vector_len,candidates_pool)
+        model = Model.seq_pic2seq_pic(config, vocab, img_numb, candidates_vector_len)
         # pdb.set_trace()
-        sess.run(tf.global_variables_initializer())
+        sess.run(tf.global_variables_initializer(),feed_dict={model._candidates_pool_ph:candidates_pool})
         if config.pre_training:
             pretrain_model(sess, model, prtrain_batches_data)
         train_model(sess, model, train_data, valid_data)
