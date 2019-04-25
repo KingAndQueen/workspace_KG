@@ -5,7 +5,7 @@ from transformer import *
 import copy
 
 class seq_pic2seq_pic():
-    def __init__(self, config, vocab,img_numb,candidates_vector_len):
+    def __init__(self, config, vocab,img_numb,candidates_vector_len,candidates_pool):
         if config.gray:
             self._color_size = 1
         else:
@@ -33,6 +33,7 @@ class seq_pic2seq_pic():
         self._num_identical = config.num_identical
         self._build_inputs()
         self._head = config.head
+        self._candidates_pool = tf.convert_to_tensor(np.array(candidates_pool),name='candidates_pool')#, shape=[self._img_numb, self._candidates_vector_len]
 
         self.g_bn0 = convolution.batch_norm(name='g_bn0')
         self.g_bn1 = convolution.batch_norm(name='g_bn1')
@@ -313,11 +314,10 @@ class seq_pic2seq_pic():
                                          name='frame_input')
         self._real_pic = tf.placeholder(tf.int32, [self._batch_size],
                                         name='frame_output')
-        self._candidates_pool=tf.placeholder(tf.float32, [self._img_numb,self._candidates_vector_len],
-                                         name='candidates_pool')
+
         # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
-    def steps(self, sess, data_dict,candidates_pool, noise=None, step_type='train',qa_transpose=False, img_affect_testing=None):
+    def steps(self, sess, data_dict, noise=None, step_type='train',qa_transpose=False, img_affect_testing=None):
         # self.is_training = step_type
         input_batch_txt = data_dict[0]
         output_batch_txt = data_dict[1]
@@ -345,7 +345,7 @@ class seq_pic2seq_pic():
                          # self._weight: weight_batch_txt,
                          self._input_pic: input_batch_pic,
                          self._real_pic:output_batch_pic,
-                         self._candidates_pool:candidates_pool
+
                          }
             output_list = [self.losses, self.train_ops, self.merged]
             try:

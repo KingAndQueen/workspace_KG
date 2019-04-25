@@ -42,7 +42,7 @@ tf.flags.DEFINE_integer('pretrain_epochs', 100, 'epoch for pre-training')
 config = tf.flags.FLAGS
 
 
-def train_model(sess, model, train_data, valid_data, candidates_pool):
+def train_model(sess, model, train_data, valid_data):
     # train_data, eval_data = model_selection.train_test_split(train_data, test_size=0.2)
     current_step = 1
     train_losses = []
@@ -57,7 +57,7 @@ def train_model(sess, model, train_data, valid_data, candidates_pool):
         for i in range(len(train_data)):
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
-            train_loss_, summary = model.steps(sess, random.choice(train_data), candidates_pool, step_type='train',
+            train_loss_, summary = model.steps(sess, random.choice(train_data), step_type='train',
                                                qa_transpose=config.qa_transpose)
             global_steps += 1
             # g_step = sess.run(model.global_step)
@@ -72,7 +72,7 @@ def train_model(sess, model, train_data, valid_data, candidates_pool):
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
 
             for i in range(len(valid_data)):
-                eval_loss, _, = model.steps(sess, random.choice(valid_data), candidates_pool, step_type='train')
+                eval_loss, _, = model.steps(sess, random.choice(valid_data), step_type='train')
                 eval_losses += eval_loss
 
             print('evaluation loss:', eval_losses / len(valid_data))
@@ -90,13 +90,13 @@ def train_model(sess, model, train_data, valid_data, candidates_pool):
     print(' current step %d finished' % current_step)
 
 
-def test_model(sess, model, test_data, vocab, times, candidates_pool):
+def test_model(sess, model, test_data, vocab, times):
     # test_loss = 0.0
     print('begin testing...')
     encoding_pics, pred_txts, target_txt, processing_data, acc_pics = [], [], [], [], []
     # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
     for batch_id, data_test in enumerate(test_data):
-        pred_txt, encoding_pic, word_defined_image, acc_img = model.steps(sess, data_test, candidates_pool,
+        pred_txt, encoding_pic, word_defined_image, acc_img = model.steps(sess, data_test,
                                                                           step_type='test')
         # test_loss += loss
 
@@ -190,15 +190,14 @@ def main(_):
     # pdb.set_trace()
     if config.is_training:
         print('establish the model...')
-        model = Model.seq_pic2seq_pic(config, vocab, img_numb, candidates_vector_len)
+        model = Model.seq_pic2seq_pic(config, vocab, img_numb, candidates_vector_len,candidates_pool)
         # pdb.set_trace()
         sess.run(tf.global_variables_initializer())
         if config.pre_training:
             pretrain_model(sess, model, prtrain_batches_data)
-        train_model(sess, model, train_data, valid_data, candidates_pool)
+        train_model(sess, model, train_data, valid_data)
         # config.model_type = 'test'
-        test_model(sess, model, test_data[:len(times_test) / config.batch_size], vocab, times_test,
-                   candidates_pool)  ###
+        test_model(sess, model, test_data[:len(times_test) / config.batch_size], vocab, times_test)  ###
 
     else:
         print('Test model.......')
@@ -209,8 +208,7 @@ def main(_):
         print('Reload model from checkpoints.....')
         ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
         model.saver.restore(sess, ckpt.model_checkpoint_path)
-        test_model(sess, model, test_data[:len(times_test) / config.batch_size], vocab, times_test,
-                   candidates_pool)  ################## test_data
+        test_model(sess, model, test_data[:len(times_test) / config.batch_size], vocab, times_test)  ################## test_data
 
 
 if __name__ == "__main__":
