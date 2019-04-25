@@ -100,7 +100,7 @@ def test_model(sess, model, test_data, vocab,times):
     Analysis.write_sents(times,pred_txts,'./result/',vocab,show_matric=False,test_data=test_data)
     # Analysis.write_process(times,processing_data,'./result/process/',vocab,batch_size=config.batch_size)
     # test_loss=test_loss / len(test_data)
-    # print('test total loss:', test_loss)K
+    # print('test total loss:', test_loss)
     print('test is finished!')
 
 def pretrain_model(sess, model, train_data):
