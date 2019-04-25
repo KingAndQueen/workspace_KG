@@ -34,8 +34,10 @@ tf.flags.DEFINE_integer('convolution_dim',256,'dim in the first layer pic decode
 tf.flags.DEFINE_bool('gray',False,'picture is gray or not, placeholder also should be changed')
 tf.flags.DEFINE_integer('num_identical',6,'number of encode transformers')
 tf.flags.DEFINE_bool('qa_transpose',False,'whether to train model in AQ with QA training')
-tf.flags.DEFINE_bool('pre_training',False,'whether to train model in AQ with QA training')
+tf.flags.DEFINE_bool('pre_training',False,'whether to train model with pre train date')
 tf.flags.DEFINE_integer('pretrain_epochs',100,'epoch for pre-training')
+tf.flags.DEFINE_integer('img_affect_testing',None,'test the image effect for text generation')
+tf.flags.DEFINE_bool('test_default',True,'whether to test model with black default image')
 config = tf.flags.FLAGS
 
 def train_model(sess, model, train_data, valid_data):
@@ -90,7 +92,7 @@ def test_model(sess, model, test_data, vocab,times):
     encoding_pics,pred_txts,processing_data = [],[],[]
     z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
     for batch_id, data_test in enumerate(test_data):
-        pred_txt,encoding_pic,word_defined_image = model.steps(sess, data_test,z_noise, step_type='test',img_affect_testing=1)
+        pred_txt,encoding_pic,word_defined_image = model.steps(sess, data_test,z_noise, step_type='test',img_affect_testing=config.img_affect_testing)
         # test_loss += loss
         # pred_pics.append(pred_pic)
         pred_txts.append(pred_txt)
@@ -139,7 +141,7 @@ def main(_):
         prtrain_batches_data = Data_Process.vectorize_batch(input_data_txt_p, output_data_txt_p, input_data_pic_p, output_data_pic_p,
                                                     weights_p, config.batch_size)
 
-    input_data_txt, output_data_txt, input_data_pic, output_data_pic,weights,times = Data_Process.get_input_output_data(config.data_dir, vocab, config.sentence_size,config.gray)
+    input_data_txt, output_data_txt, input_data_pic, output_data_pic,weights,times = Data_Process.get_input_output_data(config.data_dir, vocab, config.sentence_size,config.gray,test_default=config.test_default)
     # config.img_size_x =input_data_pic.values()[0].shape[0]
     # config.img_size_y=input_data_pic.values()[0].shape[1]
     # pdb.set_trace()

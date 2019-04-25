@@ -273,7 +273,7 @@ def read_pic_file_1E(data_path,gray=False):
 #     for weight in weights:
 #         weight.insert(0,1)
 #         _=weight.pop()
-def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
+def get_input_output_data(data_path, vocabulary,sentence_size,gray=False,test_default=False):
     files_name=os.listdir(data_path)
     dir_list=[]
     for path in files_name:
@@ -292,7 +292,12 @@ def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
     vocabulary.build_vocab_with_words_count(count_min=1)
     # pdb.set_trace()
     txt,weights=read_txt_file_1E(data_path_txt,vocabulary,sentence_size)
-    pic,times=read_pic_file_1E(files_list,gray)
+    if test_default:
+        data_path_pic = './data/pretrain/default.jpg'
+        pic = read_pretrain_pic(data_path_pic, len(txt), gray)
+        times=[i for i in range(len(txt))]
+    else:
+        pic,times=read_pic_file_1E(files_list,gray)
     input_data_txt=copy.copy(txt)
     _=input_data_txt.pop()
     output_data_txt = copy.copy(txt)
