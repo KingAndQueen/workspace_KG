@@ -90,7 +90,7 @@ def test_model(sess, model, test_data, vocab,times):
     encoding_pics,pred_txts,processing_data = [],[],[]
     z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
     for batch_id, data_test in enumerate(test_data):
-        pred_txt,encoding_pic,word_defined_image = model.steps(sess, data_test,z_noise, step_type='test',img_affect_testing=3)
+        pred_txt,encoding_pic,word_defined_image = model.steps(sess, data_test,z_noise, step_type='test',img_affect_testing=1)
         # test_loss += loss
         # pred_pics.append(pred_pic)
         pred_txts.append(pred_txt)
