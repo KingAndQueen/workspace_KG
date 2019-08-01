@@ -169,8 +169,8 @@ def main(_):
 
     if os.path.exists('./data/candidates_pool.pkl'):
         print('load the candidates pool...')
-        f = open('./data/candidates_pool.pkl', 'r')
-        candidates_pool = pkl.load(f)
+        f = open('./data/candidates_pool.pkl', 'rb')
+        candidates_pool = pkl.load(f, encoding="ISO-8859-1")
         f.close()
     else:
         # vgg_rawnet = scipy.io.loadmat('./data/imagenet-vgg-verydeep-19.mat')
@@ -192,7 +192,7 @@ def main(_):
         print('establish the model...')
         model = Model.seq_pic2seq_pic(config, vocab, img_numb, candidates_vector_len)
         # pdb.set_trace()
-        sess.run(tf.global_variables_initializer(),feed_dict={model._candidates_pool_ph:candidates_pool})
+        sess.run(tf.global_variables_initializer(), feed_dict={model._candidates_pool_ph: candidates_pool})
         if config.pre_training:
             pretrain_model(sess, model, prtrain_batches_data)
         train_model(sess, model, train_data, valid_data)
@@ -208,8 +208,10 @@ def main(_):
         print('Reload model from checkpoints.....')
         ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
         model.saver.restore(sess, ckpt.model_checkpoint_path)
-        test_model(sess, model, test_data[:len(times_test) / config.batch_size], vocab, times_test)  ################## test_data
+        test_model(sess, model, test_data[:len(times_test) / config.batch_size], vocab,
+                   times_test)  ################## test_data
 
 
 if __name__ == "__main__":
-    tf.app.run()
+    # tf.compat.v1.app.run()
+    main()

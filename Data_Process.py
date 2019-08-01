@@ -180,7 +180,7 @@ class Vocab():
 
     def build_vocab_with_words_count(self,count_min):
         print('original vocab len:',len(self.words_count))
-        for key,value in self.words_count.iteritems():
+        for key,value in self.words_count.items():
             # print('clean out ',key)
             if value>count_min:
                 self.add_vocab(key)
