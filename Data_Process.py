@@ -214,7 +214,7 @@ def read_txt_file_1E(data_path, vocabulary, sentence_size):
 
 def read_pic_file_1E(data_path,gray=False):
 
-    files = [f for f in data_path if 'txt' not in f]
+    files = [f for f in data_path if 'jpg' in f]
     sec_map_pic={}
     pic_output=[]
     for no,file in enumerate(files):

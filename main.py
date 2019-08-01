@@ -20,7 +20,7 @@ tf.flags.DEFINE_integer("epochs", 100, "Number of epochs to train for.")
 tf.flags.DEFINE_integer('check_epoch',20, 'evaluation times')
 tf.flags.DEFINE_integer("layers", 3, "the num layers of RNN.")
 tf.flags.DEFINE_integer("recurrent_dim", 64, "Embedding size for neural networks.")
-tf.flags.DEFINE_string("data_dir", "data/", "Directory containing tasks")
+tf.flags.DEFINE_string("data_dir", "data/friends/", "Directory containing tasks")
 tf.flags.DEFINE_integer('sentence_size', 30, 'length of word in a sentence')
 tf.flags.DEFINE_integer('stop_limit', 5, 'number of evaluation loss is greater than train loss  ')
 tf.flags.DEFINE_string("checkpoint_path", "./checkpoints/", "Directory to save checkpoints")
@@ -132,4 +132,4 @@ def main(_):
         test_model(sess, model,train_data[:len(times_test)/config.batch_size], vocab,times_test) ################## test_data
 
 if __name__ == "__main__":
-    tf.app.run()
+    main(_=None)
