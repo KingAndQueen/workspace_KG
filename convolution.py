@@ -9,7 +9,7 @@ class batch_norm(object):
     """Code modification of http://stackoverflow.com/a/33950177"""
 
     def __init__(self, epsilon=1e-5, momentum=0.9, name="batch_norm"):
-        with tf.variable_scope(name):
+        with tf.compat.v1.variable_scope(name):
             self.epsilon = epsilon
             self.momentum = momentum
 
@@ -19,7 +19,7 @@ class batch_norm(object):
     def __call__(self, x, type=True):
         shape = x.get_shape().as_list()
 
-        with tf.variable_scope(self.name) as scope:
+        with tf.compat.v1.variable_scope(self.name) as scope:
             self.beta = tf.get_variable("beta", [shape[-1]],
                                         initializer=tf.constant_initializer(0.))
             self.gamma = tf.get_variable("gamma", [shape[-1]],
@@ -175,7 +175,7 @@ def stack_blocks_dense(net, blocks, multi_grid, output_stride=None,
     rate = 1
 
     for block in blocks:
-        with tf.variable_scope(block.scope, 'block', [net]) as sc:
+        with tf.compat.v1.variable_scope(block.scope, 'block', [net]) as sc:
             for i, unit in enumerate(block.args):
                 if output_stride is not None and current_stride > output_stride:
                     raise ValueError('The target output_stride cannot be reached.')
@@ -285,7 +285,7 @@ def bottleneck(inputs, depth, depth_bottleneck, stride, rate=1,
     Returns:
       The ResNet unit's output.
     """
-    with tf.variable_scope(scope, 'bottleneck_v2', [inputs]) as sc:
+    with tf.compat.v1.variable_scope(scope, 'bottleneck_v2', [inputs]) as sc:
         depth_in = slim.utils.last_dimension(inputs.get_shape(), min_rank=4)
         preact = slim.batch_norm(inputs, activation_fn=tf.nn.relu, scope='preact')
         if depth == depth_in:
@@ -383,7 +383,7 @@ def resnet_v2(inputs,
     Raises:
       ValueError: If the target output_stride is not valid.
     """
-    with tf.variable_scope(scope, 'resnet_v2', [inputs], reuse=reuse) as sc:
+    with tf.compat.v1.variable_scope(scope, 'resnet_v2', [inputs], reuse=reuse) as sc:
         end_points_collection = sc.original_name_scope + '_end_points'
         with slim.arg_scope([slim.conv2d, bottleneck,
                              stack_blocks_dense],
@@ -559,7 +559,7 @@ resnet_v2_200.default_image_size = resnet_v2.default_image_size
 
 @slim.add_arg_scope
 def atrous_spatial_pyramid_pooling(net, scope, depth=256, reuse=None):
-    with tf.variable_scope(scope, reuse=reuse):
+    with tf.compat.v1.variable_scope(scope, reuse=reuse):
         feature_map_size = tf.shape(net)
 
         image_level_features = tf.reduce_mean(net, [1, 2], name='image_level_global_pool', keepdims=True)
@@ -598,7 +598,7 @@ def deeplab_v3(inputs, class_num, is_training, reuse):
                                output_stride=16,
                                reuse=reuse)
 
-        with tf.variable_scope("DeepLab_v3", reuse=reuse):
+        with tf.compat.v1.variable_scope("DeepLab_v3", reuse=reuse):
             # get block 4 feature outputs
             net = end_points['resnet_v2_50' + '/block4']
 

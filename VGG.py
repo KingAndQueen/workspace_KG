@@ -8,8 +8,10 @@ import scipy.io
 def build_net(ntype, nin, nwb=None, name=None):
     if ntype == 'conv':
         return tf.nn.relu(tf.nn.conv2d(nin, nwb[0], strides=[1, 1, 1, 1], padding='SAME', name=name) + nwb[1])
-    elif ntype == 'pool':
+    if ntype == 'pool':
         return tf.nn.avg_pool(nin, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+    if ntype == 'pool_end':
+        return tf.nn.avg_pool(nin, ksize=[1, 2, 2, 1], strides=[1, 10, 20, 10], padding='VALID')
 
 
 def get_weight_bias(vgg_layers, i):
@@ -47,7 +49,7 @@ def build_vgg19(input, reuse=False):
     net['conv5_2'] = build_net('conv', net['conv5_1'], get_weight_bias(vgg_layers, 30), name='vgg_conv5_2')
     net['conv5_3'] = build_net('conv', net['conv5_2'], get_weight_bias(vgg_layers, 32), name='vgg_conv5_3')
     net['conv5_4'] = build_net('conv', net['conv5_3'], get_weight_bias(vgg_layers, 34), name='vgg_conv5_4')
-    net['pool5'] = build_net('pool', net['conv5_4'])
+    net['pool5'] = build_net('pool_end', net['conv5_4'])
     return net
 
 
@@ -58,11 +60,10 @@ def run_candidates(input_data_pic):
     sess = tf.Session()
     input = tf.placeholder(tf.float32, [img_x,img_y,img_z], name='input_img')
     output_list=build_vgg19(input, reuse=True)['pool5']
+    # pdb.set_trace()
     output_vector=tf.reshape(output_list,[-1])
     candidates_pool = []
     for pic in input_data_pic:
         output=sess.run(output_vector,feed_dict={input:pic})
         candidates_pool.append(output)
-    # pdb.set_trace()
     return candidates_pool
-        # pdb.set_trace()

@@ -50,7 +50,7 @@ def train_model(sess, model, train_data, valid_data):
     epoch = config.epochs
     print('training....')
     checkpoint_path = os.path.join(config.checkpoint_path, 'visual_dialog.ckpt')
-    train_summary_writer = tf.summary.FileWriter(config.summary_path, sess.graph)
+    train_summary_writer = tf.compat.v1.summary.FileWriter(config.summary_path, sess.graph)
     global_steps = 0
     while current_step <= epoch:
         #  print ('current_step:',current_step)
@@ -169,14 +169,14 @@ def main(_):
 
     if os.path.exists('./data/candidates_pool.pkl'):
         print('load the candidates pool...')
-        f = open('./data/candidates_pool.pkl', 'rb')
-        candidates_pool = pkl.load(f, encoding="ISO-8859-1")
+        f = open('./data/candidates_pool.pkl','rb')
+        candidates_pool = pkl.load(f)
         f.close()
     else:
         # vgg_rawnet = scipy.io.loadmat('./data/imagenet-vgg-verydeep-19.mat')
         print('build a candidates pool...')
         candidates_pool = run_candidates(input_data_pic)
-        f = open('./data/candidates_pool.pkl', 'w+')
+        f = open('./data/candidates_pool.pkl','wb')
         pkl.dump(candidates_pool, f)
         f.close()
     # pdb.set_trace()
@@ -190,9 +190,9 @@ def main(_):
     # pdb.set_trace()
     if config.is_training:
         print('establish the model...')
-        model = Model.seq_pic2seq_pic(config, vocab, img_numb, candidates_vector_len)
+        model = Model.seq_pic2seq_pic(config, vocab, img_numb, candidates_vector_len, np.array(candidates_pool))
         # pdb.set_trace()
-        sess.run(tf.global_variables_initializer(), feed_dict={model._candidates_pool_ph: candidates_pool})
+        sess.run(tf.compat.v1.global_variables_initializer())
         if config.pre_training:
             pretrain_model(sess, model, prtrain_batches_data)
         train_model(sess, model, train_data, valid_data)
@@ -214,4 +214,4 @@ def main(_):
 
 if __name__ == "__main__":
     # tf.compat.v1.app.run()
-    main()
+    main(0)

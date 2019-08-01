@@ -6,7 +6,7 @@ import copy
 
 
 class seq_pic2seq_pic():
-    def __init__(self, config, vocab, img_numb, candidates_vector_len):
+    def __init__(self, config, vocab, img_numb, candidates_vector_len,_candidates_pool_ph):
         if config.gray:
             self._color_size = 1
         else:
@@ -20,7 +20,7 @@ class seq_pic2seq_pic():
 
         # self._opt = tf.train.GradientDescentOptimizer(learning_rate=self._learn_rate)
         # self._opt = tf.train.AdamOptimizer(learning_rate=self._learn_rate)
-        self._opt = tf.train.AdamOptimizer(learning_rate=self._learn_rate, beta1=0.9, beta2=0.98, epsilon=1e-8)
+        self._opt = tf.compat.v1.train.AdamOptimizer(learning_rate=self._learn_rate, beta1=0.9, beta2=0.98, epsilon=1e-8)
 
         self._embedding_size = config.recurrent_dim
         self._layers = config.layers
@@ -34,7 +34,7 @@ class seq_pic2seq_pic():
         self._num_identical = config.num_identical
         self._build_inputs()
         self._head = config.head
-        self._candidates_pool = tf.Variable(self._candidates_pool_ph, trainable=False)
+        self._candidates_pool = tf.constant(_candidates_pool_ph,shape=[img_numb,candidates_vector_len], name='candidates_pool')
 
         self.g_bn0 = convolution.batch_norm(name='g_bn0')
         self.g_bn1 = convolution.batch_norm(name='g_bn1')
@@ -46,7 +46,7 @@ class seq_pic2seq_pic():
         self.e_bn2 = convolution.batch_norm(name='e_bn2')
         self.e_bn3 = convolution.batch_norm(name='e_bn3')
 
-        with tf.variable_scope("encode_txt"):
+        with tf.compat.v1.variable_scope("encode_txt"):
             self.enc = embedding(self._question,
                                  vocab_size=vocab.vocab_size,
                                  num_units=self._embedding_size,
@@ -69,7 +69,7 @@ class seq_pic2seq_pic():
 
             # Identical
             for i in range(self._num_identical):
-                with tf.variable_scope("num_identical_{}".format(i)):
+                with tf.compat.v1.variable_scope("num_identical_{}".format(i)):
                     # Multi-head Attention
                     self.enc = multihead_attention(queries=self.enc,
                                                    keys=self.enc,
@@ -93,10 +93,10 @@ class seq_pic2seq_pic():
         #     encoder_pic_output = tf.tile(encoding_pic_output, [1, self._sentence_size, 1])
         #     pdb.set_trace()
         def conv2d(input_, output_shape, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="conv2d", with_w=False):
-            with tf.variable_scope(name):
+            with tf.compat.v1.variable_scope(name):
                 # pdb.set_trace()
                 # filter : [height, width, output_channels, in_channels]
-                w = tf.get_variable('w', [k_h, k_w, input_.get_shape()[-1], output_shape[-1]],
+                w = tf.compat.v1.get_variable('w', [k_h, k_w, input_.get_shape()[-1], output_shape[-1]],
                                     initializer=tf.random_normal_initializer(stddev=stddev))
 
                 deconv = tf.nn.conv2d(input_, filter=w, strides=[1, d_h, d_w, 1], padding="SAME")
@@ -112,7 +112,7 @@ class seq_pic2seq_pic():
         def lrelu(x, leak=0.2, name="lrelu"):
             return tf.maximum(x, leak * x)
 
-        with tf.variable_scope('encoding_frame_cnn'):
+        with tf.compat.v1.variable_scope('encoding_frame_cnn'):
             s = self.img_size_x
             y = self.img_size_y
             s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
@@ -140,7 +140,7 @@ class seq_pic2seq_pic():
 
         def deconv2d(input_, output_shape, weight_cnn, biase_cnn=None, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02,
                      name="deconv2d", with_w=False):
-            with tf.variable_scope(name):
+            with tf.compat.v1.variable_scope(name):
                 # filter : [height, width, output_channels, in_channels]
                 # w = tf.get_variable('w', [k_h, k_w, output_shape[-1], input_.get_shape()[-1]],
                 #                     initializer=tf.random_normal_initializer(stddev=stddev))
@@ -159,7 +159,7 @@ class seq_pic2seq_pic():
 
                 return deconv
 
-        with tf.variable_scope('decoder_pic'):
+        with tf.compat.v1.variable_scope('decoder_pic'):
             # h0 = ztf.reshape(h3_e, [-1, s16, y16, self._cov_size * 8])
             h0 = tf.nn.relu(self.g_bn0(h3_e, type=self.is_training))
             # pdb.set_trace()
@@ -176,7 +176,7 @@ class seq_pic2seq_pic():
 
             self.encoder_pic = tf.tanh(h4) / 2. + 0.5
 
-        with tf.variable_scope('embed_decode_input'):
+        with tf.compat.v1.variable_scope('embed_decode_input'):
             # pdb.set_trace()
             decoder_input = tf.concat((tf.ones_like(self._response[:, :1]) * 2, self._response[:, :-1]),
                                       -1)  ## add 'go' sign
@@ -201,14 +201,14 @@ class seq_pic2seq_pic():
         #     # pdb.set_trace()
         #     self.dec = tf.nn.conv1d(decoder_input, w_merge, 1, 'SAME')
 
-        with tf.variable_scope('merge_txt_pic'):
+        with tf.compat.v1.variable_scope('merge_txt_pic'):
             # pdb.set_trace()
             decoder_input = tf.concat((encoder_pic_output, self.enc), -1)
             w_merge = tf.get_variable('w', [1, 2 * self._embedding_size, self._embedding_size],
                                       initializer=tf.random_normal_initializer(stddev=0.02))
             self.enc = tf.nn.conv1d(decoder_input, w_merge, 1, 'SAME')
 
-        with tf.variable_scope('decode_txt'):
+        with tf.compat.v1.variable_scope('decode_txt'):
             # Dropout
             dec_input = tf.layers.dropout(dec_input,
                                           rate=0.1,
@@ -217,7 +217,7 @@ class seq_pic2seq_pic():
             # pdb.set_trace()
 
             for i in range(self._num_identical):
-                with tf.variable_scope("num_identical_{}".format(i)):
+                with tf.compat.v1.variable_scope("num_identical_{}".format(i)):
                     # Multi-head Attention(self-attention)
                     dec_input = multihead_attention(queries=dec_input,
                                                     keys=dec_input,
@@ -241,36 +241,39 @@ class seq_pic2seq_pic():
                     self.dec_output = feedforward(self.dec_output,
                                                   num_units=[4 * self._embedding_size, self._embedding_size])
 
-        with tf.variable_scope('img_classification'):
+        with tf.compat.v1.variable_scope('img_classification'):
 
             classfy_input = tf.concat((tf.expand_dims(encoder_pic_output, -1), tf.expand_dims(self.enc, -1),
                                        tf.expand_dims(self.dec_output, -1)), -1)
 
-            with tf.variable_scope('text_input_cnn_classify'):
+            with tf.compat.v1.variable_scope('text_input_cnn_classify'):
                 # pdb.set_trace()
-                w = tf.get_variable('w', [5, 5, 3, 64],
+                w = tf.get_variable('w', [5, 5, 3, 2],
                                     initializer=tf.random_normal_initializer(stddev=0.02))
 
                 conv = tf.nn.conv2d(classfy_input, filter=w, strides=[1, 2, 2, 1], padding="SAME")
 
-                biases = tf.get_variable('biases', [64], initializer=tf.constant_initializer(0.0))
+                biases = tf.get_variable('biases', [2], initializer=tf.constant_initializer(0.0))
                 conv = tf.reshape(tf.nn.bias_add(conv, biases), conv.get_shape())
 
             conv_classfy = tf.reshape(conv, [self._batch_size, -1], name='classify_reshape')
 
             # feedforward(conv_classfy,num_units=[conv_classfy.get_shape()[-1],self._cov_size],scope='classify_ff')
+            # pdb.set_trace()
             context_img = tf.layers.dense(conv_classfy, self._img_numb)
             context_img_vgg = tf.nn.softmax(tf.matmul(context_img, self._candidates_pool))
             self.logits_img = tf.layers.dense(context_img_vgg, self._img_numb)
-            self.predict_img = tf.to_int32(tf.argmax(self.logits_img, axis=-1))
+            # self.predict_img = tf.to_int32(tf.argmax(self.logits_img, axis=-1))
+            self.predict_img = tf.cast(tf.argmax(self.logits_img, axis=-1),tf.int32)
             self.acc_img = tf.reduce_sum(tf.to_float(tf.equal(self.predict_img, self._real_pic)))
-            tf.summary.scalar('acc_img', self.acc_img)
+            tf.compat.v1.summary.scalar('acc_img', self.acc_img)
+            # tf.summary.scalar('acc_img', self.acc_img)
             self.img_real_smoothed = label_smoothing(tf.one_hot(self._real_pic, depth=self._img_numb))
             img_loss = tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.logits_img, labels=self.img_real_smoothed)
             mean_img_loss = tf.reduce_mean(img_loss)
             self.losses_img = mean_img_loss
 
-        with tf.variable_scope('loss_function_txt'):
+        with tf.compat.v1.variable_scope('loss_function_txt'):
 
             self.logits = tf.layers.dense(self.dec_output, vocab.vocab_size)
             preds = tf.to_int32(tf.argmax(self.logits, axis=-1))
@@ -278,7 +281,7 @@ class seq_pic2seq_pic():
             self.istarget = tf.to_float(tf.not_equal(self._response, 0))
             self.acc = tf.reduce_sum(tf.to_float(tf.equal(preds, self._response)) * self.istarget) / (
                 tf.reduce_sum(self.istarget))
-            tf.summary.scalar('acc', self.acc)
+            tf.compat.v1.summary.scalar('acc', self.acc)
             self.y_smoothed = label_smoothing(tf.one_hot(self._response, depth=vocab.vocab_size))
             # pdb.set_trace()
             txt_loss = tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.logits, labels=self.y_smoothed)
@@ -292,15 +295,17 @@ class seq_pic2seq_pic():
 
             self.losses = mean_txt_loss + self.losses_img  # + pic_loss
 
-        self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
-        with tf.variable_scope('output_information'):
+        # self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
+        self.saver =tf.compat.v1.train.Saver(tf.compat.v1.global_variables(), max_to_keep=1)
+        with tf.compat.v1.variable_scope('output_information'):
             # self.global_step = tf.Variable(0, name='global_step', trainable=False)
             # optimizer
             self.train_ops = self._opt.minimize(self.losses)
             # grads_and_vars = self._opt.compute_gradients(self.losses)
             # self.train_ops=self._opt.apply_gradients(grads_and_vars=grads_and_vars, name='train_op')
-            tf.summary.scalar('mean_loss', self.losses)
-            self.merged = tf.summary.merge_all()
+            tf.compat.v1.summary.scalar('mean_loss', self.losses)
+            # self.merged = tf.summary.merge_all()
+            self.merged = tf.compat.v1.summary.merge_all()
 
     def add_gradient_noise(self, t, stddev=1e-3, name=None):
         """
@@ -312,16 +317,16 @@ class seq_pic2seq_pic():
             return tf.add(t, gn, name=name)
 
     def _build_inputs(self):
-        self._question = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Question')
-        self._response = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Response')
+        self._question = tf.compat.v1.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Question')
+        self._response = tf.compat.v1.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Response')
         # self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
-        self._input_pic = tf.placeholder(tf.float32,
+        self._input_pic = tf.compat.v1.placeholder(tf.float32,
                                          [self._batch_size, self.img_size_x, self.img_size_y, self._color_size],
                                          name='frame_input')
-        self._real_pic = tf.placeholder(tf.int32, [self._batch_size],
+        self._real_pic = tf.compat.v1.placeholder(tf.int32, [self._batch_size],
                                         name='frame_output')
-        self._candidates_pool_ph = tf.placeholder(tf.float32, [self._img_numb, self._candidates_vector_len],
-                                                  name='candidates_pool')
+        # self._candidates_pool_ph = tf.compat.v1.placeholder(tf.float32, [self._img_numb, self._candidates_vector_len],
+        #                                           name='candidates_pool')
         # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
     def steps(self, sess, data_dict, noise=None, step_type='train', qa_transpose=False, img_affect_testing=None):

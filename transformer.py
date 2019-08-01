@@ -22,7 +22,7 @@ def normalize(inputs,
     Returns:
         A tensor with the same shape and data type as "inputs"
     '''
-    with tf.variable_scope(scope, reuse=reuse):
+    with tf.compat.v1.variable_scope(scope, reuse=reuse):
         inputs_shape = inputs.get_shape()
         params_shape = inputs_shape[-1:]
 
@@ -93,7 +93,7 @@ def positional_encoding(inputs,
 
     N, T = inputs.get_shape().as_list()
 
-    with tf.variable_scope(scope, reuse=reuse):
+    with tf.compat.v1.variable_scope(scope, reuse=reuse):
         # pdb.set_trace()
         position_ind = tf.tile(tf.expand_dims(tf.range(T), 0), [N, 1])
 
@@ -142,8 +142,8 @@ def embedding(inputs,
         Returns:
             A 'Tensor' with one more rank than inputs's, with the dimensionality should be 'num_units'
     '''
-    with tf.variable_scope(scope, reuse=reuse):
-        lookup_table = tf.get_variable('lookup_table',
+    with tf.compat.v1.variable_scope(scope, reuse=reuse):
+        lookup_table = tf.compat.v1.get_variable('lookup_table',
                                        dtype=tf.float32,
                                        shape=[vocab_size, num_units],
                                        initializer=tf.contrib.layers.xavier_initializer())
@@ -185,7 +185,7 @@ def multihead_attention(queries,
     Returns:
         A 3-dimensions tensor with shape of [N, T_q, S]
     '''
-    with tf.variable_scope(scope, reuse=reuse):
+    with tf.compat.v1.variable_scope(scope, reuse=reuse):
         if num_units is None:
             # length of sentence
             num_units = queries.get_shape().as_list()[-1]
@@ -291,7 +291,7 @@ def feedforward_position(inputs,
         A tensor converted by feedforward layers from inputs
     '''
 
-    with tf.variable_scope(scope, reuse=reuse):
+    with tf.compat.v1.variable_scope(scope, reuse=reuse):
         # params = {"inputs": inputs, "filters": num_units[0], "kernel_size": 1, \
         # "activation": tf.nn.relu, "use_bias": True}
         # outputs = tf.layers.conv1d(inputs = inputs, filters = num_units[0], kernel_size = 1, activation = tf.nn.relu, use_bias = True)
@@ -332,7 +332,7 @@ def feedforward(inputs,
     Returns:
       A 3d tensor with the same shape and dtype as inputs
     '''
-    with tf.variable_scope(scope, reuse=reuse):
+    with tf.compat.v1.variable_scope(scope, reuse=reuse):
         # Inner layer
         params = {"inputs": inputs, "filters": num_units[0], "kernel_size": 1,
                   "activation": tf.nn.relu, "use_bias": True}
