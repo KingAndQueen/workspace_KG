@@ -7,6 +7,7 @@ import time
 import pdb
 import numpy as np
 from nltk.translate.bleu_score import corpus_bleu
+import copy
 
 
 def run_tm(func):
@@ -100,7 +101,7 @@ def write_sents(times, data_seq_batch, target_sents, save_path, vocab, show_matr
             print('please install nlgeval first')
 
 
-def write_sents_1(batch_id,sents_id, data_seq_batch, save_path, vocab,times,batch_size):
+def write_sents_1(batch_id, sents_id, data_seq_batch, save_path, vocab, times, batch_size):
     data_seq_pred = []
     for idx, txt_batch in enumerate(data_seq_batch):
         txt = list(txt_batch)
@@ -114,16 +115,16 @@ def write_sents_1(batch_id,sents_id, data_seq_batch, save_path, vocab,times,batc
     for idx, txt2 in enumerate(data_seq_pred):
         name = str(times[batch_id * batch_size + idx]) + '_sID' + str(sents_id)
         sent_pred = [vocab.index_to_word(word) + ' ' for word in txt2]
-        f.write(name+':')
+        f.write(name + ':')
         f.writelines(sent_pred)
         f.write('\n')
     f.close()
 
 
-def drew_seq_1(batch_id,sents_id, data_seq_batch, save_path,times,batch_size, gray=False):
+def drew_seq_1(batch_id, sents_id, data_seq_batch, save_path, times, batch_size, gray=False):
     # assert len(times) == len(data_seq_batch)
     for idx, pic in enumerate(data_seq_batch):
-        name = str(times[batch_id*batch_size+idx])+'_sID'+str(sents_id)
+        name = str(times[batch_id * batch_size + idx]) + '_sID' + str(sents_id)
         drew_output_pic(pic, name, save_path, gray)
 
 
@@ -137,5 +138,26 @@ def write_process(times, data_seq_batch, save_path, vocab, batch_size):
             # for i in range(len(sents)):
             #     time.append(times[id_batch * batch_size + id_sents]+'_sID'+str(id_sents))
             # pdb.set_trace()
-            write_sents_1(id_batch,id_sents, sents, save_path, vocab,times,batch_size)
-            drew_seq_1(id_batch,id_sents, images, save_path,times,batch_size)
+            write_sents_1(id_batch, id_sents, sents, save_path, vocab, times, batch_size)
+            drew_seq_1(id_batch, id_sents, images, save_path, times, batch_size)
+
+
+def count_acc(input_pic_tensors, output_pic_tensors):
+    acc_b = len(input_pic_tensors)
+    count = 0
+    pred_pics=[]
+    # pdb.set_trace()
+    for idx, input_pic_tensor in enumerate(input_pic_tensors):
+        target = copy.copy(output_pic_tensors)
+        target = np.array(target)
+        if input_pic_tensor.all() in target:
+            target.remove(input_pic_tensor)
+            pdb.set_trace()
+        loss = np.ravel(np.sum(np.square(target - input_pic_tensor), axis=-1))
+        pred_pic_idx = np.argmax(loss)
+        if pred_pic_idx == idx:
+            count += 1
+        pred_pics.append(pred_pic_idx)
+    acc = count / float(acc_b)
+    print("pred img",pred_pics)
+    print('accuracy:', acc)

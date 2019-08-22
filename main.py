@@ -29,7 +29,7 @@ tf.flags.DEFINE_integer('sentence_size', 30, 'length of word in a sentence')
 tf.flags.DEFINE_integer('stop_limit', 5, 'number of evaluation loss is greater than train loss  ')
 tf.flags.DEFINE_string("checkpoint_path", "./checkpoints/", "Directory to save checkpoints")
 tf.flags.DEFINE_string("summary_path", "./summary/", "Directory to save summary")
-tf.flags.DEFINE_bool("is_training", True, "whether to train or test model")
+tf.flags.DEFINE_bool("is_training", False, "whether to train or test model")
 tf.flags.DEFINE_integer('img_size_x', 160, 'generate pic size in X')
 tf.flags.DEFINE_integer('img_size_y', 320, 'generate pic size in Y')
 tf.flags.DEFINE_integer('noise_dim', 64, 'dim in noise')
@@ -93,22 +93,24 @@ def train_model(sess, model, train_data, valid_data):
 def test_model(sess, model, test_data, vocab, times):
     # test_loss = 0.0
     print('begin testing...')
-    encoding_pics, pred_txts, target_txt, processing_data, acc_pics = [], [], [], [], []
+    output_pic_tensors, pred_txts, target_txt, processing_data, input_pic_tensors = [], [], [], [], []
     # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
     for batch_id, data_test in enumerate(test_data):
-        pred_txt, encoding_pic, word_defined_image, acc_img = model.steps(sess, data_test,
-                                                                          step_type='test')
+        pred_txt, input_pic_tensor, output_pic_tensor, word_defind_pic = model.steps(sess, data_test, step_type='test')
         # test_loss += loss
 
         # pred_pics.append(pred_pic)
         pred_txts.append(pred_txt)
         target_txt.append(data_test[1])
-        encoding_pics.append(encoding_pic)
-        # processing_data.append(word_defined_image)
-        acc_pics.append(acc_img)
-    print('img choosing accuracy:', np.mean(acc_pics))
-    Analysis.drew_seq(times, encoding_pics, './result/', config.gray)
+        # encoding_pics.append(encoding_pic)
+        processing_data.append(word_defind_pic)
+        # acc_pics.append(acc_img)
+        output_pic_tensors.extend(output_pic_tensor)
+        input_pic_tensors.extend(input_pic_tensor)
+    # print('img choosing accuracy:',chec np.mean(acc_pics))
+    # Analysis.drew_seq(times, encoding_pics, './result/', config.gray)
     Analysis.write_sents(times, pred_txts, target_txt, './result/', vocab, show_matric=False)
+    Analysis.count_acc(input_pic_tensors, output_pic_tensors)
     # Analysis.write_process(times,processing_data,'./result/process/',vocab,batch_size=config.batch_size)
     # test_loss=test_loss / len(test_data)
     # print('test total loss:', test_loss)
@@ -164,24 +166,24 @@ def main(_):
     batches_data = Data_Process.vectorize_batch(input_data_txt, output_data_txt, input_data_pic, output_data_pic,
                                                 weights, config.batch_size)
     print('data processed,vocab size:', vocab.vocab_size)
-    train_data, valid_test_data = model_selection.train_test_split(batches_data, test_size=0.2, shuffle=False)
+    train_data, valid_test_data = model_selection.train_test_split(batches_data, test_size=0.1, shuffle=False)
     valid_data, test_data = model_selection.train_test_split(valid_test_data, test_size=0.5, shuffle=False)
 
-    if os.path.exists('./data/candidates_pool.pkl'):
-        print('load the candidates pool...')
-        f = open('./data/candidates_pool.pkl','rb')
-        candidates_pool = pkl.load(f)
-        f.close()
-    else:
-        # vgg_rawnet = scipy.io.loadmat('./data/imagenet-vgg-verydeep-19.mat')
-        print('build a candidates pool...')
-        candidates_pool = run_candidates(input_data_pic)
-        f = open('./data/candidates_pool.pkl','wb')
-        pkl.dump(candidates_pool, f)
-        f.close()
-    # pdb.set_trace()
-    sess = tf.Session()
-    candidates_vector_len = len(candidates_pool[0])
+    # if os.path.exists('./data/candidates_pool.pkl'):
+    #     print('load the candidates pool...')
+    #     f = open('./data/candidates_pool.pkl','rb')
+    #     candidates_pool = pkl.load(f)
+    #     f.close()
+    # else:
+    #     # vgg_rawnet = scipy.io.loadmat('./data/imagenet-vgg-verydeep-19.mat')
+    #     print('build a candidates pool...')
+    #     candidates_pool = run_candidates(input_data_pic)
+    #     f = open('./data/candidates_pool.pkl','wb')
+    #     pkl.dump(candidates_pool, f)
+    #     f.close()
+    # # pdb.set_trace()
+    # candidates_vector_len = len(candidates_pool[0])
+    sess = tf.compat.v1.Session()
     test_ignore_len = len(times) - len(batches_data) * config.batch_size
     if test_ignore_len > 0:
         times_test = times[-(len(test_data) * config.batch_size + test_ignore_len):-test_ignore_len]
@@ -190,14 +192,14 @@ def main(_):
     # pdb.set_trace()
     if config.is_training:
         print('establish the model...')
-        model = Model.seq_pic2seq_pic(config, vocab, img_numb, candidates_vector_len, np.array(candidates_pool))
+        model = Model.seq_pic2seq_pic(config, vocab, img_numb)  # , candidates_vector_len, np.array(candidates_pool))
         # pdb.set_trace()
         sess.run(tf.compat.v1.global_variables_initializer())
         if config.pre_training:
             pretrain_model(sess, model, prtrain_batches_data)
         train_model(sess, model, train_data, valid_data)
         # config.model_type = 'test'
-        test_model(sess, model, test_data[:len(times_test) / config.batch_size], vocab, times_test)  ###
+        test_model(sess, model, test_data[:int(len(times_test) / config.batch_size)], vocab, times_test)  ###
 
     else:
         print('Test model.......')
@@ -208,8 +210,8 @@ def main(_):
         print('Reload model from checkpoints.....')
         ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
         model.saver.restore(sess, ckpt.model_checkpoint_path)
-        test_model(sess, model, test_data[:len(times_test) / config.batch_size], vocab,
-                   times_test)  ################## test_data
+        # pdb.set_trace()
+        test_model(sess, model, test_data[:int(len(times_test) / config.batch_size)], vocab,times_test)
 
 
 if __name__ == "__main__":

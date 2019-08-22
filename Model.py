@@ -6,7 +6,7 @@ import copy
 
 
 class seq_pic2seq_pic():
-    def __init__(self, config, vocab, img_numb, candidates_vector_len,_candidates_pool_ph):
+    def __init__(self, config, vocab, img_numb, candidates_vector_len=None, _candidates_pool_ph=None):
         if config.gray:
             self._color_size = 1
         else:
@@ -20,13 +20,14 @@ class seq_pic2seq_pic():
 
         # self._opt = tf.train.GradientDescentOptimizer(learning_rate=self._learn_rate)
         # self._opt = tf.train.AdamOptimizer(learning_rate=self._learn_rate)
-        self._opt = tf.compat.v1.train.AdamOptimizer(learning_rate=self._learn_rate, beta1=0.9, beta2=0.98, epsilon=1e-8)
+        self._opt = tf.compat.v1.train.AdamOptimizer(learning_rate=self._learn_rate, beta1=0.9, beta2=0.98,
+                                                     epsilon=1e-8)
 
         self._embedding_size = config.recurrent_dim
         self._layers = config.layers
         self.img_size_x = config.img_size_x
         self.img_size_y = config.img_size_y
-        # self._gf_dim=config.gf_dim
+        # self._gf_dim=config.gf_dimwit
         self._max_grad_norm = config.max_grad_norm
         self._cov_size = config.convolution_dim
         self._noise_dim = config.noise_dim
@@ -34,12 +35,12 @@ class seq_pic2seq_pic():
         self._num_identical = config.num_identical
         self._build_inputs()
         self._head = config.head
-        self._candidates_pool = tf.constant(_candidates_pool_ph,shape=[img_numb,candidates_vector_len], name='candidates_pool')
+        # self._candidates_pool = tf.constant(_candidates_pool_ph,shape=[img_numb,candidates_vector_len], name='candidates_pool')
 
-        self.g_bn0 = convolution.batch_norm(name='g_bn0')
-        self.g_bn1 = convolution.batch_norm(name='g_bn1')
-        self.g_bn2 = convolution.batch_norm(name='g_bn2')
-        self.g_bn3 = convolution.batch_norm(name='g_bn3')
+        # self.g_bn0 = convolution.batch_norm(name='g_bn0')
+        # self.g_bn1 = convolution.batch_norm(name='g_bn1')
+        # self.g_bn2 = convolution.batch_norm(name='g_bn2')
+        # self.g_bn3 = convolution.batch_norm(name='g_bn3')
 
         self.e_bn0 = convolution.batch_norm(name='e_bn0')
         self.e_bn1 = convolution.batch_norm(name='e_bn1')
@@ -92,22 +93,24 @@ class seq_pic2seq_pic():
         #     encoding_pic_output = tf.nn.conv1d(resnet_output, w_pic, 1, 'SAME')
         #     encoder_pic_output = tf.tile(encoding_pic_output, [1, self._sentence_size, 1])
         #     pdb.set_trace()
-        def conv2d(input_, output_shape, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="conv2d", with_w=False):
+        def conv2d(input_, output_shape, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="conv2d", with_w=False, w=None,
+                   biases=None):
             with tf.compat.v1.variable_scope(name):
                 # pdb.set_trace()
                 # filter : [height, width, output_channels, in_channels]
-                w = tf.compat.v1.get_variable('w', [k_h, k_w, input_.get_shape()[-1], output_shape[-1]],
-                                    initializer=tf.random_normal_initializer(stddev=stddev))
+                if w is None:
+                    w = tf.compat.v1.get_variable('w', [k_h, k_w, input_.get_shape()[-1], output_shape[-1]],
+                                                  initializer=tf.random_normal_initializer(stddev=stddev))
 
-                deconv = tf.nn.conv2d(input_, filter=w, strides=[1, d_h, d_w, 1], padding="SAME")
-
-                biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
-                deconv = tf.reshape(tf.nn.bias_add(deconv, biases), deconv.get_shape())
+                conv = tf.nn.conv2d(input_, filter=w, strides=[1, d_h, d_w, 1], padding="SAME")
+                if biases is None:
+                    biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
+                conv = tf.reshape(tf.nn.bias_add(conv, biases), conv.get_shape())
 
                 if with_w:
-                    return deconv, w, biases
+                    return conv, w, biases
                 else:
-                    return deconv
+                    return conv
 
         def lrelu(x, leak=0.2, name="lrelu"):
             return tf.maximum(x, leak * x)
@@ -136,47 +139,48 @@ class seq_pic2seq_pic():
             w_pic = tf.get_variable('w', [1, h4_e.get_shape()[-1], self._embedding_size],
                                     initializer=tf.random_normal_initializer(stddev=0.02))
             encoding_pic_output = tf.nn.conv1d(tf.expand_dims(h4_e, 1), w_pic, 1, 'SAME')
+            self.encoder_output = encoding_pic_output
             encoder_pic_output = tf.tile(encoding_pic_output, [1, self._sentence_size, 1])
 
-        def deconv2d(input_, output_shape, weight_cnn, biase_cnn=None, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02,
-                     name="deconv2d", with_w=False):
-            with tf.compat.v1.variable_scope(name):
-                # filter : [height, width, output_channels, in_channels]
-                # w = tf.get_variable('w', [k_h, k_w, output_shape[-1], input_.get_shape()[-1]],
-                #                     initializer=tf.random_normal_initializer(stddev=stddev))
-                # w=tf.transpose(weight_cnn,[0,1,3,2])
-                # pdb.set_trace()
+        # def deconv2d(input_, output_shape, weight_cnn, biase_cnn=None, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02,
+        #              name="deconv2d", with_w=False):
+        #     with tf.compat.v1.variable_scope(name):
+        #         # filter : [height, width, output_channels, in_channels]
+        #         # w = tf.get_variable('w', [k_h, k_w, output_shape[-1], input_.get_shape()[-1]],
+        #         #                     initializer=tf.random_normal_initializer(stddev=stddev))
+        #         # w=tf.transpose(weight_cnn,[0,1,3,2])
+        #         # pdb.set_trace()
+        #
+        #         biase_cnn = tf.negative(biase_cnn)
+        #         input_bias = tf.nn.bias_add(input_, biase_cnn)
+        #         deconv = tf.nn.conv2d_transpose(input_bias, weight_cnn, output_shape=output_shape,
+        #                                         strides=[1, d_h, d_w, 1])
+        #         # if biase_cnn is None:
+        #         #     return deconv
+        #         # biase_cnn = tf.negative(biase_cnn)
+        #         # deconv_output = tf.nn.bias_add(deconv, biase_cnn)
+        #         # biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
+        #
+        #         return deconv
 
-                biase_cnn = tf.negative(biase_cnn)
-                input_bias = tf.nn.bias_add(input_, biase_cnn)
-                deconv = tf.nn.conv2d_transpose(input_bias, weight_cnn, output_shape=output_shape,
-                                                strides=[1, d_h, d_w, 1])
-                # if biase_cnn is None:
-                #     return deconv
-                # biase_cnn = tf.negative(biase_cnn)
-                # deconv_output = tf.nn.bias_add(deconv, biase_cnn)
-                # biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
+        # with tf.compat.v1.variable_scope('decoder_pic'):
+        #
+        #     h0 = tf.nn.relu(self.g_bn0(h3_e, type=self.is_training))
+        #     # pdb.set_trace()
+        #     h1 = deconv2d(h0, [self._batch_size, s8, y8, self._cov_size * 4], weight_cnn=w3, biase_cnn=b3, name='g_h1')
+        #     h1 = tf.nn.relu(self.g_bn1(h1, type=self.is_training))
+        #
+        #     h2 = deconv2d(h1, [self._batch_size, s4, y4, self._cov_size * 2], weight_cnn=w2, biase_cnn=b2, name='g_h2')
+        #     h2 = tf.nn.relu(self.g_bn2(h2, type=self.is_training))
+        #
+        #     h3 = deconv2d(h2, [self._batch_size, s2, y2, self._cov_size * 1], weight_cnn=w1, biase_cnn=b1, name='g_h3')
+        #     h3 = tf.nn.relu(self.g_bn3(h3, type=self.is_training))
+        #
+        #     h4 = deconv2d(h3, [self._batch_size, s, y, self._color_size], weight_cnn=w0, biase_cnn=b0, name='g_h4')
+        #
+        #     self.encoder_pic = tf.tanh(h4) / 2. + 0.5
 
-                return deconv
-
-        with tf.compat.v1.variable_scope('decoder_pic'):
-            # h0 = ztf.reshape(h3_e, [-1, s16, y16, self._cov_size * 8])
-            h0 = tf.nn.relu(self.g_bn0(h3_e, type=self.is_training))
-            # pdb.set_trace()
-            h1 = deconv2d(h0, [self._batch_size, s8, y8, self._cov_size * 4], weight_cnn=w3, biase_cnn=b3, name='g_h1')
-            h1 = tf.nn.relu(self.g_bn1(h1, type=self.is_training))
-
-            h2 = deconv2d(h1, [self._batch_size, s4, y4, self._cov_size * 2], weight_cnn=w2, biase_cnn=b2, name='g_h2')
-            h2 = tf.nn.relu(self.g_bn2(h2, type=self.is_training))
-
-            h3 = deconv2d(h2, [self._batch_size, s2, y2, self._cov_size * 1], weight_cnn=w1, biase_cnn=b1, name='g_h3')
-            h3 = tf.nn.relu(self.g_bn3(h3, type=self.is_training))
-
-            h4 = deconv2d(h3, [self._batch_size, s, y, self._color_size], weight_cnn=w0, biase_cnn=b0, name='g_h4')
-
-            self.encoder_pic = tf.tanh(h4) / 2. + 0.5
-
-        with tf.compat.v1.variable_scope('embed_decode_input'):
+        with tf.compat.v1.variable_scope('word_embed_decode_input'):
             # pdb.set_trace()
             decoder_input = tf.concat((tf.ones_like(self._response[:, :1]) * 2, self._response[:, :-1]),
                                       -1)  ## add 'go' sign
@@ -241,42 +245,69 @@ class seq_pic2seq_pic():
                     self.dec_output = feedforward(self.dec_output,
                                                   num_units=[4 * self._embedding_size, self._embedding_size])
 
-        with tf.compat.v1.variable_scope('img_classification'):
-
-            classfy_input = tf.concat((tf.expand_dims(encoder_pic_output, -1), tf.expand_dims(self.enc, -1),
-                                       tf.expand_dims(self.dec_output, -1)), -1)
-
-            with tf.compat.v1.variable_scope('text_input_cnn_classify'):
-                # pdb.set_trace()
-                w = tf.get_variable('w', [5, 5, 3, 2],
-                                    initializer=tf.random_normal_initializer(stddev=0.02))
-
-                conv = tf.nn.conv2d(classfy_input, filter=w, strides=[1, 2, 2, 1], padding="SAME")
-
-                biases = tf.get_variable('biases', [2], initializer=tf.constant_initializer(0.0))
-                conv = tf.reshape(tf.nn.bias_add(conv, biases), conv.get_shape())
-
-            conv_classfy = tf.reshape(conv, [self._batch_size, -1], name='classify_reshape')
-
-            # feedforward(conv_classfy,num_units=[conv_classfy.get_shape()[-1],self._cov_size],scope='classify_ff')
+        # with tf.compat.v1.variable_scope('img_classification'):
+        #
+        #     classfy_input = tf.concat((tf.expand_dims(encoder_pic_output, -1), tf.expand_dims(self.enc, -1),
+        #                                tf.expand_dims(self.dec_output, -1)), -1)
+        #
+        #     with tf.compat.v1.variable_scope('text_input_cnn_classify'):
+        #         # pdb.set_trace()
+        #         w = tf.get_variable('w', [5, 5, 3, 2],
+        #                             initializer=tf.random_normal_initializer(stddev=0.02))
+        #
+        #         conv = tf.nn.conv2d(classfy_input, filter=w, strides=[1, 2, 2, 1], padding="SAME")
+        #
+        #         biases = tf.get_variable('biases', [2], initializer=tf.constant_initializer(0.0))
+        #         conv = tf.reshape(tf.nn.bias_add(conv, biases), conv.get_shape())
+        #
+        #     conv_classfy = tf.reshape(conv, [self._batch_size, -1], name='classify_reshape')
+        #
+        #     # feedforward(conv_classfy,num_units=[conv_classfy.get_shape()[-1],self._cov_size],scope='classify_ff')
+        #     # pdb.set_trace()
+        #     context_img = tf.layers.dense(conv_classfy, self._img_numb)
+        #     context_img_vgg = tf.nn.softmax(tf.matmul(context_img, self._candidates_pool))
+        #     self.logits_img = tf.layers.dense(context_img_vgg, self._img_numb)
+        #     # self.predict_img = tf.to_int32(tf.argmax(self.logits_img, axis=-1))
+        #     self.predict_img = tf.cast(tf.argmax(self.logits_img, axis=-1),tf.int32)
+        #     self.acc_img = tf.reduce_sum(tf.to_float(tf.equal(self.predict_img, self._real_pic)))
+        #     tf.compat.v1.summary.scalar('acc_img', self.acc_img)
+        #     # tf.summary.scalar('acc_img', self.acc_img)
+        #     self.img_real_smoothed = label_smoothing(tf.one_hot(self._real_pic, depth=self._img_numb))
+        #     img_loss = tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.logits_img, labels=self.img_real_smoothed)
+        #     mean_img_loss = tf.reduce_mean(img_loss)
+        #     self.losses_img = mean_img_loss
+        with tf.compat.v1.variable_scope('img_decoder_input'):
+            s = self.img_size_x
+            y = self.img_size_y
+            s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
+            y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
             # pdb.set_trace()
-            context_img = tf.layers.dense(conv_classfy, self._img_numb)
-            context_img_vgg = tf.nn.softmax(tf.matmul(context_img, self._candidates_pool))
-            self.logits_img = tf.layers.dense(context_img_vgg, self._img_numb)
-            # self.predict_img = tf.to_int32(tf.argmax(self.logits_img, axis=-1))
-            self.predict_img = tf.cast(tf.argmax(self.logits_img, axis=-1),tf.int32)
-            self.acc_img = tf.reduce_sum(tf.to_float(tf.equal(self.predict_img, self._real_pic)))
-            tf.compat.v1.summary.scalar('acc_img', self.acc_img)
-            # tf.summary.scalar('acc_img', self.acc_img)
-            self.img_real_smoothed = label_smoothing(tf.one_hot(self._real_pic, depth=self._img_numb))
-            img_loss = tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.logits_img, labels=self.img_real_smoothed)
-            mean_img_loss = tf.reduce_mean(img_loss)
-            self.losses_img = mean_img_loss
+            h0_d = conv2d(self._real_pic, [self._batch_size, s, y, self._cov_size * 1], name='d_h0', w=w0, biases=b0)
+            h0_d = lrelu(self.e_bn0(h0_d, type=self.is_training))
+
+            h1_d = conv2d(h0_d, [self._batch_size, s2, y2, self._cov_size * 2], name='d_h1', w=w1, biases=b1)
+            h1_d = lrelu(self.e_bn1(h1_d, type=self.is_training))
+
+            h2_d = conv2d(h1_d, [self._batch_size, s4, y4, self._cov_size * 4], name='d_h2', w=w2, biases=b2)
+            h2_d = lrelu(self.e_bn2(h2_d, type=self.is_training))
+
+            h3_d = conv2d(h2_d, [self._batch_size, s8, y8, self._cov_size * 8], name='d_h3', w=w3, biases=b3)
+            h3_d = lrelu(self.e_bn3(h3_d, type=self.is_training))
+
+            h4_d = tf.reshape(h3_d, [self._batch_size, -1], name='d_h4')
+            # pdb.set_trace()
+            # w_pic_d = tf.get_variable('w_d', [1, h4_d.get_shape()[-1], self._embedding_size],
+            #                         initializer=tf.random_normal_initializer(stddev=0.02))
+            decoding_pic_input = tf.nn.conv1d(tf.expand_dims(h4_d, 1), w_pic, 1, 'SAME')
+
+            self.decoder_input = decoding_pic_input
+        with tf.compat.v1.variable_scope('img_classification'):
+            # pdb.set_trace()
+            self.img_loss = tf.reduce_mean(tf.math.square(tf.math.subtract(decoding_pic_input, encoding_pic_output)))
 
         with tf.compat.v1.variable_scope('loss_function_txt'):
-
             self.logits = tf.layers.dense(self.dec_output, vocab.vocab_size)
-            preds = tf.to_int32(tf.argmax(self.logits, axis=-1))
+            preds = tf.cast(tf.argmax(self.logits, axis=-1), tf.int32)
             self.predict_txt = preds
             self.istarget = tf.to_float(tf.not_equal(self._response, 0))
             self.acc = tf.reduce_sum(tf.to_float(tf.equal(preds, self._response)) * self.istarget) / (
@@ -293,10 +324,10 @@ class seq_pic2seq_pic():
             # loss_=tf.concat([tf.expand_dims(G_loss,-1),tf.expand_dims(cross_entropy_sentence,-1)],1)
             # all_loss=linear(loss_,1)
 
-            self.losses = mean_txt_loss + self.losses_img  # + pic_loss
+            self.losses = mean_txt_loss + self.img_loss  # + pic_loss
 
         # self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
-        self.saver =tf.compat.v1.train.Saver(tf.compat.v1.global_variables(), max_to_keep=1)
+        self.saver = tf.compat.v1.train.Saver(tf.compat.v1.global_variables(), max_to_keep=1)
         with tf.compat.v1.variable_scope('output_information'):
             # self.global_step = tf.Variable(0, name='global_step', trainable=False)
             # optimizer
@@ -320,11 +351,15 @@ class seq_pic2seq_pic():
         self._question = tf.compat.v1.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Question')
         self._response = tf.compat.v1.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Response')
         # self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
-        self._input_pic = tf.compat.v1.placeholder(tf.float32,
-                                         [self._batch_size, self.img_size_x, self.img_size_y, self._color_size],
-                                         name='frame_input')
-        self._real_pic = tf.compat.v1.placeholder(tf.int32, [self._batch_size],
-                                        name='frame_output')
+        self._input_pic = tf.compat.v1.placeholder(tf.float32, [self._batch_size, self.img_size_x, self.img_size_y,
+                                                                self._color_size],
+                                                   name='frame_input')
+        # self._real_pic = tf.compat.v1.placeholder(tf.int32, [self._batch_size],
+        #                                 name='frame_output')
+        self._real_pic = tf.compat.v1.placeholder(tf.float32,
+                                                  [self._batch_size, self.img_size_x, self.img_size_y,
+                                                   self._color_size],
+                                                  name='frame_output')
         # self._candidates_pool_ph = tf.compat.v1.placeholder(tf.float32, [self._img_numb, self._candidates_vector_len],
         #                                           name='candidates_pool')
         # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
@@ -392,14 +427,14 @@ class seq_pic2seq_pic():
 
         if step_type == 'test':
             output_batch_txt = np.zeros((self._batch_size, self._sentence_size), dtype=np.int32)
-            pic_encoding, acc_img = None, None
             word_defined_image = []
             for j in range(self._sentence_size):
-                txt_preds, pic_encoding, acc_img = sess.run([self.predict_txt, self.encoder_pic, self.acc_img],
-                                                            feed_dict={self._question: input_batch_txt,
-                                                                       self._response: output_batch_txt,
-                                                                       self._input_pic: input_batch_pic,
-                                                                       self._real_pic: output_batch_pic})
+                txt_preds, input_pic_tensor, output_pic_tensor = sess.run(
+                    [self.predict_txt, self.encoder_output, self.decoder_input],
+                    feed_dict={self._question: input_batch_txt,
+                               self._response: output_batch_txt,
+                               self._input_pic: input_batch_pic,
+                               self._real_pic: output_batch_pic})
                 output_batch_txt[:, j] = txt_preds[:, j]
 
                 # feed_dict = {self._response: output_batch_txt,
@@ -411,8 +446,9 @@ class seq_pic2seq_pic():
                 #     loss, txt = sess.run(output_list, feed_dict=feed_dict)
                 # except:
                 #     pdb.set_trace()
-                word_defined_image.append([copy.copy(output_batch_txt), copy.copy(pic_encoding)])
-            return output_batch_txt, pic_encoding, word_defined_image, acc_img
+                word_defined_image.append(
+                    [copy.copy(output_batch_txt), copy.copy(input_pic_tensor), copy.copy(output_pic_tensor)])
+            return output_batch_txt,input_pic_tensor,output_pic_tensor,word_defined_image
 
         print('step_type is wrong!>>>')
         return None
