@@ -10,7 +10,7 @@ import Analysis
 from VGG import run_candidates
 import pickle as pkl
 import scipy.io
-
+os.environ['CUDA_VISIBLE_DEVICES']='0'
 # from math import exp
 tf.flags.DEFINE_float("learn_rate", 0.0001, "Learning rate for adam.")
 # tf.flags.DEFINE_float("anneal_rate", 25, "Number of epochs between halving the learnign rate.")
