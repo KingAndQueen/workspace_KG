@@ -46,7 +46,7 @@ class seq_pic2seq_pic():
         self.e_bn1 = convolution.batch_norm(name='e_bn1')
         self.e_bn2 = convolution.batch_norm(name='e_bn2')
         self.e_bn3 = convolution.batch_norm(name='e_bn3')
-
+        dropout = tf.keras.layers.Dropout(0.1)
         with tf.compat.v1.variable_scope("encode_txt"):
             self.enc = embedding(self._question,
                                  vocab_size=vocab.vocab_size,
@@ -64,9 +64,7 @@ class seq_pic2seq_pic():
                                             scope="enc_pe")
 
             # Dropout
-            self.enc = tf.layers.dropout(self.enc,
-                                         rate=0.1,
-                                         training=tf.convert_to_tensor(self.is_training))
+            self.enc = dropout(self.enc, training=tf.convert_to_tensor(self.is_training))
 
             # Identical
             for i in range(self._num_identical):
@@ -214,9 +212,7 @@ class seq_pic2seq_pic():
 
         with tf.compat.v1.variable_scope('decode_txt'):
             # Dropout
-            dec_input = tf.layers.dropout(dec_input,
-                                          rate=0.1,
-                                          training=self.is_training)
+            dec_input = dropout(dec_input, training=self.is_training)
             # Identical
             # pdb.set_trace()
 
@@ -309,8 +305,8 @@ class seq_pic2seq_pic():
             self.logits = tf.layers.dense(self.dec_output, vocab.vocab_size)
             preds = tf.cast(tf.argmax(self.logits, axis=-1), tf.int32)
             self.predict_txt = preds
-            self.istarget = tf.to_float(tf.not_equal(self._response, 0))
-            self.acc = tf.reduce_sum(tf.to_float(tf.equal(preds, self._response)) * self.istarget) / (
+            self.istarget = tf.cast(tf.not_equal(self._response, 0), tf.float32)
+            self.acc = tf.reduce_sum(tf.cast(tf.equal(preds, self._response),tf.float32) * self.istarget) / (
                 tf.reduce_sum(self.istarget))
             tf.compat.v1.summary.scalar('acc', self.acc)
             self.y_smoothed = label_smoothing(tf.one_hot(self._response, depth=vocab.vocab_size))
@@ -448,7 +444,7 @@ class seq_pic2seq_pic():
                 #     pdb.set_trace()
                 word_defined_image.append(
                     [copy.copy(output_batch_txt), copy.copy(input_pic_tensor), copy.copy(output_pic_tensor)])
-            return output_batch_txt,input_pic_tensor,output_pic_tensor,word_defined_image
+            return output_batch_txt, input_pic_tensor, output_pic_tensor, word_defined_image
 
         print('step_type is wrong!>>>')
         return None
