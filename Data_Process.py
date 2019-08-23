@@ -131,10 +131,12 @@ if __name__ == "__main__":
 
 
 class Vocab():
-    def __init__(self, word2vec=None, embed_size=0):
-        self.word2idx = {'<eos>': 0, '<go>': 1, '<pad>': 2, '<unk>': 3}
-        self.idx2word = {0: '<eos>', 1: '<go>', 2: '<pad>', 3: '<unk>'}
-        self.embed_size = embed_size
+    def __init__(self, word2vec=None):
+        self.word2idx = {'<pad>': 0,'<eos>': 1, '<go>': 2, '<unk>': 3}
+        self.idx2word = { 0: '<pad>',1: '<eos>', 2: '<go>', 3: '<unk>'}
+        # self.embed_size = embed_size
+        self.words_count={'<eos>': self.vocab_size, '<go>': self.vocab_size, '<pad>': self.vocab_size, '<unk>': self.vocab_size}
+        # pdb.set_trace()
 
     def add_vocab(self, words):
         if isinstance(words, (list, np.ndarray)):
@@ -143,6 +145,10 @@ class Vocab():
                     index = len(self.word2idx)
                     self.word2idx[word] = index
                     self.idx2word[index] = word
+
+                else:
+                    print('already exist word:',word)
+                    # self.words_count[words] += 1
         else:
             if words not in self.word2idx:
                 # print('adding new word',words)
@@ -150,16 +156,35 @@ class Vocab():
                 self.word2idx[words] = index
                 self.idx2word[index] = words
 
-    def word_to_index(self, word):
+            # else:
+            #     print('already exist word:',words)
 
-        self.add_vocab(word)
-        return self.word2idx[word]
+
+    def word_to_index(self, word):
+        if word in self.word2idx:
+            return self.word2idx[word]
+        else:
+            return self.word2idx['<unk>']
+            # pdb.set_trace()
+            # self.add_vocab(word)
         # for rl
         # if word in self.word2idx:
         #     return self.word2idx[word]
         # else:
         #     return self.word2idx['<unk>']
+    def count_word(self,word):
+        if word in self.words_count:
+            self.words_count[word]+=1
+        else:
+            self.words_count[word]=1
 
+    def build_vocab_with_words_count(self,count_min):
+        print('original vocab len:',len(self.words_count))
+        for key,value in self.words_count.items():
+            # print('clean out ',key)
+            if value>count_min:
+                self.add_vocab(key)
+        print('after cleaning vocab len:', len(self.word2idx))
     def index_to_word(self, index):
         if index in self.idx2word:
             return self.idx2word[index]
@@ -168,7 +193,7 @@ class Vocab():
 
     @property
     def vocab_size(self):
-        return len(self.idx2word)
+        return len(self.word2idx)
 
 def tokenize(sent):
     '''Return the tokens of a sentence including punctuation.
@@ -198,7 +223,8 @@ def read_txt_file_1E(data_path, vocabulary, sentence_size):
         sent=sent[:sentence_size-1]
         for word in sent:
             idx=vocabulary.word_to_index(word)
-            # pdb.set_trace()
+            # if idx >337:
+            #     pdb.set_trace()
             weight.append(1)
             sent_idx.append(idx)
         sent_idx.append(vocabulary.word_to_index('<eos>'))
@@ -239,14 +265,14 @@ def read_pic_file_1E(data_path,gray=False):
     # pdb.set_trace()
     return pic_output,sorted_keys
 
-def _insert_go(output_data_txt,weights,vocabulary):
-    for sents in output_data_txt:
-        # pdb.set_trace()
-        sents.insert(0,vocabulary.word_to_index('<go>'))
-        _=sents.pop()
-    for weight in weights:
-        weight.insert(0,1)
-        _=weight.pop()
+# def _insert_go(output_data_txt,weights,vocabulary):
+#     for sents in output_data_txt:
+#         # pdb.set_trace()
+#         sents.insert(0,vocabulary.word_to_index('<go>'))
+#         _=sents.pop()
+#     for weight in weights:
+#         weight.insert(0,1)
+#         _=weight.pop()
 def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
     files_name=os.listdir(data_path)
     dir_list=[]
@@ -261,20 +287,25 @@ def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
             files_list.append(os.path.join(path_,file_name))
     # pdb.set_trace()
     data_path_txt=[file_name for file_name in files_list if 'txt' in file_name ]
+
+    count_words(vocabulary,data_path_txt)
+    vocabulary.build_vocab_with_words_count(count_min=1)
+    # pdb.set_trace()
     txt,weights=read_txt_file_1E(data_path_txt,vocabulary,sentence_size)
     pic,times=read_pic_file_1E(files_list,gray)
     input_data_txt=copy.copy(txt)
     _=input_data_txt.pop()
     output_data_txt = copy.copy(txt)
+
     _=output_data_txt.pop(0)
-    _insert_go(output_data_txt,weights,vocabulary)
+    # _insert_go(output_data_txt,weights,vocabulary)
     # pdb.set_trace()
     output_weights=copy.copy(weights)
     output_weights.pop(0)
 
     input_data_pic=copy.copy(pic)
     _=input_data_pic.pop()################ test the deCNN process
-    output_data_pic=copy.copy(pic)
+    output_data_pic=[i for i in range(len(pic))]
     _=output_data_pic.pop(0)################ test the deCNN process
     # pdb.set_trace()
     assert len(output_weights)==len(output_data_txt)
@@ -286,6 +317,24 @@ def get_input_output_data(data_path, vocabulary,sentence_size,gray=False):
     assert len(output_times) == len(output_data_txt)
 
     return input_data_txt,output_data_txt,input_data_pic,output_data_pic, output_weights,output_times
+
+def count_words(vocabulary,paths):
+    sents = []
+    for data_txt in paths:
+        f = open(data_txt, 'r')
+        sent = f.readlines()
+        sents += sent
+        f.close()
+    for sent in sents:
+        sent = sent.strip()
+        sent = sent.split('\t')
+        sent = sent[-1]
+        # pdb.set_trace()
+        sent = tokenize(sent)
+        # sent = sent[:sentence_size - 1]
+        for word in sent:
+            vocabulary.count_word(word)
+            # pdb.set_trace()
 
 def vectorize_batch(input_data_txt,output_data_txt,input_data_pic,output_data_pic,weights,batch_size):
     batches_data=[]
@@ -317,3 +366,86 @@ def get_vocab(data_path):
         print('<<<<<<< vocab is not exist >>>>>>>')
         vocab = None
     return vocab
+
+def read_pretrain_txt(data_txt,vocabulary,sentence_size):
+    f = open(data_txt, 'r')
+    sents = f.readlines()
+    f.close()
+    sents_idx = []
+    weights = []
+    # pdb.set_trace()
+    for no,sent in enumerate(sents):
+        if no%2==0:
+            sent_idx = []
+            weight = []
+            sent = sent.strip()
+            # pdb.set_trace()
+            sent = tokenize(sent)
+            sent = sent[:sentence_size - 1]
+            for word in sent:
+                idx = vocabulary.word_to_index(word)
+                # if idx >337:
+                #     pdb.set_trace()
+                weight.append(1)
+                sent_idx.append(idx)
+            sent_idx.append(vocabulary.word_to_index('<eos>'))
+            weight.append(1)
+            padding_len = max(sentence_size - len(sent_idx), 0)
+            for i in range(padding_len):
+                weight.append(0)
+                sent_idx.append(vocabulary.word_to_index('<pad>'))
+
+            sents_idx.append(copy.copy(sent_idx))
+            weights.append(copy.copy(weight))
+    return sents_idx, weights
+
+
+def read_pretrain_pic(pic_path, pic_len,gray):
+    pic_output = []
+    try:
+        if gray:
+            img = np.asarray(Image.open(pic_path).convert('L'))
+            img = np.expand_dims(img, -1)
+        else:
+            img = np.asarray(Image.open(pic_path))
+    except:
+        pdb.set_trace()
+        # print(img.shape)
+        # pdb.set_trace()
+    for i in range(pic_len):
+        pic_output.append(img)
+    return pic_output
+
+def get_pretrain_data(data_path, vocabulary,sentence_size,gray=False):
+    data_path_txt='./data/pretrain/subtitle/train.txt'
+    data_path_pic='./data/pretrain/default.jpg'
+    count_words(vocabulary, [data_path_txt])
+    vocabulary.build_vocab_with_words_count(count_min=3)
+    txt, weights = read_pretrain_txt(data_path_txt, vocabulary, sentence_size)
+    # pdb.set_trace()
+    print('pretrain sentences count:',len(txt))
+    pic = read_pretrain_pic(data_path_pic,len(txt), gray)
+    input_data_txt = copy.copy(txt)
+    _ = input_data_txt.pop()
+    output_data_txt = copy.copy(txt)
+
+    _ = output_data_txt.pop(0)
+    # _insert_go(output_data_txt,weights,vocabulary)
+    # pdb.set_trace()
+    output_weights = copy.copy(weights)
+    output_weights.pop(0)
+
+    input_data_pic = copy.copy(pic)
+    _ = input_data_pic.pop()  ################ test the deCNN process
+    output_data_pic = copy.copy(pic)
+    _ = output_data_pic.pop(0)  ################ test the deCNN process
+    # pdb.set_trace()
+    assert len(output_weights) == len(output_data_txt)
+    assert len(output_data_pic) == len(input_data_pic)
+    assert len(input_data_txt) == len(output_data_txt)
+
+    # output_times = copy.copy(times)
+    # output_times.pop(0)
+    # assert len(output_times) == len(output_data_txt)
+
+    return input_data_txt, output_data_txt, input_data_pic, output_data_pic, output_weights #output_times
