@@ -7,7 +7,8 @@ import Data_Process
 import Model
 import random
 import Analysis
-from VGG import run_candidates
+# from tqdm import tqdm
+# from VGG import run_candidates
 import pickle as pkl
 import scipy.io
 os.environ['CUDA_VISIBLE_DEVICES']='0'
