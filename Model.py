@@ -4,15 +4,16 @@ import convolution
 from transformer import *
 import copy
 
+
 class seq_pic2seq_pic():
-    def __init__(self, config, vocab,img_numb,candidates_vector_len):
+    def __init__(self, config, vocab, img_numb, candidates_vector_len):
         if config.gray:
             self._color_size = 1
         else:
             self._color_size = 3
         self._vocab = vocab
-        self._img_numb=img_numb
-        self._candidates_vector_len=candidates_vector_len
+        self._img_numb = img_numb
+        self._candidates_vector_len = candidates_vector_len
         self._batch_size = config.batch_size
         self._sentence_size = config.sentence_size
         self._learn_rate = tf.Variable(float(config.learn_rate), trainable=False, dtype=tf.float32, name='learn_rate')
@@ -33,18 +34,7 @@ class seq_pic2seq_pic():
         self._num_identical = config.num_identical
         self._build_inputs()
         self._head = config.head
-        self._candidates_pool=tf.Variable(self._candidates_pool_ph,trainable=False)
-
-        self.g_bn0 = convolution.batch_norm(name='g_bn0')
-        self.g_bn1 = convolution.batch_norm(name='g_bn1')
-        self.g_bn2 = convolution.batch_norm(name='g_bn2')
-        self.g_bn3 = convolution.batch_norm(name='g_bn3')
-
-        self.e_bn0 = convolution.batch_norm(name='e_bn0')
-        self.e_bn1 = convolution.batch_norm(name='e_bn1')
-        self.e_bn2 = convolution.batch_norm(name='e_bn2')
-        self.e_bn3 = convolution.batch_norm(name='e_bn3')
-
+        self._candidates_pool = tf.Variable(self._candidates_pool_ph, trainable=False)
 
         with tf.variable_scope("encode_txt"):
             self.enc = embedding(self._question,
@@ -78,7 +68,8 @@ class seq_pic2seq_pic():
                                                    dropout_rate=0.1,
                                                    is_training=self.is_training,
                                                    causality=False)
-                    self.enc = feedforward(self.enc, num_units=[4 * self._embedding_size, self._embedding_size]) # 4 30 64
+                    self.enc = feedforward(self.enc,
+                                           num_units=[4 * self._embedding_size, self._embedding_size])  # 4 30 64
 
         def conv2d(input_, output_shape, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="conv2d", with_w=False):
             with tf.variable_scope(name):
@@ -137,13 +128,13 @@ class seq_pic2seq_pic():
             # encoding_pic_output = tf.nn.conv1d(resnet_output, w_pic, 1, 'SAME')
             # encoder_pic_output = tf.tile(encoding_pic_output, [1, self._sentence_size, 1])
 
-
             resnet_output, end_points = convolution.resnet_v2_50(self._input_pic)
             # resnet_output=end_points['resnet_v2_50' + '/block4'] # test2 to check the full connections effect
             encode_output = end_points['encoding_frame_cnn/resnet_v2_50/block4']
 
-            encode_output = tf.reshape(encode_output,(self._batch_size, -1, 2048))  # 4 5 10 2048 -> 4 50 512 进transformer
-            trans_encode_out = tf.layers.dense(encode_output, 64) # -> 4 50 512
+            encode_output = tf.reshape(encode_output,
+                                       (self._batch_size, -1, 2048))  # 4 5 10 2048 -> 4 50 512 进transformer
+            trans_encode_out = tf.layers.dense(encode_output, 64)  # -> 4 50 512
 
             # trans_encode_out = multihead_attention(
             #     queries=trans_encode_out,
@@ -155,133 +146,52 @@ class seq_pic2seq_pic():
             #     causality=False)
 
             trans_encode_out = multihead_attention(
-                                                   queries=trans_encode_out,
-                                                   keys=trans_encode_out,
-                                                   num_units=self._embedding_size,
-                                                   num_heads=self._head,
-                                                   dropout_rate=0.1,
-                                                   is_training=self.is_training,
-                                                   causality=False)
+                queries=trans_encode_out,
+                keys=trans_encode_out,
+                num_units=self._embedding_size,
+                num_heads=self._head,
+                dropout_rate=0.1,
+                is_training=self.is_training,
+                causality=False)
             # trans_encode_out = feedforward(trans_encode_out,num_units=[4 * 512, 512],reuse=True)
-            trans_encode_out = tf.reshape(trans_encode_out,(self._batch_size,-1))  # pic 4 * 5 * 10 * 512
-            trans_encode_out = tf.layers.dense(trans_encode_out,30*64)
-            encoder_pic_output = tf.reshape(trans_encode_out,(self._batch_size,30,64))
-
-
-
-        def deconv2d(input_, output_shape,weight_cnn,biase_cnn=None, k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, name="deconv2d", with_w=False):
-            with tf.variable_scope(name):
-                # filter : [height, width, output_channels, in_channels]
-                # w = tf.get_variable('w', [k_h, k_w, output_shape[-1], input_.get_shape()[-1]],
-                #                     initializer=tf.random_normal_initializer(stddev=stddev))
-                # w=tf.transpose(weight_cnn,[0,1,3,2])
-                # pdb.set_trace()
-
-                biase_cnn = tf.negative(biase_cnn)
-                input_bias = tf.nn.bias_add(input_, biase_cnn)
-                deconv = tf.nn.conv2d_transpose(input_bias, weight_cnn, output_shape=output_shape,strides=[1, d_h, d_w,1])
-                # if biase_cnn is None:
-                #     return deconv
-                # biase_cnn = tf.negative(biase_cnn)
-                # deconv_output = tf.nn.bias_add(deconv, biase_cnn)
-                # biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
-
-                return deconv
-
-        # with tf.variable_scope('decoder_pic'):
-        #     # h0 = ztf.reshape(h3_e, [-1, s16, y16, self._cov_size * 8])
-        #     #h0 = tf.nn.relu(self.g_bn0(h3_e, type=self.is_training))
-        #     pdb.set_trace()
-        #     # h0 = tf.nn.relu(self.g_bn0(encoder_pic_output, type=self.is_training))
-        #     # # pdb.set_trace()
-        #     # h1 = deconv2d(h0, [self._batch_size, s8, y8, self._cov_size * 4],weight_cnn=w3,biase_cnn=b3, name='g_h1')
-        #     # h1 = tf.nn.relu(self.g_bn1(h1, type=self.is_training))
-        #     #
-        #     # h2 = deconv2d(h1, [self._batch_size, s4, y4, self._cov_size * 2],weight_cnn=w2,biase_cnn=b2, name='g_h2')
-        #     # h2 = tf.nn.relu(self.g_bn2(h2, type=self.is_training))
-        #     #
-        #     # h3 = deconv2d(h2, [self._batch_size, s2, y2, self._cov_size * 1],weight_cnn=w1,biase_cnn=b1, name='g_h3')
-        #     # h3 = tf.nn.relu(self.g_bn3(h3, type=self.is_training))
-        #     #
-        #     # h4 = deconv2d(h3, [self._batch_size, s, y, self._color_size],weight_cnn=w0,biase_cnn=b0, name='g_h4')
-        #
-        #     #self.encoder_pic =  tf.tanh(h4) / 2. + 0.5
-        #
-        #     s = self.img_size_x
-        #     y = self.img_size_y
-        #     s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(s / 16)
-        #     y2, y4, y8, y16 = int(y / 2), int(y / 4), int(y / 8), int(y / 16)
-        #     # encoder_pic_output_reshape = tf.reshape(encoder_pic_output, [self._batch_size, -1])
-        #     # response_txt_reshape=tf.reshape(response_txt,[self._batch_size,-1])
-        #     # encoder_txt_output_reshape=tf.reshape(encoder_txt_output,[self._batch_size,-1])
-        #     # all_infor=tf.concat([response_txt_reshape,encoder_txt_output_reshape,encoder_pic_output_reshape],1)
-        #     # try more input method to replace all_infor # test1
-        #     # pdb.set_trace()
-        #     # reduced_text_embedding = lrelu(linear(all_infor, self._cov_size, 'g_embedding'))
-        #     # reduced_text_embedding = lrelu(all_infor)
-        #     # z_concat = tf.concat([self._random_z, reduced_text_embedding],1)
-        #     # z_ = linear(encoder_pic_output_reshape, self._cov_size * 8 * s16 * y16, 'g_h0_lin')
-        #
-        #     z_ = encoder_pic_output
-        #     # pdb.set_trace()
-        #     #s16 10 y16 20
-        #     h0 = tf.reshape(z_, [-1, s16, y16, self._cov_size * 2])
-        #     h0 = tf.nn.relu(self.g_bn0(h0, type=self.model_type))
-        #
-        #     h1 = deconv2d(h0, [self._batch_size, s8, y8, self._cov_size * 4], name='g_h1')
-        #     h1 = tf.nn.relu(self.g_bn1(h1, type=self.model_type))
-        #
-        #     h2 = deconv2d(h1, [self._batch_size, s4, y4, self._cov_size * 2], name='g_h2')
-        #     h2 = tf.nn.relu(self.g_bn2(h2, type=self.model_type))
-        #
-        #     h3 = deconv2d(h2, [self._batch_size, s2, y2, self._cov_size * 1], name='g_h3')
-        #     h3 = tf.nn.relu(self.g_bn3(h3, type=self.model_type))
-        #
-        #     h4 = deconv2d(h3, [self._batch_size, s, y, 1], name='g_h4')
-        #
-        #     predict_pic = tf.tanh(h4) / 2. + 0.5
-
+            trans_encode_out = tf.reshape(trans_encode_out, (self._batch_size, -1))  # pic 4 * 5 * 10 * 512
+            trans_encode_out = tf.layers.dense(trans_encode_out, 30 * 64)
+            encoder_pic_output = tf.reshape(trans_encode_out, (self._batch_size, 30, 64))
 
         with tf.variable_scope('embed_decode_input'):
             # pdb.set_trace()
-            decoder_input = tf.concat((tf.ones_like(self._response[:, :1]) * 2, self._response[:, :-1]), -1) ## add 'go' sign
-            dec_input = embedding(decoder_input,                   #self._response,
-                                 vocab_size=vocab.vocab_size,
-                                 num_units=self._embedding_size,
-                                 scale=True,
-                                 scope="dec_embed")
+            decoder_input = tf.concat((tf.ones_like(self._response[:, :1]) * 2, self._response[:, :-1]),
+                                      -1)  ## add 'go' sign
+            dec_input = embedding(decoder_input,  # self._response,
+                                  vocab_size=vocab.vocab_size,
+                                  num_units=self._embedding_size,
+                                  scale=True,
+                                  scope="dec_embed")
 
             # Position Encoding(use range from 0 to len(inpt) to represent position dim)
             dec_input += positional_encoding(decoder_input,
-                                            vocab_size=self._sentence_size,
-                                            num_units=self._embedding_size,
-                                            zero_pad=False,
-                                            scale=False,
-                                            scope="dec_pe")
-
-        # with tf.variable_scope('merge_txt_pic'):
-        #     decoder_input = tf.concat((encoder_pic_output, self.dec), -1)
-        #     w_merge = tf.get_variable('w', [1, 2 * self._embedding_size, self._embedding_size],
-        #                               initializer=tf.random_normal_initializer(stddev=0.02))
-        #     # pdb.set_trace()
-        #     self.dec = tf.nn.conv1d(decoder_input, w_merge, 1, 'SAME')
+                                             vocab_size=self._sentence_size,
+                                             num_units=self._embedding_size,
+                                             zero_pad=False,
+                                             scale=False,
+                                             scope="dec_pe")
 
         with tf.variable_scope('merge_txt_pic'):
             # encoder_pic_output 4 5 10 512 -> 4 30 64
             # pic 30 64 > 1 64  sentence 30 * 64
-            encoder_pic_output = tf.reshape(encoder_pic_output,[self._batch_size,-1])
+            encoder_pic_output = tf.reshape(encoder_pic_output, [self._batch_size, -1])
 
-            encoder_pic_output = tf.layers.dense(encoder_pic_output,64)
-            encoder_pic_output = tf.expand_dims(encoder_pic_output, 1) # batch size 1 64
+            encoder_pic_output = tf.layers.dense(encoder_pic_output, 64)
+            encoder_pic_output = tf.expand_dims(encoder_pic_output, 1)  # batch size 1 64
 
-            cur_self_enc = tf.transpose(self.enc,perm=[0,2,1])
+            cur_self_enc = tf.transpose(self.enc, perm=[0, 2, 1])
             """
             每个词对应的图片信息不同
             """
-            pic_attention = tf.nn.softmax(tf.matmul(encoder_pic_output,cur_self_enc)) # 8 1 64 \ 8 64 30 -> 8 1 30
-            pic_attention = tf.transpose(pic_attention,[0,2,1])
-            encoder_pic_output = tf.tile(encoder_pic_output,[1,30,1]) # batch size 30 64
-            encoder_pic_output = tf.multiply(encoder_pic_output,pic_attention)
+            pic_attention = tf.nn.softmax(tf.matmul(encoder_pic_output, cur_self_enc))  # 8 1 64 \ 8 64 30 -> 8 1 30
+            pic_attention = tf.transpose(pic_attention, [0, 2, 1])
+            encoder_pic_output = tf.tile(encoder_pic_output, [1, 30, 1])  # batch size 30 64
+            encoder_pic_output = tf.multiply(encoder_pic_output, pic_attention)
 
             decoder_input = tf.concat((encoder_pic_output, self.enc), -1)
 
@@ -294,13 +204,11 @@ class seq_pic2seq_pic():
             之前对两个向量直接拼接，现在利用cross Attention来改变两者的向量表示。
             """
 
-
-
         with tf.variable_scope('decode_txt'):
             # Dropout
             dec_input = tf.layers.dropout(dec_input,
-                                         rate=0.1,
-                                         training=self.is_training)
+                                          rate=0.1,
+                                          training=self.is_training)
             # Identical
             # pdb.set_trace()
 
@@ -308,61 +216,34 @@ class seq_pic2seq_pic():
                 with tf.variable_scope("num_identical_{}".format(i)):
                     # Multi-head Attention(self-attention)
                     dec_input = multihead_attention(queries=dec_input,
-                                                   keys=dec_input,
-                                                   num_units=self._embedding_size,
-                                                   num_heads=self._head,
-                                                   dropout_rate=0.1,
-                                                   is_training=self.is_training,
-                                                   causality=True,
-                                                   scope="self_attention")
+                                                    keys=dec_input,
+                                                    num_units=self._embedding_size,
+                                                    num_heads=self._head,
+                                                    dropout_rate=0.1,
+                                                    is_training=self.is_training,
+                                                    causality=True,
+                                                    scope="self_attention")
 
                     # Multi-head Attention(vanilla-attention)
                     self.dec_output = multihead_attention(queries=dec_input,
-                                                   keys=self.enc,
-                                                   num_units=self._embedding_size,
-                                                   num_heads=self._head,
-                                                   dropout_rate=0.1,
-                                                   is_training=self.is_training,
-                                                   causality=False,
-                                                   scope="vanilla_attention")
+                                                          keys=self.enc,
+                                                          num_units=self._embedding_size,
+                                                          num_heads=self._head,
+                                                          dropout_rate=0.1,
+                                                          is_training=self.is_training,
+                                                          causality=False,
+                                                          scope="vanilla_attention")
 
-                    self.dec_output = feedforward(self.dec_output, num_units=[4 * self._embedding_size, self._embedding_size])
-
-        # with tf.variable_scope('img_classification'):
-        #
-        #     classfy_input = tf.concat((tf.expand_dims(encoder_pic_output,-1), tf.expand_dims(self.enc,-1),tf.expand_dims(self.dec_output,-1)), -1)
-        #
-        #     with tf.variable_scope('text_input_cnn_classify'):
-        #         # pdb.set_trace()
-        #         w = tf.get_variable('w', [5, 5,3, 64],
-        #                             initializer=tf.random_normal_initializer(stddev=0.02))
-        #
-        #         conv = tf.nn.conv2d(classfy_input, filter=w, strides=[1, 2, 2, 1], padding="SAME")
-        #
-        #         biases = tf.get_variable('biases', [64], initializer=tf.constant_initializer(0.0))
-        #         conv = tf.reshape(tf.nn.bias_add(conv, biases), conv.get_shape())
-        #
-        #     conv_classfy=tf.reshape(conv, [self._batch_size, -1], name='classify_reshape')
-        #
-        #     # feedforward(conv_classfy,num_units=[conv_classfy.get_shape()[-1],self._cov_size],scope='classify_ff')
-        #     context_img = tf.layers.dense(conv_classfy, self._img_numb)
-        #     context_img_vgg=tf.nn.softmax(tf.matmul(context_img, self._candidates_pool))
-        #     self.logits_img = tf.layers.dense(context_img_vgg, self._img_numb)
-        #     self.predict_img = tf.to_int32(tf.argmax(self.logits_img, axis=-1))
-        #     self.acc_img = tf.reduce_sum(tf.to_float(tf.equal(self.predict_img, self._real_pic)))
-        #     tf.summary.scalar('acc_img', self.acc_img)
-        #     self.img_real_smoothed = label_smoothing(tf.one_hot(self._real_pic, depth=self._img_numb))
-        #     img_loss = tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.logits_img, labels=self.img_real_smoothed)
-        #     mean_img_loss=tf.reduce_mean(img_loss)
-        #     self.losses_img=mean_img_loss
+                    self.dec_output = feedforward(self.dec_output,
+                                                  num_units=[4 * self._embedding_size, self._embedding_size])
 
         with tf.variable_scope('loss_function_txt'):
 
             self.logits = tf.layers.dense(self.dec_output, vocab.vocab_size)
-            preds = tf.to_int32(tf.argmax(self.logits, axis=-1))
+            preds = tf.cast(tf.argmax(self.logits, axis=-1), tf.int32)
             self.predict_txt = preds
-            self.istarget = tf.to_float(tf.not_equal(self._response, 0))
-            self.acc = tf.reduce_sum(tf.to_float(tf.equal(preds, self._response)) * self.istarget) / (
+            self.istarget = tf.cast(tf.not_equal(self._response, 0), tf.float32)
+            self.acc = tf.reduce_sum(tf.cast(tf.equal(preds, self._response), tf.float32) * self.istarget) / (
                 tf.reduce_sum(self.istarget))
             tf.summary.scalar('acc', self.acc)
             self.y_smoothed = label_smoothing(tf.one_hot(self._response, depth=vocab.vocab_size))
@@ -372,11 +253,6 @@ class seq_pic2seq_pic():
             # all_loss = pic_loss + 0.0*txt_loss
             # pdb.set_trace()
 
-            # all_loss=G_loss+txt_loss
-            # loss_=tf.concat([tf.expand_dims(G_loss,-1),tf.expand_dims(cross_entropy_sentence,-1)],1)
-            # all_loss=linear(loss_,1)
-
-            #self.losses = mean_txt_loss+ self.losses_img # + pic_loss
             self.losses = mean_txt_loss
         self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
 
@@ -384,8 +260,6 @@ class seq_pic2seq_pic():
             # self.global_step = tf.Variable(0, name='global_step', trainable=False)
             # optimizer
             self.train_ops = self._opt.minimize(self.losses)
-            # grads_and_vars = self._opt.compute_gradients(self.losses)
-            # self.train_ops=self._opt.apply_gradients(grads_and_vars=grads_and_vars, name='train_op')
             tf.summary.scalar('mean_loss', self.losses)
             self.merged = tf.summary.merge_all()
 
@@ -402,25 +276,26 @@ class seq_pic2seq_pic():
         self._question = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Question')
         self._response = tf.placeholder(tf.int32, [self._batch_size, self._sentence_size], name='Response')
         # self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
-        self._input_pic = tf.placeholder(tf.float32, [self._batch_size, self.img_size_x, self.img_size_y, self._color_size],
+        self._input_pic = tf.placeholder(tf.float32,
+                                         [self._batch_size, self.img_size_x, self.img_size_y, self._color_size],
                                          name='frame_input')
         self._real_pic = tf.placeholder(tf.int32, [self._batch_size],
                                         name='frame_output')
-        self._candidates_pool_ph=tf.placeholder(tf.float32, [self._img_numb,self._candidates_vector_len],
-                                         name='candidates_pool')
+        self._candidates_pool_ph = tf.placeholder(tf.float32, [self._img_numb, self._candidates_vector_len],
+                                                  name='candidates_pool')
         # self._random_z=tf.placeholder(tf.float32,[self._batch_size,self._noise_dim],name='noise')
 
-    def steps(self, sess, data_dict, noise=None, step_type='train',qa_transpose=False, img_affect_testing=None):
+    def steps(self, sess, data_dict, noise=None, step_type='train', qa_transpose=False, img_affect_testing=None):
         # self.is_training = step_type
         input_batch_txt = data_dict[0]
         output_batch_txt = data_dict[1]
         input_batch_pic = data_dict[2]
-        if isinstance(img_affect_testing ,int):
-            input_batch_pic_temp=[]
-            for idx,pic in enumerate(input_batch_pic):
-                id=(idx+img_affect_testing)%len(input_batch_pic)
+        if isinstance(img_affect_testing, int):
+            input_batch_pic_temp = []
+            for idx, pic in enumerate(input_batch_pic):
+                id = (idx + img_affect_testing) % len(input_batch_pic)
                 input_batch_pic_temp.append(input_batch_pic[id])
-            input_batch_pic=input_batch_pic_temp
+            input_batch_pic = input_batch_pic_temp
         output_batch_pic = data_dict[3]
         # weight_batch_txt = data_dict[4]
         # pdb.set_trace()
@@ -437,7 +312,7 @@ class seq_pic2seq_pic():
                          self._question: input_batch_txt,
                          # self._weight: weight_batch_txt,
                          self._input_pic: input_batch_pic,
-                         self._real_pic:output_batch_pic,
+                         self._real_pic: output_batch_pic,
                          # self._candidates_pool:candidates_pool
                          }
             output_list = [self.losses, self.train_ops, self.merged]
@@ -453,9 +328,9 @@ class seq_pic2seq_pic():
                              self._input_pic: output_batch_pic}
                 try:
                     loss_t, _, summary = sess.run(output_list, feed_dict=feed_dict)
-                    loss=(loss+loss_t)/2
+                    loss = (loss + loss_t) / 2
                 except:
-                        pdb.set_trace()
+                    pdb.set_trace()
             return loss, summary
 
         # if step_type == 'valid':
@@ -473,28 +348,28 @@ class seq_pic2seq_pic():
 
         if step_type == 'test':
             output_batch_txt = np.zeros((self._batch_size, self._sentence_size), dtype=np.int32)
-            pic_encoding,acc_img=None,None
-            word_defined_image=[]
+            pic_encoding, acc_img = None, None
+            word_defined_image = []
             for j in range(self._sentence_size):
-                #txt_preds,pic_encoding,acc_img = sess.run([self.predict_txt,self.encoder_pic,self.acc_img],
-                txt_preds=sess.run([self.predict_txt],
-                                  feed_dict={self._question: input_batch_txt,
-                                             self._response: output_batch_txt,
-                                             self._input_pic: input_batch_pic,
-                                             self._real_pic:output_batch_pic})
+                # txt_preds,pic_encoding,acc_img = sess.run([self.predict_txt,self.encoder_pic,self.acc_img],
+                txt_preds = sess.run([self.predict_txt],
+                                     feed_dict={self._question: input_batch_txt,
+                                                self._response: output_batch_txt,
+                                                self._input_pic: input_batch_pic,
+                                                self._real_pic: output_batch_pic})
                 # output_batch_txt[:, j] = txt_preds[:, j]
                 output_batch_txt = txt_preds[0]
-            # feed_dict = {self._response: output_batch_txt,
-            #              self._question: input_batch_txt,
-            #              # self._weight: weight_batch_txt,
-            #              self._input_pic: input_batch_pic}
-            # output_list = [self.losses, self.predict_txt]#, self.predict_pic
-            # try:
-            #     loss, txt = sess.run(output_list, feed_dict=feed_dict)
-            # except:
-            #     pdb.set_trace()
-                word_defined_image.append([copy.copy(output_batch_txt),copy.copy(pic_encoding)])
-            #return output_batch_txt,pic_encoding,word_defined_image,acc_img
+                # feed_dict = {self._response: output_batch_txt,
+                #              self._question: input_batch_txt,
+                #              # self._weight: weight_batch_txt,
+                #              self._input_pic: input_batch_pic}
+                # output_list = [self.losses, self.predict_txt]#, self.predict_pic
+                # try:
+                #     loss, txt = sess.run(output_list, feed_dict=feed_dict)
+                # except:
+                #     pdb.set_trace()
+                word_defined_image.append([copy.copy(output_batch_txt), copy.copy(pic_encoding)])
+            # return output_batch_txt,pic_encoding,word_defined_image,acc_img
             return output_batch_txt, pic_encoding, word_defined_image, acc_img
         print('step_type is wrong!>>>')
         return None

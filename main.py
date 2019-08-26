@@ -9,7 +9,9 @@ import random
 import Analysis
 from VGG import run_candidates
 import pickle as pkl
+from dataset import VisDialDataset
 import scipy.io
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 # from math import exp
 tf.flags.DEFINE_float("learn_rate", 0.00001, "Learning rate for SGD.")
@@ -53,7 +55,7 @@ def train_model(sess, model, train_data, valid_data):
     train_summary_writer = tf.summary.FileWriter(config.summary_path, sess.graph)
     global_steps = 0
     while current_step <= epoch:
-        print ('current_step:',current_step)
+        print('current_step:', current_step)
         for i in range(len(train_data)):
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
@@ -110,12 +112,12 @@ def test_model(sess, model, test_data, vocab, times):
         # processing_data.append(word_defined_image)
         acc_pics.append(acc_img)
         if current_step % 100 == 0:
-            print("current_step",current_step)
-            print("pred_txt",pred_txt)
-            print("target_txt",data_test[1])
-        current_step+=1
-    #print('img choosing accuracy:', np.mean(acc_pics))
-    #Analysis.drew_seq(times, encoding_pics, './result/', config.gray)
+            print("current_step", current_step)
+            print("pred_txt", pred_txt)
+            print("target_txt", data_test[1])
+        current_step += 1
+    # print('img choosing accuracy:', np.mean(acc_pics))
+    # Analysis.drew_seq(times, encoding_pics, './result/', config.gray)
     Analysis.write_sents(times, pred_txts, target_txt, './result/', vocab, show_matric=False)
     # Analysis.write_process(times,processing_data,'./result/process/',vocab,batch_size=config.batch_size)
     # test_loss=test_loss / len(test_data)
@@ -153,70 +155,50 @@ def pretrain_model(sess, model, train_data):
 
 
 def main(_):
-    vocab = Data_Process.Vocab()
+    dataset = {
+        'image_features_train_h5': 'data/visdial/features_faster_rcnn_x101_train.h5',
+        'image_features_val_h5': 'data/visdial/features_faster_rcnn_x101_val.h5',
+        'image_features_test_h5': 'data/visdial/features_faster_rcnn_x101_test.h5',
+        'word_counts_json': 'data/visdial/visdial_1.0_word_counts_train.json',
+
+        'img_norm': 1,
+        'concat_history': True,
+        'max_sequence_length': 20,
+        'vocab_min_count': 5}
+
     if config.pre_training:
-        input_data_txt_p, output_data_txt_p, input_data_pic_p, output_data_pic_p, weights_p, = Data_Process.get_pretrain_data(
-            config.data_dir, vocab, config.sentence_size, config.gray)
-        prtrain_batches_data = Data_Process.vectorize_batch(input_data_txt_p, output_data_txt_p, input_data_pic_p,
-                                                            output_data_pic_p,
-                                                            weights_p, config.batch_size)
+        train_dataset = VisDialDataset(dataset, 'data/visdial/visdial_1.0_train.json', True, True, True, False)
+        train_dataloader = tf.data(train_dataset, batch_size=32, shuffle=True)
+        valid_dataset=VisDialDataset(dataset, 'data/visdial/visdial_1.0_val.json', True, True, True, False)
+        valid_dataloader = tf.data(valid_dataset, batch_size=32, shuffle=True)
 
-    input_data_txt, output_data_txt, input_data_pic, output_data_pic, weights, times = Data_Process.get_input_output_data(
-        config.data_dir, vocab, config.sentence_size, config.gray)
-    # config.img_size_x =input_data_pic.values()[0].shape[0]
-    # config.img_size_y=input_data_pic.values()[0].shape[1]
-    # pdb.set_trace()
-    img_numb = len(output_data_pic)
-    print('total imgs:', img_numb)
-    print('total sentences:', len(input_data_txt))
-    batches_data = Data_Process.vectorize_batch(input_data_txt, output_data_txt, input_data_pic, output_data_pic,
-                                                weights, config.batch_size)
-    print('data processed,vocab size:', vocab.vocab_size)
-    train_data, valid_test_data = model_selection.train_test_split(batches_data, test_size=0.2, shuffle=False)
-    valid_data, test_data = model_selection.train_test_split(valid_test_data, test_size=0.5, shuffle=False)
-
-    if os.path.exists('./data/candidates_pool.pkl'):
-        print('load the candidates pool...')
-        f = open('./data/candidates_pool.pkl', 'rb')
-        candidates_pool = pkl.load(f,encoding='ISO-8859-1')
-        f.close()
-    else:
-        # vgg_rawnet = scipy.io.loadmat('./data/imagenet-vgg-verydeep-19.mat')
-        print('build a candidates pool...')
-        candidates_pool = run_candidates(input_data_pic)
-        f = open('./data/candidates_pool.pkl', 'w+')
-        pkl.dump(candidates_pool, f)
-        f.close()
+    img_numb = len(train_dataloader)
+    print('total train sentences:', img_numb)
+    candidates_vector_len=None
+    vocab=None
+    times_test=None
     # pdb.set_trace()
     sess = tf.Session()
-    candidates_vector_len = len(candidates_pool[0])
-    test_ignore_len = len(times) - len(batches_data) * config.batch_size
-    if test_ignore_len > 0:
-        times_test = times[-(len(test_data) * config.batch_size + test_ignore_len):-test_ignore_len]
-    else:
-        times_test = times[-len(test_data) * config.batch_size:]
     # pdb.set_trace()
     if config.is_training:
         print('establish the model...')
         model = Model.seq_pic2seq_pic(config, vocab, img_numb, candidates_vector_len)
         # pdb.set_trace()
-        sess.run(tf.global_variables_initializer(),feed_dict={model._candidates_pool_ph:candidates_pool})
-        if config.pre_training:
-            pretrain_model(sess, model, prtrain_batches_data)
-        train_model(sess, model, train_data, valid_data)
+        sess.run(tf.global_variables_initializer())
+        train_model(sess, model, train_dataset, valid_dataset)
         # config.model_type = 'test'
-        test_model(sess, model, test_data[:len(times_test) / config.batch_size], vocab, times_test)  ###
+        test_model(sess, model, test_data, vocab, times_test)  ###
 
     else:
         print('Test model.......')
         print('establish the model...')
         # config.batch_size = len(test_data)
 
-        model = Model.seq_pic2seq_pic(config, vocab, img_numb,candidates_vector_len)
+        model = Model.seq_pic2seq_pic(config, vocab, img_numb, candidates_vector_len)
         print('Reload model from checkpoints.....')
         ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
         model.saver.restore(sess, ckpt.model_checkpoint_path)
-        test_model(sess, model, test_data[:int(len(times_test) / config.batch_size)], vocab, times_test)  ################## test_data
+        test_model(sess, model, test_data, vocab, times_test)
 
 
 if __name__ == "__main__":
