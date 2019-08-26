@@ -1,10 +1,10 @@
 from typing import Any, Dict, List, Optional
 
 import tensorflow as tf
-import tensorflow.keras.utils.normalize as normalize
-import tensorflow.compat.v1.keras.preprocessing.sequence.pad_sequences as pad_sequence
-import tensorflow.compat.v1.data.Dataset as Dataset
+from tensorflow.keras.utils import normalize
+from tensorflow.compat.v1.keras.preprocessing.sequence import pad_sequences
 
+import pdb
 from readers import (
     DialogsReader,
     DenseAnnotationsReader,
@@ -13,7 +13,7 @@ from readers import (
 from vocabulary import Vocabulary
 
 
-class VisDialDataset(Dataset):
+class VisDialDataset():
     """
     A full representation of VisDial v1.0 (train/val/test) dataset. According
     to the appropriate split, it returns dictionary of question, image,
@@ -21,16 +21,16 @@ class VisDialDataset(Dataset):
     """
 
     def __init__(
-        self,
-        config: Dict[str, Any],
-        dialogs_jsonpath: str,
-        dense_annotations_jsonpath: Optional[str] = None,
-        overfit: bool = False,
-        in_memory: bool = False,
-        return_options: bool = True,
-        add_boundary_toks: bool = False,
+            self,
+            config: Dict[str, Any],
+            dialogs_jsonpath: str,
+            dense_annotations_jsonpath: Optional[str] = None,
+            overfit: bool = False,
+            in_memory: bool = False,
+            return_options: bool = True,
+            add_boundary_toks: bool = False,
     ):
-        super().__init__()
+        # super().__init__()
         self.config = config
         self.return_options = return_options
         self.add_boundary_toks = add_boundary_toks
@@ -238,8 +238,8 @@ class VisDialDataset(Dataset):
 
         for i in range(len(sequences)):
             sequences[i] = sequences[i][
-                : self.config["max_sequence_length"] - 1
-            ]
+                           : self.config["max_sequence_length"] - 1
+                           ]
         sequence_lengths = [len(sequence) for sequence in sequences]
 
         # Pad all sequences to max_sequence_length.
@@ -247,7 +247,7 @@ class VisDialDataset(Dataset):
             (len(sequences), self.config["max_sequence_length"]),
             value=self.vocabulary.PAD_INDEX,
         )
-        padded_sequences = pad_sequence(
+        padded_sequences = pad_sequences(
             [tf.convert_to_tensor(sequence) for sequence in sequences],
             batch_first=True,
             padding_value=self.vocabulary.PAD_INDEX,
@@ -256,18 +256,18 @@ class VisDialDataset(Dataset):
         return maxpadded_sequences, sequence_lengths
 
     def _get_history(
-        self,
-        caption: List[int],
-        questions: List[List[int]],
-        answers: List[List[int]],
+            self,
+            caption: List[int],
+            questions: List[List[int]],
+            answers: List[List[int]],
     ):
         # Allow double length of caption, equivalent to a concatenated QA pair.
         caption = caption[: self.config["max_sequence_length"] * 2 - 1]
 
         for i in range(len(questions)):
             questions[i] = questions[i][
-                : self.config["max_sequence_length"] - 1
-            ]
+                           : self.config["max_sequence_length"] - 1
+                           ]
 
         for i in range(len(answers)):
             answers[i] = answers[i][: self.config["max_sequence_length"] - 1]
@@ -293,7 +293,7 @@ class VisDialDataset(Dataset):
                     concatenated_history[i].extend(history[j])
 
             max_history_length = (
-                self.config["max_sequence_length"] * 2 * len(history)
+                    self.config["max_sequence_length"] * 2 * len(history)
             )
             history = concatenated_history
 
@@ -302,7 +302,7 @@ class VisDialDataset(Dataset):
             (len(history), max_history_length),
             value=self.vocabulary.PAD_INDEX,
         )
-        padded_history = pad_sequence(
+        padded_history = pad_sequences(
             [tf.convert_to_tensor(round_history) for round_history in history],
             batch_first=True,
             padding_value=self.vocabulary.PAD_INDEX,

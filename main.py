@@ -125,33 +125,33 @@ def test_model(sess, model, test_data, vocab, times):
     print('test is finished!')
 
 
-def pretrain_model(sess, model, train_data):
-    current_step = 1
-    train_losses = []
-
-    epoch = config.pretrain_epochs
-    print('pre-training....')
-    # train_summary_writer = tf.summary.FileWriter(config.summary_path, sess.graph)
-    # global_steps = 0
-    while current_step <= epoch:
-        #  print ('current_step:',current_step)
-        for i in range(len(train_data)):
-            # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
-            # pdb.set_trace()
-            train_loss_, _ = model.steps(sess, random.choice(train_data), step_type='train',
-                                         qa_transpose=config.qa_transpose)
-            # global_steps += 1
-            # g_step = sess.run(model.global_step)
-            # if global_steps % len(train_data) == 0:
-            #     train_summary_writer.add_summary(summary, global_steps)
-        if current_step % config.check_epoch == 0:
-            train_losses.append(train_loss_)
-            print('-------------------------------')
-            print('pre-train current_step:', current_step)
-            print('pre-training loss:', train_loss_)
-            # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
-        current_step += 1
-    print(' pre-train current step %d finished' % current_step)
+# def pretrain_model(sess, model, train_data):
+#     current_step = 1
+#     train_losses = []
+#
+#     epoch = config.pretrain_epochs
+#     print('pre-training....')
+#     # train_summary_writer = tf.summary.FileWriter(config.summary_path, sess.graph)
+#     # global_steps = 0
+#     while current_step <= epoch:
+#         #  print ('current_step:',current_step)
+#         for i in range(len(train_data)):
+#             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
+#             # pdb.set_trace()
+#             train_loss_, _ = model.steps(sess, random.choice(train_data), step_type='train',
+#                                          qa_transpose=config.qa_transpose)
+#             # global_steps += 1
+#             # g_step = sess.run(model.global_step)
+#             # if global_steps % len(train_data) == 0:
+#             #     train_summary_writer.add_summary(summary, global_steps)
+#         if current_step % config.check_epoch == 0:
+#             train_losses.append(train_loss_)
+#             print('-------------------------------')
+#             print('pre-train current_step:', current_step)
+#             print('pre-training loss:', train_loss_)
+#             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
+#         current_step += 1
+#     print(' pre-train current step %d finished' % current_step)
 
 
 def main(_):
@@ -166,12 +166,14 @@ def main(_):
         'max_sequence_length': 20,
         'vocab_min_count': 5}
 
-    if config.pre_training:
+    if config.is_training:
         train_dataset = VisDialDataset(dataset, 'data/visdial/visdial_1.0_train.json', True, True, True, False)
         train_dataloader = tf.data(train_dataset, batch_size=32, shuffle=True)
         valid_dataset=VisDialDataset(dataset, 'data/visdial/visdial_1.0_val.json', True, True, True, False)
         valid_dataloader = tf.data(valid_dataset, batch_size=32, shuffle=True)
-
+    else:
+        test_dataset=VisDialDataset(dataset, 'data/visdial/visdial_1.0_test.json', True, True, True, False)
+        test_dataloader = tf.data(test_dataset, batch_size=32, shuffle=True)
     img_numb = len(train_dataloader)
     print('total train sentences:', img_numb)
     candidates_vector_len=None
@@ -185,9 +187,9 @@ def main(_):
         model = Model.seq_pic2seq_pic(config, vocab, img_numb, candidates_vector_len)
         # pdb.set_trace()
         sess.run(tf.global_variables_initializer())
-        train_model(sess, model, train_dataset, valid_dataset)
+        train_model(sess, model, train_dataloader, valid_dataloader)
         # config.model_type = 'test'
-        test_model(sess, model, test_data, vocab, times_test)  ###
+        test_model(sess, model, test_dataloader, vocab, times_test)  ###
 
     else:
         print('Test model.......')
@@ -198,7 +200,7 @@ def main(_):
         print('Reload model from checkpoints.....')
         ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
         model.saver.restore(sess, ckpt.model_checkpoint_path)
-        test_model(sess, model, test_data, vocab, times_test)
+        test_model(sess, model, test_dataset, vocab, times_test)
 
 
 if __name__ == "__main__":
