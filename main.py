@@ -32,8 +32,8 @@ tf.flags.DEFINE_integer('stop_limit', 5, 'number of evaluation loss is greater t
 tf.flags.DEFINE_string("checkpoint_path", "./checkpoints/", "Directory to save checkpoints")
 tf.flags.DEFINE_string("summary_path", "./summary/", "Directory to save summary")
 tf.flags.DEFINE_bool("is_training", True, "whether to train or test model")
-tf.flags.DEFINE_integer('img_size_x', 160, 'generate pic size in X')
-tf.flags.DEFINE_integer('img_size_y', 320, 'generate pic size in Y')
+tf.flags.DEFINE_integer('img_feature_layer', 32, 'generate pic size in X')
+tf.flags.DEFINE_integer('img_feature_vector', 2048, 'generate pic size in Y')
 tf.flags.DEFINE_integer('noise_dim', 64, 'dim in noise')
 tf.flags.DEFINE_integer('convolution_dim', 256, 'dim in the first layer pic decoder')
 tf.flags.DEFINE_bool('gray', False, 'picture is gray or not, placeholder also should be changed')
@@ -41,10 +41,22 @@ tf.flags.DEFINE_integer('num_identical', 6, 'number of encode transformers')
 tf.flags.DEFINE_bool('qa_transpose', False, 'whether to train model in AQ with QA training')
 tf.flags.DEFINE_bool('pre_training', False, 'whether to train model in AQ with QA training')
 tf.flags.DEFINE_integer('pretrain_epochs', 100, 'epoch for pre-training')
+tf.flags.DEFINE_integer('round', 10, 'dialogue round in a image')
 config = tf.flags.FLAGS
 
 
-def train_model(sess, model, train_data, valid_data):
+def get_batch_data(data_class, data_ids):
+    batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
+    for id in data_ids:
+        sample = data_class[id]
+        batch_txt_ans_input.append(sample["ans_in"])
+        batch_txt_ans_output.append(sample["ans_out"])
+        batch_txt_query.append(sample["ques"])
+        batch_pic_input.append(sample["img_feat"])
+    return [batch_txt_query, batch_txt_ans_input, batch_txt_ans_output, batch_pic_input]
+
+
+def train_model(sess, model, train_data, valid_data, batch_size):
     # train_data, eval_data = model_selection.train_test_split(train_data, test_size=0.2)
     current_step = 1
     train_losses = []
@@ -54,12 +66,19 @@ def train_model(sess, model, train_data, valid_data):
     checkpoint_path = os.path.join(config.checkpoint_path, 'visual_dialog.ckpt')
     train_summary_writer = tf.summary.FileWriter(config.summary_path, sess.graph)
     global_steps = 0
+    keys_train = train_data.image_ids
+
     while current_step <= epoch:
         print('current_step:', current_step)
-        for i in range(len(train_data)):
+        for i in range(len(train_data.dialogs_reader)):
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
-            train_loss_, summary = model.steps(sess, random.choice(train_data), step_type='train',
+            train_data_batch_id = []
+            for i in range(batch_size):
+                id_train = random.choice(keys_train)
+                train_data_batch_id.append(id_train)
+            train_data_batch = get_batch_data(train_data, train_data_batch_id)
+            train_loss_, summary = model.steps(sess, train_data_batch, step_type='train',
                                                qa_transpose=config.qa_transpose)
             global_steps += 1
             # g_step = sess.run(model.global_step)
@@ -73,8 +92,8 @@ def train_model(sess, model, train_data, valid_data):
             print('training loss:', train_loss_)
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
 
-            for i in range(len(valid_data)):
-                eval_loss, _, = model.steps(sess, random.choice(valid_data), step_type='train')
+            for id_valid in valid_data.dialogs_reader.keys():
+                eval_loss, _, = model.steps(sess, valid_data[id_valid], step_type='train')
                 eval_losses += eval_loss
 
             print('evaluation loss:', eval_losses / len(valid_data))
@@ -155,7 +174,7 @@ def test_model(sess, model, test_data, vocab, times):
 
 
 def main(_):
-    dataset = {
+    data_config = {
         'image_features_train_h5': 'data/visdial/features_faster_rcnn_x101_train.h5',
         'image_features_val_h5': 'data/visdial/features_faster_rcnn_x101_val.h5',
         'image_features_test_h5': 'data/visdial/features_faster_rcnn_x101_test.h5',
@@ -163,44 +182,36 @@ def main(_):
 
         'img_norm': 1,
         'concat_history': True,
-        'max_sequence_length': 20,
+        'max_sequence_length': config.sentence_size,
         'vocab_min_count': 5}
-
-    if config.is_training:
-        train_dataset = VisDialDataset(dataset, 'data/visdial/visdial_1.0_train.json', True, True, True, False)
-        train_dataloader = tf.data(train_dataset, batch_size=32, shuffle=True)
-        valid_dataset=VisDialDataset(dataset, 'data/visdial/visdial_1.0_val.json', True, True, True, False)
-        valid_dataloader = tf.data(valid_dataset, batch_size=32, shuffle=True)
-    else:
-        test_dataset=VisDialDataset(dataset, 'data/visdial/visdial_1.0_test.json', True, True, True, False)
-        test_dataloader = tf.data(test_dataset, batch_size=32, shuffle=True)
-    img_numb = len(train_dataloader)
-    print('total train sentences:', img_numb)
-    candidates_vector_len=None
-    vocab=None
-    times_test=None
-    # pdb.set_trace()
     sess = tf.Session()
-    # pdb.set_trace()
     if config.is_training:
-        print('establish the model...')
-        model = Model.seq_pic2seq_pic(config, vocab, img_numb, candidates_vector_len)
+        train_dataset = VisDialDataset(data_config, 'data/visdial/visdial_1.0_train.json',
+                                       dense_annotations_jsonpath=None, overfit=False, in_memory=True,
+                                       return_options=True, add_boundary_toks=True)
+        print('train dataset length :', len(train_dataset.dialogs_reader))
+        valid_dataset = VisDialDataset(data_config, 'data/visdial/visdial_1.0_val.json', None, True, True, True, True)
         # pdb.set_trace()
+
+        print('establish the model...')
+        model = Model.seq_pic2seq_pic(config, train_dataset.vocabulary)
         sess.run(tf.global_variables_initializer())
-        train_model(sess, model, train_dataloader, valid_dataloader)
-        # config.model_type = 'test'
-        test_model(sess, model, test_dataloader, vocab, times_test)  ###
+        train_model(sess, model, train_dataset, valid_dataset,config.batch_size)
+
+
 
     else:
+        test_dataset = VisDialDataset(data_config, 'data/visdial/visdial_1.0_test.json', None, True, True, True, False)
+
         print('Test model.......')
         print('establish the model...')
         # config.batch_size = len(test_data)
 
-        model = Model.seq_pic2seq_pic(config, vocab, img_numb, candidates_vector_len)
+        model = Model.seq_pic2seq_pic(config, test_dataset.vocabulary)
         print('Reload model from checkpoints.....')
         ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
         model.saver.restore(sess, ckpt.model_checkpoint_path)
-        test_model(sess, model, test_dataset, vocab, times_test)
+        test_model(sess, model, test_dataset, test_dataset.vocabulary)
 
 
 if __name__ == "__main__":

@@ -1,9 +1,9 @@
 from typing import Any, Dict, List, Optional
 
 import tensorflow as tf
-from tensorflow.keras.utils import normalize
-from tensorflow.compat.v1.keras.preprocessing.sequence import pad_sequences
-
+# from tensorflow.keras.utils import normalize
+# from tensorflow.compat.v1.keras.preprocessing.sequence import pad_sequences
+import numpy as np
 import pdb
 from readers import (
     DialogsReader,
@@ -72,15 +72,15 @@ class VisDialDataset():
 
     def __getitem__(self, index):
         # Get image_id, which serves as a primary key for current instance.
-        image_id = self.image_ids[index]
-
+        # image_id = self.image_ids[index]
+        image_id = index
         # Get image features for this image_id using hdf reader.
         image_features = self.hdf_reader[image_id]
-        image_features = tf.convert_to_tensor(image_features)
+        # image_features = tf.convert_to_tensor(image_features)
         # Normalize image features at zero-th dimension (since there's no batch
         # dimension).
         if self.config["img_norm"]:
-            image_features = normalize(image_features, dim=0, p=2)
+            image_features = tf.keras.utils.normalize(image_features, axis=0, order=2)
 
         # Retrieve instance for this image_id using json reader.
         visdial_instance = self.dialogs_reader[image_id]
@@ -121,10 +121,8 @@ class VisDialDataset():
                         ] = self.vocabulary.to_indices(
                             dialog[i]["answer_options"][j]
                         )
-
-        questions, question_lengths = self._pad_sequences(
-            [dialog_round["question"] for dialog_round in dialog]
-        )
+        # pdb.set_trace()
+        questions, question_lengths = self._pad_sequences([dialog_round["question"] for dialog_round in dialog])
         history, history_lengths = self._get_history(
             caption,
             [dialog_round["question"] for dialog_round in dialog],
@@ -133,27 +131,31 @@ class VisDialDataset():
         answers_in, answer_lengths = self._pad_sequences(
             [dialog_round["answer"][:-1] for dialog_round in dialog]
         )
-        answers_out, _ = self._pad_sequences(
+
+        answers_out,_= self._pad_sequences(
             [dialog_round["answer"][1:] for dialog_round in dialog]
         )
+        # for idx,answer in enumerate(answer_out):
+        #     if len(answer)>1:
+        #         answer_out[idx][:]=answer_out[idx][1:]
+        # answers_out, _ = self._pad_sequences(answer_out)
 
         # Collect everything as tensors for ``collate_fn`` of dataloader to
         # work seamlessly questions, history, etc. are converted to
         # LongTensors, for nn.Embedding input.
+        # pdb.set_trace()
         item = {}
-        item["img_ids"] = tf.convert_to_tensor(image_id).long()
+        item["img_ids"] = image_id
         item["img_feat"] = image_features
-        item["ques"] = questions.long()
-        item["hist"] = history.long()
-        item["ans_in"] = answers_in.long()
-        item["ans_out"] = answers_out.long()
-        item["ques_len"] = tf.convert_to_tensor(question_lengths).long()
-        item["hist_len"] = tf.convert_to_tensor(history_lengths).long()
-        item["ans_len"] = tf.convert_to_tensor(answer_lengths).long()
-        item["num_rounds"] = tf.convert_to_tensor(
-            visdial_instance["num_rounds"]
-        ).long()
-
+        item["ques"] = questions
+        item["hist"] = history
+        item["ans_in"] = answers_in
+        item["ans_out"] = answers_out
+        item["ques_len"] = question_lengths
+        item["hist_len"] = history_lengths
+        item["ans_len"] = answer_lengths
+        item["num_rounds"] = visdial_instance["num_rounds"]
+        # pdb.set_trace()
         if self.return_options:
             if self.add_boundary_toks:
                 answer_options_in, answer_options_out = [], []
@@ -176,12 +178,13 @@ class VisDialDataset():
                     answer_options_out.append(options)
 
                     answer_option_lengths.append(option_lengths)
-                answer_options_in = tf.stack(answer_options_in, 0)
-                answer_options_out = tf.stack(answer_options_out, 0)
+                # pdb.set_trace()
+                answer_options_in = np.stack(answer_options_in, 0)
+                answer_options_out = np.stack(answer_options_out, 0)
 
-                item["opt_in"] = answer_options_in.long()
-                item["opt_out"] = answer_options_out.long()
-                item["opt_len"] = tf.convert_to_tensor(answer_option_lengths).long()
+                item["opt_in"] = answer_options_in
+                item["opt_out"] = answer_options_out
+                item["opt_len"] = answer_option_lengths
             else:
                 answer_options = []
                 answer_option_lengths = []
@@ -200,17 +203,14 @@ class VisDialDataset():
                 answer_indices = [
                     dialog_round["gt_index"] for dialog_round in dialog
                 ]
-                item["ans_ind"] = tf.convert_to_tensor(answer_indices).long()
+                item["ans_ind"] = answer_indices
 
         # Gather dense annotations.
         if "val" in self.split:
             dense_annotations = self.annotations_reader[image_id]
-            item["gt_relevance"] = tf.convert_to_tensor(
-                dense_annotations["gt_relevance"]
-            ).float()
-            item["round_id"] = tf.convert_to_tensor(
-                dense_annotations["round_id"]
-            ).long()
+            item["gt_relevance"] = dense_annotations["gt_relevance"]
+
+            item["round_id"] = dense_annotations["round_id"]
 
         return item
 
@@ -241,18 +241,16 @@ class VisDialDataset():
                            : self.config["max_sequence_length"] - 1
                            ]
         sequence_lengths = [len(sequence) for sequence in sequences]
-
+        # pdb.set_trace()
         # Pad all sequences to max_sequence_length.
-        maxpadded_sequences = tf.fill(
-            (len(sequences), self.config["max_sequence_length"]),
+        maxpadded_sequences = np.full(
+            [len(sequences), self.config["max_sequence_length"]],self.vocabulary.PAD_INDEX)
+        padded_sequences = tf.compat.v1.keras.preprocessing.sequence.pad_sequences(
+            [sequence for sequence in sequences],
+            padding='post',
             value=self.vocabulary.PAD_INDEX,
         )
-        padded_sequences = pad_sequences(
-            [tf.convert_to_tensor(sequence) for sequence in sequences],
-            batch_first=True,
-            padding_value=self.vocabulary.PAD_INDEX,
-        )
-        maxpadded_sequences[:, : padded_sequences.size(1)] = padded_sequences
+        maxpadded_sequences[:, : len(padded_sequences[0])] = padded_sequences
         return maxpadded_sequences, sequence_lengths
 
     def _get_history(
@@ -298,14 +296,14 @@ class VisDialDataset():
             history = concatenated_history
 
         history_lengths = [len(round_history) for round_history in history]
-        maxpadded_history = tf.fill(
-            (len(history), max_history_length),
+        maxpadded_history = np.full(
+            [len(history), max_history_length],
+            self.vocabulary.PAD_INDEX,
+        )
+        padded_history = tf.compat.v1.keras.preprocessing.sequence.pad_sequences(
+            [round_history for round_history in history],
+            padding='post',
             value=self.vocabulary.PAD_INDEX,
         )
-        padded_history = pad_sequences(
-            [tf.convert_to_tensor(round_history) for round_history in history],
-            batch_first=True,
-            padding_value=self.vocabulary.PAD_INDEX,
-        )
-        maxpadded_history[:, : padded_history.size(1)] = padded_history
+        maxpadded_history[:, : len(padded_history[0])] = padded_history
         return maxpadded_history, history_lengths
