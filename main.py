@@ -20,7 +20,7 @@ tf.flags.DEFINE_float("learn_rate", 0.00001, "Learning rate for SGD.")
 # tf.flags.DEFINE_float("learning_rate_decay_factor", 0.5, 'if loss not decrease, multiple the lr with factor')
 tf.flags.DEFINE_float("max_grad_norm", 5.0, "Clip gradients to this norm.")
 tf.flags.DEFINE_integer("evaluation_interval", 10, "Evaluate and print results every x epochs")
-tf.flags.DEFINE_integer("batch_size", 8, "Batch size for training.")  # should consider the size of validation set
+tf.flags.DEFINE_integer("batch_size", 10, "Batch size for training.")  # should consider the size of validation set
 tf.flags.DEFINE_integer("head", 8, "head number of attention")
 tf.flags.DEFINE_integer("epochs", 2000, "Number of epochs to train for.")
 tf.flags.DEFINE_integer('check_epoch', 10, 'evaluation times')
@@ -45,15 +45,16 @@ tf.flags.DEFINE_integer('round', 10, 'dialogue round in a image')
 config = tf.flags.FLAGS
 
 
-def get_batch_data(data_class, data_ids):
-    batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
-    for id in data_ids:
-        sample = data_class[id]
-        batch_txt_ans_input.append(sample["ans_in"])
-        batch_txt_ans_output.append(sample["ans_out"])
-        batch_txt_query.append(sample["ques"])
-        batch_pic_input.append(sample["img_feat"])
-    return [batch_txt_query, batch_txt_ans_input, batch_txt_ans_output, batch_pic_input]
+def get_fake_batch_data(data_class, data_ids):
+    # batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
+    # for id in data_ids:
+    #     sample = data_class[id]
+    #     batch_txt_ans_input.append(sample["ans_in"])
+    #     batch_txt_ans_output.append(sample["ans_out"])
+    #     batch_txt_query.append(sample["ques"])
+    #     batch_pic_input.append(sample["img_feat"])
+    sample = data_class[id]
+    return [sample["ques"], sample["ans_in"], sample["ans_out"], sample["img_feat"]]
 
 
 def train_model(sess, model, train_data, valid_data, batch_size):
@@ -74,10 +75,10 @@ def train_model(sess, model, train_data, valid_data, batch_size):
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
             train_data_batch_id = []
-            for i in range(batch_size):
-                id_train = random.choice(keys_train)
-                train_data_batch_id.append(id_train)
-            train_data_batch = get_batch_data(train_data, train_data_batch_id)
+
+            id_train = random.choice(keys_train)
+
+            train_data_batch = get_fake_batch_data(train_data, id_train)
             train_loss_, summary = model.steps(sess, train_data_batch, step_type='train',
                                                qa_transpose=config.qa_transpose)
             global_steps += 1

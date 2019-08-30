@@ -6,7 +6,7 @@ import copy
 
 
 class seq_pic2seq_pic():
-    def __init__(self, config, vocab,img_numb=None, candidates_vector_len=None):
+    def __init__(self, config, vocab, img_numb=None, candidates_vector_len=None):
         if config.gray:
             self._color_size = 1
         else:
@@ -17,10 +17,11 @@ class seq_pic2seq_pic():
         self._batch_size = config.batch_size
         self._sentence_size = config.sentence_size
         self._learn_rate = tf.Variable(float(config.learn_rate), trainable=False, dtype=tf.float32, name='learn_rate')
-        self._round=config.round
+        self._round = config.round
         # self._opt = tf.train.GradientDescentOptimizer(learning_rate=self._learn_rate)
         # self._opt = tf.train.AdamOptimizer(learning_rate=self._learn_rate)
-        self._opt = tf.compat.v1.train.AdamOptimizer(learning_rate=self._learn_rate, beta1=0.9, beta2=0.98, epsilon=1e-8)
+        self._opt = tf.compat.v1.train.AdamOptimizer(learning_rate=self._learn_rate, beta1=0.9, beta2=0.98,
+                                                     epsilon=1e-8)
 
         self._embedding_size = config.recurrent_dim
         self._layers = config.layers
@@ -45,27 +46,29 @@ class seq_pic2seq_pic():
 
             # Position Encoding(use range from 0 to len(inpt) to represent position dim of each words)
             # tf.tile(tf.expand_dims(tf.range(tf.shape(self.inpt)[1]), 0), [tf.shape(self.inpt)[0], 1]),
-            self.enc += positional_encoding(self._question,
-                                            vocab_size=self._sentence_size,
-                                            num_units=self._embedding_size,
-                                            zero_pad=False,
-                                            scale=False,
+
+            self.enc += positional_encoding(self._question, vocab_size=self._sentence_size,
+                                            num_units=self._embedding_size, zero_pad=False, scale=False,
                                             scope="enc_pe")
+
+            # self.enc += positional_encoding(self._question,
+            #                                 vocab_size=self._sentence_size,
+            #                                 num_units=self._embedding_size,
+            #                                 zero_pad=False,
+            #                                 scale=False,
+            #                                 scope="enc_pe")
 
             # Dropout
             self.enc = tf.layers.dropout(self.enc,
                                          rate=0.1,
-                                         training=tf.convert_to_tensor(self.is_training))
+                                         training=self.is_training)
 
             # Identical
             for i in range(self._num_identical):
                 with tf.compat.v1.variable_scope("num_identical_{}".format(i)):
                     # Multi-head Attention
-                    self.enc = multihead_attention(queries=self.enc,
-                                                   keys=self.enc,
-                                                   num_units=self._embedding_size,
-                                                   num_heads=self._head,
-                                                   dropout_rate=0.1,
+                    self.enc = multihead_attention(queries=self.enc, keys=self.enc, num_units=self._embedding_size,
+                                                   num_heads=self._head, dropout_rate=0.1,
                                                    is_training=self.is_training,
                                                    causality=False)
                     self.enc = feedforward(self.enc,
@@ -162,7 +165,7 @@ class seq_pic2seq_pic():
             # pdb.set_trace()
             # decoder_input = tf.concat((tf.ones_like(self._response[:, :1]) * 2, self._response[:, :-1]),
             #                           -1)  ## add 'go' sign
-            decoder_input=self._response_in
+            decoder_input = self._response_in
             dec_input = embedding(decoder_input,  # self._response,
                                   vocab_size=len(vocab),
                                   num_units=self._embedding_size,
@@ -181,24 +184,28 @@ class seq_pic2seq_pic():
             # encoder_pic_output 4 5 10 512 -> 4 30 64
             # pic 30 64 > 1 64  sentence 30 * 64
             pdb.set_trace()
-            encoder_pic_output = tf.reshape(self._input_pic, [self._batch_size, -1])
+            # encoder_pic_output = tf.reshape(self._input_pic, [self._batch_size, -1])
 
-            encoder_pic_output = tf.layers.dense(encoder_pic_output, 64)
-            encoder_pic_output = tf.expand_dims(encoder_pic_output, 1)  # batch size 1 64
+            encoder_pic_output = tf.layers.dense(self._input_pic, self._embedding_size)
+            # encoder_pic_output = tf.expand_dims(encoder_pic_output, 1)  # batch size 1 64
 
-            cur_self_enc = tf.transpose(self.enc, perm=[0, 2, 1])
+            test_enc = tf.reshape(self.enc, [self._batch_size, -1])
+            test_enc= tf.layers.dense(test_enc, self._embedding_size)
+            test_enc = tf.expand_dims(test_enc, axis=1)
+            cur_self_enc = tf.tile(test_enc, [1, self.img_feature_layer, 1])
+
             """
             每个词对应的图片信息不同
             """
-            pic_attention = tf.nn.softmax(tf.matmul(encoder_pic_output, cur_self_enc))  # 8 1 64 \ 8 64 30 -> 8 1 30
-            pic_attention = tf.transpose(pic_attention, [0, 2, 1])
-            encoder_pic_output = tf.tile(encoder_pic_output, [1, 30, 1])  # batch size 30 64
-            encoder_pic_output = tf.multiply(encoder_pic_output, pic_attention)
+            pic_attention = tf.nn.softmax(tf.multiply(encoder_pic_output, cur_self_enc))  # 8 1 64 \ 8 64 30 -> 8 1 30
+            # pic_attention = tf.transpose(pic_attention, [0, 2, 1])
+            # # encoder_pic_output = tf.tile(encoder_pic_output, [1, 30, 1])  # batch size 30 64
+            # encoder_pic_output = tf.matmul(encoder_pic_output, pic_attention)
 
-            decoder_input = tf.concat((encoder_pic_output, self.enc), -1)
+            decoder_input = tf.concat((pic_attention, self.enc), -1)
 
             w_merge = tf.compat.v1.get_variable('w', [1, 2 * self._embedding_size, self._embedding_size],
-                                      initializer=tf.random_normal_initializer(stddev=0.02))
+                                                initializer=tf.random_normal_initializer(stddev=0.02))
 
             self.enc = tf.nn.conv1d(decoder_input, w_merge, 1, 'SAME')
 
@@ -275,13 +282,16 @@ class seq_pic2seq_pic():
             return tf.add(t, gn, name=name)
 
     def _build_inputs(self):
-        self._question = tf.compat.v1.placeholder(tf.int32, [self._batch_size,self._round, self._sentence_size], name='Question')
-        self._response_in = tf.compat.v1.placeholder(tf.int32, [self._batch_size,self._round, self._sentence_size], name='Response_in')
-        self._response_out = tf.compat.v1.placeholder(tf.int32, [self._batch_size,self._round, self._sentence_size], name='Response_out')
+        self._question = tf.compat.v1.placeholder(tf.int32, [self._batch_size, self._sentence_size],
+                                                  name='Question')
+        self._response_in = tf.compat.v1.placeholder(tf.int32, [self._batch_size, self._sentence_size],
+                                                     name='Response_in')
+        self._response_out = tf.compat.v1.placeholder(tf.int32, [self._batch_size, self._sentence_size],
+                                                      name='Response_out')
         # self._weight = tf.placeholder(tf.float32, [self._batch_size, self._sentence_size], name='weight')
         self._input_pic = tf.compat.v1.placeholder(tf.float32,
-                                         [self._batch_size, self.img_feature_layer ,self.img_feature_vector ],
-                                         name='frame_input')
+                                                   [self._batch_size, self.img_feature_layer, self.img_feature_vector],
+                                                   name='frame_input')
         # self._real_pic = tf.placeholder(tf.int32, [self._batch_size],
         #                                 name='frame_output')
         # self._candidates_pool_ph = tf.placeholder(tf.float32, [self._img_numb, self._candidates_vector_len],
@@ -295,13 +305,13 @@ class seq_pic2seq_pic():
         output_batch_txt_out = data_dict[2]
         input_batch_pic = data_dict[3]
 
-        if isinstance(img_affect_testing, int):
-            input_batch_pic_temp = []
-            for idx, pic in enumerate(input_batch_pic):
-                id = (idx + img_affect_testing) % len(input_batch_pic)
-                input_batch_pic_temp.append(input_batch_pic[id])
-            input_batch_pic = input_batch_pic_temp
-        output_batch_pic = data_dict[3]
+        # if isinstance(img_affect_testing, int):
+        #     input_batch_pic_temp = []
+        #     for idx, pic in enumerate(input_batch_pic):
+        #         id = (idx + img_affect_testing) % len(input_batch_pic)
+        #         input_batch_pic_temp.append(input_batch_pic[id])
+        #     input_batch_pic = input_batch_pic_temp
+        # output_batch_pic = data_dict[3]
         # weight_batch_txt = data_dict[4]
         # pdb.set_trace()
         # feed_dict = {self._response: output_batch_txt,
@@ -331,7 +341,7 @@ class seq_pic2seq_pic():
                 feed_dict = {self._response_in: input_batch_txt,
                              self._question: output_batch_txt_in,
                              # self._weight: weight_batch_txt,
-                             self._input_pic: output_batch_pic}
+                             self._input_pic: input_batch_pic}
                 try:
                     loss_t, _, summary = sess.run(output_list, feed_dict=feed_dict)
                     loss = (loss + loss_t) / 2
@@ -361,8 +371,8 @@ class seq_pic2seq_pic():
                 txt_preds = sess.run([self.predict_txt],
                                      feed_dict={self._question: input_batch_txt,
                                                 self._response: output_batch_txt,
-                                                self._input_pic: input_batch_pic,
-                                                self._real_pic: output_batch_pic})
+                                                self._input_pic: input_batch_pic, })
+                # self._real_pic: output_batch_pic})
                 # output_batch_txt[:, j] = txt_preds[:, j]
                 output_batch_txt = txt_preds[0]
                 # feed_dict = {self._response: output_batch_txt,
