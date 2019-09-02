@@ -45,15 +45,27 @@ tf.flags.DEFINE_integer('round', 10, 'dialogue round in a image')
 config = tf.flags.FLAGS
 
 
-def get_fake_batch_data(data_class, data_ids):
+def get_fake_batch_data(data_class, keys):
     # batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
     # for id in data_ids:
     #     sample = data_class[id]
     #     batch_txt_ans_input.append(sample["ans_in"])
     #     batch_txt_ans_output.append(sample["ans_out"])
     #     batch_txt_query.append(sample["ques"])
-    #     batch_pic_input.append(sample["img_feat"])
-    sample = data_class[data_ids]
+    #     batch_pic_input.append
+    sampling = True
+    error_ids=[]
+    while sampling:
+        id_image = random.choice(keys)
+        if id_image in error_ids:
+            continue
+        sample = data_class[id_image]
+        if 'data_error' not in sample.keys():
+            sampling = False
+        else:
+            print('error data_ids:', id_image)
+            error_ids.append(id_image)
+
     return [sample["ques"], sample["ans_in"], sample["ans_out"], sample["img_feat"]]
 
 
@@ -74,14 +86,13 @@ def train_model(sess, model, train_data, valid_data, batch_size):
         for i in range(len(train_data.dialogs_reader)):
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
-            train_data_batch_id = []
-
-            id_train = random.choice(keys_train)
-
-            train_data_batch = get_fake_batch_data(train_data, id_train)
+            # train_data_batch_id = []
+            # pdb.set_trace()
+            train_data_batch = get_fake_batch_data(train_data, keys_train)
             train_loss_, summary = model.steps(sess, train_data_batch, step_type='train',
                                                qa_transpose=config.qa_transpose)
             global_steps += 1
+
             # g_step = sess.run(model.global_step)
             if global_steps % len(train_data) == 0:
                 train_summary_writer.add_summary(summary, global_steps)
@@ -197,7 +208,7 @@ def main(_):
         print('establish the model...')
         model = Model.seq_pic2seq_pic(config, train_dataset.vocabulary)
         sess.run(tf.global_variables_initializer())
-        train_model(sess, model, train_dataset, valid_dataset,config.batch_size)
+        train_model(sess, model, train_dataset, valid_dataset, config.batch_size)
 
 
 

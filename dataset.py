@@ -84,6 +84,8 @@ class VisDialDataset():
 
         # Retrieve instance for this image_id using json reader.
         visdial_instance = self.dialogs_reader[image_id]
+        if 'data_error' in visdial_instance.keys():
+            return visdial_instance
         caption = visdial_instance["caption"]
         dialog = visdial_instance["dialog"]
 

@@ -12,7 +12,7 @@ Each reader must atleast implement three methods:
     - ``keys`` to return a list of possible ``image_id``s this Reader can
       provide data of.
 """
-
+import pdb
 import copy
 import json
 from typing import Dict, List, Union
@@ -79,8 +79,8 @@ class DialogsReader(object):
                         dialog_for_image["dialog"][i]["answer"] = -1
                     if "answer_options" not in dialog_for_image["dialog"][i]:
                         dialog_for_image["dialog"][i]["answer_options"] = [
-                            -1
-                        ] * 100
+                                                                              -1
+                                                                          ] * 100
 
                 self.dialogs[dialog_for_image["image_id"]] = dialog_for_image[
                     "dialog"
@@ -107,15 +107,23 @@ class DialogsReader(object):
         num_rounds = self.num_rounds[image_id]
 
         # Replace question and answer indices with actual word tokens.
+        # pdb.set_trace()
         for i in range(len(dialog_for_image)):
-            dialog_for_image[i]["question"] = self.questions[
-                dialog_for_image[i]["question"]
-            ]
-            dialog_for_image[i]["answer"] = self.answers[
-                dialog_for_image[i]["answer"]
-            ]
+            if isinstance(dialog_for_image[i]["question"], int):
+                # try:
+                dialog_for_image[i]["question"] = self.questions[
+                    dialog_for_image[i]["question"]
+                ]
+            else:
+                return {'data_error': 1, 'image_id': image_id}
+            # except:
+            #     pdb.set_trace()
+            if isinstance(dialog_for_image[i]["answer"], int):
+                dialog_for_image[i]["answer"] = self.answers[
+                    dialog_for_image[i]["answer"]
+                ]
             for j, answer_option in enumerate(
-                dialog_for_image[i]["answer_options"]
+                    dialog_for_image[i]["answer_options"]
             ):
                 dialog_for_image[i]["answer_options"][j] = self.answers[
                     answer_option
