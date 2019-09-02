@@ -183,7 +183,7 @@ class seq_pic2seq_pic():
         with tf.compat.v1.variable_scope('merge_txt_pic'):
             # encoder_pic_output 4 5 10 512 -> 4 30 64
             # pic 30 64 > 1 64  sentence 30 * 64
-            pdb.set_trace()
+            # pdb.set_trace()
             # encoder_pic_output = tf.reshape(self._input_pic, [self._batch_size, -1])
 
             encoder_pic_output = tf.layers.dense(self._input_pic, self._embedding_size)
@@ -197,17 +197,20 @@ class seq_pic2seq_pic():
             """
             每个词对应的图片信息不同
             """
+            # pdb.set_trace()
             pic_attention = tf.nn.softmax(tf.multiply(encoder_pic_output, cur_self_enc))  # 8 1 64 \ 8 64 30 -> 8 1 30
-            # pic_attention = tf.transpose(pic_attention, [0, 2, 1])
+            pic_attention = tf.reshape(pic_attention, [self._batch_size, -1])
+            pic_attention= tf.expand_dims(pic_attention, axis=1)
+            pic_attention=tf.tile(pic_attention,[1, self._sentence_size, 1])
             # # encoder_pic_output = tf.tile(encoder_pic_output, [1, 30, 1])  # batch size 30 64
             # encoder_pic_output = tf.matmul(encoder_pic_output, pic_attention)
 
             decoder_input = tf.concat((pic_attention, self.enc), -1)
-
-            w_merge = tf.compat.v1.get_variable('w', [1, 2 * self._embedding_size, self._embedding_size],
-                                                initializer=tf.random_normal_initializer(stddev=0.02))
-
-            self.enc = tf.nn.conv1d(decoder_input, w_merge, 1, 'SAME')
+            self.enc=tf.layers.dense(decoder_input, self._embedding_size)
+            # w_merge = tf.compat.v1.get_variable('w', [1, 2 * self._embedding_size, self._embedding_size],
+            #                                     initializer=tf.random_normal_initializer(stddev=0.02))
+            #
+            # self.enc = tf.nn.conv1d(decoder_input, w_merge, 1, 'SAME')
 
             """
             之前对两个向量直接拼接，现在利用cross Attention来改变两者的向量表示。
@@ -303,7 +306,7 @@ class seq_pic2seq_pic():
         input_batch_txt = data_dict[0]
         output_batch_txt_in = data_dict[1]
         output_batch_txt_out = data_dict[2]
-        input_batch_pic = data_dict[3]
+        input_batch_pic = np.tile(data_dict[3],[self._batch_size,1,1])
 
         # if isinstance(img_affect_testing, int):
         #     input_batch_pic_temp = []

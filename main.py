@@ -32,7 +32,7 @@ tf.flags.DEFINE_integer('stop_limit', 5, 'number of evaluation loss is greater t
 tf.flags.DEFINE_string("checkpoint_path", "./checkpoints/", "Directory to save checkpoints")
 tf.flags.DEFINE_string("summary_path", "./summary/", "Directory to save summary")
 tf.flags.DEFINE_bool("is_training", True, "whether to train or test model")
-tf.flags.DEFINE_integer('img_feature_layer', 32, 'generate pic size in X')
+tf.flags.DEFINE_integer('img_feature_layer', 36, 'generate pic size in X')
 tf.flags.DEFINE_integer('img_feature_vector', 2048, 'generate pic size in Y')
 tf.flags.DEFINE_integer('noise_dim', 64, 'dim in noise')
 tf.flags.DEFINE_integer('convolution_dim', 256, 'dim in the first layer pic decoder')
@@ -53,7 +53,7 @@ def get_fake_batch_data(data_class, data_ids):
     #     batch_txt_ans_output.append(sample["ans_out"])
     #     batch_txt_query.append(sample["ques"])
     #     batch_pic_input.append(sample["img_feat"])
-    sample = data_class[id]
+    sample = data_class[data_ids]
     return [sample["ques"], sample["ans_in"], sample["ans_out"], sample["img_feat"]]
 
 
