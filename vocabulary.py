@@ -39,7 +39,7 @@ class Vocabulary(object):
     def __init__(self, word_counts_path: str, min_count: int = 5):
         if not os.path.exists(word_counts_path):
             raise FileNotFoundError(
-                f"Word counts do not exist at {word_counts_path}"
+                "Word counts do not exist at {word_counts_path}"
             )
 
         with open(word_counts_path, "r") as word_counts_file:
