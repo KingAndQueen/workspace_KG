@@ -54,9 +54,9 @@ def get_batch_data(data_class, keys):
     #     batch_txt_ans_output.append(sample["ans_out"])
     #     batch_txt_query.append(sample["ques"])
     #     batch_pic_input.append
-    if not os.path.exists('data/visdial/valid_idx.pkl'):
+    if not os.path.exists('data/vds/valid_idx.pkl'):
         pdb.set_trace()
-        f = open('data/visdial/valid_idx.pkl', 'w')
+        f = open('data/vds/valid_idx.pkl', 'w')
         valid_ids, error_ids = [], []
 
         # id_image = random.choice(keys)
@@ -72,7 +72,7 @@ def get_batch_data(data_class, keys):
 
         pkl.dump(valid_ids, f)
     else:
-        f = open('data/visdial/valid_idx.pkl', 'r')
+        f = open('data/vds/valid_idx.pkl', 'r')
         valid_ids = pkl.load(f)
     f.close()
     pdb.set_trace()
@@ -199,10 +199,10 @@ def test_model(sess, model, test_data, vocab, times):
 
 def main(_):
     data_config = {
-        'image_features_train_h5': 'data/visdial/features_faster_rcnn_x101_train.h5',
-        'image_features_val_h5': 'data/visdial/features_faster_rcnn_x101_val.h5',
-        'image_features_test_h5': 'data/visdial/features_faster_rcnn_x101_test.h5',
-        'word_counts_json': 'data/visdial/visdial_1.0_word_counts_train.json',
+        'image_features_train_h5': 'data/vds/features_faster_rcnn_x101_train.h5',
+        'image_features_val_h5': 'data/vds/features_faster_rcnn_x101_val.h5',
+        'image_features_test_h5': 'data/vds/features_faster_rcnn_x101_test.h5',
+        'word_counts_json': 'data/vds/visdial_1.0_word_counts_train.json',
 
         'img_norm': 1,
         'concat_history': True,
@@ -210,14 +210,14 @@ def main(_):
         'vocab_min_count': 5}
     # sess = tf.Session()
     if config.is_training:
-        train_dataset = VisDialDataset(data_config, 'data/visdial/visdial_1.0_train.json',
+        train_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_train.json',
                                        dense_annotations_jsonpath=None, overfit=False, in_memory=True,
                                        return_options=True, add_boundary_toks=True)
         print('train dataset length :', len(train_dataset.dialogs_reader))
         keys_train = train_dataset.image_ids
         get_batch_data(train_dataset, keys_train)
 
-        # valid_dataset = VisDialDataset(data_config, 'data/visdial/visdial_1.0_val.json', None, True, True, True, True)
+        # valid_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_val.json', None, True, True, True, True)
 
         # pdb.set_trace()
 
@@ -229,17 +229,17 @@ def main(_):
 
 
     else:
-        test_dataset = VisDialDataset(data_config, 'data/visdial/visdial_1.0_test.json', None, True, True, True, False)
+        test_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_test.json', None, True, True, True, False)
 
         print('Test model.......')
         print('establish the model...')
         # config.batch_size = len(test_data)
 
-        model = Model.seq_pic2seq_pic(config, test_dataset.vocabulary)
-        print('Reload model from checkpoints.....')
-        ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
-        model.saver.restore(sess, ckpt.model_checkpoint_path)
-        test_model(sess, model, test_dataset, test_dataset.vocabulary)
+        # model = Model.seq_pic2seq_pic(config, test_dataset.vocabulary)
+        # print('Reload model from checkpoints.....')
+        # ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
+        # model.saver.restore(sess, ckpt.model_checkpoint_path)
+        # test_model(sess, model, test_dataset, test_dataset.vocabulary)
 
 
 if __name__ == "__main__":
