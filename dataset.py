@@ -134,7 +134,7 @@ class VisDialDataset():
             [dialog_round["answer"][:-1] for dialog_round in dialog]
         )
 
-        answers_out,_= self._pad_sequences(
+        answers_out, _ = self._pad_sequences(
             [dialog_round["answer"][1:] for dialog_round in dialog]
         )
         # for idx,answer in enumerate(answer_out):
@@ -246,7 +246,7 @@ class VisDialDataset():
         # pdb.set_trace()
         # Pad all sequences to max_sequence_length.
         maxpadded_sequences = np.full(
-            [len(sequences), self.config["max_sequence_length"]],self.vocabulary.PAD_INDEX)
+            [len(sequences), self.config["max_sequence_length"]], self.vocabulary.PAD_INDEX)
         padded_sequences = tf.compat.v1.keras.preprocessing.sequence.pad_sequences(
             [sequence for sequence in sequences],
             padding='post',

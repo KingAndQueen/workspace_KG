@@ -11,7 +11,8 @@ from VGG import run_candidates
 import pickle as pkl
 from dataset import VisDialDataset
 import scipy.io
-
+import pickle as pkl
+from tqdm import tqdm
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 # from math import exp
 tf.flags.DEFINE_float("learn_rate", 0.00001, "Learning rate for SGD.")
@@ -20,7 +21,7 @@ tf.flags.DEFINE_float("learn_rate", 0.00001, "Learning rate for SGD.")
 # tf.flags.DEFINE_float("learning_rate_decay_factor", 0.5, 'if loss not decrease, multiple the lr with factor')
 tf.flags.DEFINE_float("max_grad_norm", 5.0, "Clip gradients to this norm.")
 tf.flags.DEFINE_integer("evaluation_interval", 10, "Evaluate and print results every x epochs")
-tf.flags.DEFINE_integer("batch_size", 10, "Batch size for training.")  # should consider the size of validation set
+tf.flags.DEFINE_integer("batch_size", 10 * 10, "Batch size for training.")  # should consider the size of validation set
 tf.flags.DEFINE_integer("head", 8, "head number of attention")
 tf.flags.DEFINE_integer("epochs", 2000, "Number of epochs to train for.")
 tf.flags.DEFINE_integer('check_epoch', 10, 'evaluation times')
@@ -45,7 +46,7 @@ tf.flags.DEFINE_integer('round', 10, 'dialogue round in a image')
 config = tf.flags.FLAGS
 
 
-def get_fake_batch_data(data_class, keys):
+def get_batch_data(data_class, keys):
     # batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
     # for id in data_ids:
     #     sample = data_class[id]
@@ -53,20 +54,31 @@ def get_fake_batch_data(data_class, keys):
     #     batch_txt_ans_output.append(sample["ans_out"])
     #     batch_txt_query.append(sample["ques"])
     #     batch_pic_input.append
-    sampling = True
-    error_ids=[]
-    while sampling:
-        id_image = random.choice(keys)
-        if id_image in error_ids:
-            continue
-        sample = data_class[id_image]
-        if 'data_error' not in sample.keys():
-            sampling = False
-        else:
-            print('error data_ids:', id_image)
-            error_ids.append(id_image)
+    if not os.path.exists('data/visdial/valid_idx.pkl'):
+        pdb.set_trace()
+        f = open('data/visdial/valid_idx.pkl', 'w')
+        valid_ids, error_ids = [], []
 
-    return [sample["ques"], sample["ans_in"], sample["ans_out"], sample["img_feat"]]
+        # id_image = random.choice(keys)
+        for i in tqdm(range(len(keys))):
+            id_image = keys[i]
+            sample = data_class[id_image]
+            if 'data_error' not in sample.keys():
+                valid_ids.append(id_image)
+            else:
+                print('error data_ids:', id_image)
+                error_ids.append(id_image)
+            del sample
+
+        pkl.dump(valid_ids, f)
+    else:
+        f = open('data/visdial/valid_idx.pkl', 'r')
+        valid_ids = pkl.load(f)
+    f.close()
+    pdb.set_trace()
+    keys=valid_ids
+
+    # return [sample["ques"], sample["ans_in"], sample["ans_out"], sample["img_feat"]]
 
 
 def train_model(sess, model, train_data, valid_data, batch_size):
@@ -88,7 +100,7 @@ def train_model(sess, model, train_data, valid_data, batch_size):
             # pdb.set_trace()
             # train_data_batch_id = []
             # pdb.set_trace()
-            train_data_batch = get_fake_batch_data(train_data, keys_train)
+            train_data_batch = get_batch_data(train_data, keys_train)
             train_loss_, summary = model.steps(sess, train_data_batch, step_type='train',
                                                qa_transpose=config.qa_transpose)
             global_steps += 1
@@ -196,19 +208,23 @@ def main(_):
         'concat_history': True,
         'max_sequence_length': config.sentence_size,
         'vocab_min_count': 5}
-    sess = tf.Session()
+    # sess = tf.Session()
     if config.is_training:
         train_dataset = VisDialDataset(data_config, 'data/visdial/visdial_1.0_train.json',
                                        dense_annotations_jsonpath=None, overfit=False, in_memory=True,
                                        return_options=True, add_boundary_toks=True)
         print('train dataset length :', len(train_dataset.dialogs_reader))
-        valid_dataset = VisDialDataset(data_config, 'data/visdial/visdial_1.0_val.json', None, True, True, True, True)
+        keys_train = train_dataset.image_ids
+        get_batch_data(train_dataset, keys_train)
+
+        # valid_dataset = VisDialDataset(data_config, 'data/visdial/visdial_1.0_val.json', None, True, True, True, True)
+
         # pdb.set_trace()
 
-        print('establish the model...')
-        model = Model.seq_pic2seq_pic(config, train_dataset.vocabulary)
-        sess.run(tf.global_variables_initializer())
-        train_model(sess, model, train_dataset, valid_dataset, config.batch_size)
+        # print('establish the model...')
+        # model = Model.seq_pic2seq_pic(config, train_dataset.vocabulary)
+        # sess.run(tf.global_variables_initializer())
+        # train_model(sess, model, train_dataset, valid_dataset, config.batch_size)
 
 
 
