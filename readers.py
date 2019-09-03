@@ -86,15 +86,15 @@ class DialogsReader(object):
                     "dialog"
                 ]
 
-            print(f"[{self._split}] Tokenizing questions...")
+            print("[{self._split}] Tokenizing questions...")
             for i in tqdm(range(len(self.questions))):
                 self.questions[i] = word_tokenize(self.questions[i] + "?")
 
-            print(f"[{self._split}] Tokenizing answers...")
+            print("[{self._split}] Tokenizing answers...")
             for i in tqdm(range(len(self.answers))):
                 self.answers[i] = word_tokenize(self.answers[i])
 
-            print(f"[{self._split}] Tokenizing captions...")
+            print("[{self._split}] Tokenizing captions...")
             for image_id, caption in tqdm(self.captions.items()):
                 self.captions[image_id] = word_tokenize(caption)
 
