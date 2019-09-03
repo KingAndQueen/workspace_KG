@@ -55,7 +55,7 @@ def get_batch_data(data_class, keys):
     #     batch_txt_query.append(sample["ques"])
     #     batch_pic_input.append
     if not os.path.exists('data/vds/valid_idx.pkl'):
-        pdb.set_trace()
+        # pdb.set_trace()
         f = open('data/vds/valid_idx.pkl', 'w')
         valid_ids, error_ids = [], []
 
