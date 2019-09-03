@@ -136,7 +136,7 @@ class seq_pic2seq_pic():
         #     encode_output = end_points['encoding_frame_cnn/resnet_v2_50/block4']
         #
         #     encode_output = tf.reshape(encode_output,
-        #                                (self._batch_size, -1, 2048))  # 4 5 10 2048 -> 4 50 512 进transformer
+        #                                (self._batch_size, -1, 2048))
         #     trans_encode_out = tf.layers.dense(encode_output, 64)  # -> 4 50 512
         #
         #     # trans_encode_out = multihead_attention(
