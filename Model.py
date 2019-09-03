@@ -194,9 +194,7 @@ class seq_pic2seq_pic():
             test_enc = tf.expand_dims(test_enc, axis=1)
             cur_self_enc = tf.tile(test_enc, [1, self.img_feature_layer, 1])
 
-            """
-            每个词对应的图片信息不同
-            """
+
             # pdb.set_trace()
             pic_attention = tf.nn.softmax(tf.multiply(encoder_pic_output, cur_self_enc))  # 8 1 64 \ 8 64 30 -> 8 1 30
             pic_attention = tf.reshape(pic_attention, [self._batch_size, -1])
@@ -212,9 +210,7 @@ class seq_pic2seq_pic():
             #
             # self.enc = tf.nn.conv1d(decoder_input, w_merge, 1, 'SAME')
 
-            """
-            之前对两个向量直接拼接，现在利用cross Attention来改变两者的向量表示。
-            """
+
 
         with tf.compat.v1.variable_scope('decode_txt'):
             # Dropout
