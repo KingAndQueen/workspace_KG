@@ -69,8 +69,6 @@ def get_batch_data(data_class, keys):
                 print('error data_ids:', id_image)
                 error_ids.append(id_image)
             del sample
-            if i>=0:
-                break
         pkl.dump(valid_ids, f)
     else:
         f = open('data/vds/valid_idx.pkl', 'rb')
