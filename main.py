@@ -56,7 +56,7 @@ def get_batch_data(data_class, keys):
     #     batch_pic_input.append
     if not os.path.exists('data/vds/valid_idx.pkl'):
         # pdb.set_trace()
-        f = open('data/vds/valid_idx.pkl', 'w')
+        f = open('data/vds/valid_idx.pkl', 'wb')
         valid_ids, error_ids = [], []
 
         # id_image = random.choice(keys)
@@ -69,10 +69,11 @@ def get_batch_data(data_class, keys):
                 print('error data_ids:', id_image)
                 error_ids.append(id_image)
             del sample
-
+            if i>=0:
+                break
         pkl.dump(valid_ids, f)
     else:
-        f = open('data/vds/valid_idx.pkl', 'r')
+        f = open('data/vds/valid_idx.pkl', 'rb')
         valid_ids = pkl.load(f)
     f.close()
     pdb.set_trace()
