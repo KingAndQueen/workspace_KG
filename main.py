@@ -13,7 +13,7 @@ from dataset import VisDialDataset
 import scipy.io
 import pickle as pkl
 from tqdm import tqdm
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 # from math import exp
 tf.flags.DEFINE_float("learn_rate", 0.0001, "Learning rate for adam.")
 # tf.flags.DEFINE_float("anneal_rate", 25, "Number of epochs between halving the learnign rate.")
