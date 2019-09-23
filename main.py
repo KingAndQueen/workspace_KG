@@ -73,21 +73,22 @@ def clean_data(data_class, keys,name='valid_idx.pkl'):
 
 def get_batch_data(data_class,valid_ids,i_starter,batch_size):
     batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
-    batch_size=int(batch_size/10)
+
     for id in range(batch_size):
-        ture_id=valid_ids[i_starter * batch_size + id]
-        sample = data_class[ture_id]
-        batch_txt_ans_input.extend(sample["ans_in"])
-        batch_txt_ans_output.extend(sample["ans_out"])
-        batch_txt_query.extend(sample["ques"])
-        batch_pic_input.extend(10*[sample['img_feat']])
+        if i_starter * batch_size + id<len(valid_ids):
+            ture_id=valid_ids[i_starter * batch_size + id]
+            sample = data_class[ture_id]
+            batch_txt_ans_input.extend(sample["ans_in"])
+            batch_txt_ans_output.extend(sample["ans_out"])
+            batch_txt_query.extend(sample["ques"])
+            batch_pic_input.extend(10*[sample['img_feat']])
     return [batch_txt_query, batch_txt_ans_input, batch_txt_ans_output, batch_pic_input]
 
 def train_model(sess, model, train_data, valid_data, batch_size):
     # train_data, eval_data = model_selection.train_test_split(train_data, test_size=0.2)
     current_step = 1
     train_losses = []
-
+    batch_size = int(batch_size / 10)
     epoch = config.epochs
     print('training....')
     checkpoint_path = os.path.join(config.checkpoint_path, 'visual_dialog.ckpt')
@@ -99,7 +100,7 @@ def train_model(sess, model, train_data, valid_data, batch_size):
     # valid_data_ids = clean_data(valid_data, keys_valid,name='valid_idx.pkl')
     while current_step <= epoch:
         print('current_step:', current_step)
-        for i in range(len(train_data_ids)):
+        for i in range(int(len(train_data_ids)/batch_size)):
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
             # train_data_batch_id = []
