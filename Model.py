@@ -302,7 +302,7 @@ class seq_pic2seq_pic():
         input_batch_txt = data_dict[0]
         output_batch_txt_in = data_dict[1]
         output_batch_txt_out = data_dict[2]
-        input_batch_pic = np.tile(data_dict[3],[self._batch_size,1,1])
+        input_batch_pic = data_dict[3] #np.tile(data_dict[3],[self._batch_size,1,1])
 
         # if isinstance(img_affect_testing, int):
         #     input_batch_pic_temp = []

@@ -21,7 +21,7 @@ tf.flags.DEFINE_float("learn_rate", 0.00001, "Learning rate for SGD.")
 # tf.flags.DEFINE_float("learning_rate_decay_factor", 0.5, 'if loss not decrease, multiple the lr with factor')
 tf.flags.DEFINE_float("max_grad_norm", 5.0, "Clip gradients to this norm.")
 tf.flags.DEFINE_integer("evaluation_interval", 10, "Evaluate and print results every x epochs")
-tf.flags.DEFINE_integer("batch_size", 10 * 10, "Batch size for training.")  # should consider the size of validation set
+tf.flags.DEFINE_integer("batch_size",10*10, "Batch size for training.")  # should consider the size of validation set
 tf.flags.DEFINE_integer("head", 8, "head number of attention")
 tf.flags.DEFINE_integer("epochs", 2000, "Number of epochs to train for.")
 tf.flags.DEFINE_integer('check_epoch', 10, 'evaluation times')
@@ -46,17 +46,11 @@ tf.flags.DEFINE_integer('round', 10, 'dialogue round in a image')
 config = tf.flags.FLAGS
 
 
-def get_batch_data(data_class, keys):
-    # batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
-    # for id in data_ids:
-    #     sample = data_class[id]
-    #     batch_txt_ans_input.append(sample["ans_in"])
-    #     batch_txt_ans_output.append(sample["ans_out"])
-    #     batch_txt_query.append(sample["ques"])
-    #     batch_pic_input.append
-    if not os.path.exists('data/vds/valid_idx.pkl'):
-        # pdb.set_trace()
-        f = open('data/vds/valid_idx.pkl', 'wb')
+def clean_data(data_class, keys,name='valid_idx.pkl'):
+
+    if not os.path.exists('data/vds/'+name):
+        pdb.set_trace()
+        f = open('data/vds/'+name, 'wb')
         valid_ids, error_ids = [], []
 
         # id_image = random.choice(keys)
@@ -71,14 +65,23 @@ def get_batch_data(data_class, keys):
             del sample
         pkl.dump(valid_ids, f)
     else:
-        f = open('data/vds/valid_idx.pkl', 'rb')
+        f = open('data/vds/'+name, 'rb')
         valid_ids = pkl.load(f)
     f.close()
-    pdb.set_trace()
-    keys=valid_ids
+    print('valid training data: ',len(valid_ids))
+    return valid_ids
 
-    # return [sample["ques"], sample["ans_in"], sample["ans_out"], sample["img_feat"]]
-
+def get_batch_data(data_class,valid_ids,i_starter,batch_size):
+    batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
+    batch_size=int(batch_size/10)
+    for id in range(batch_size):
+        ture_id=valid_ids[i_starter * batch_size + id]
+        sample = data_class[ture_id]
+        batch_txt_ans_input.extend(sample["ans_in"])
+        batch_txt_ans_output.extend(sample["ans_out"])
+        batch_txt_query.extend(sample["ques"])
+        batch_pic_input.extend(10*[sample['img_feat']])
+    return [batch_txt_query, batch_txt_ans_input, batch_txt_ans_output, batch_pic_input]
 
 def train_model(sess, model, train_data, valid_data, batch_size):
     # train_data, eval_data = model_selection.train_test_split(train_data, test_size=0.2)
@@ -91,15 +94,17 @@ def train_model(sess, model, train_data, valid_data, batch_size):
     train_summary_writer = tf.summary.FileWriter(config.summary_path, sess.graph)
     global_steps = 0
     keys_train = train_data.image_ids
-
+    train_data_ids=clean_data(train_data,keys_train,name='train_idx.pkl')
+    # keys_valid=valid_data.image_ids
+    # valid_data_ids = clean_data(valid_data, keys_valid,name='valid_idx.pkl')
     while current_step <= epoch:
         print('current_step:', current_step)
-        for i in range(len(train_data.dialogs_reader)):
+        for i in range(len(train_data_ids)):
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
             # train_data_batch_id = []
             # pdb.set_trace()
-            train_data_batch = get_batch_data(train_data, keys_train)
+            train_data_batch = get_batch_data(train_data, train_data_ids,i,batch_size)
             train_loss_, summary = model.steps(sess, train_data_batch, step_type='train',
                                                qa_transpose=config.qa_transpose)
             global_steps += 1
@@ -115,7 +120,7 @@ def train_model(sess, model, train_data, valid_data, batch_size):
             print('training loss:', train_loss_)
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
 
-            for id_valid in valid_data.dialogs_reader.keys():
+            for id_valid in valid_data:
                 eval_loss, _, = model.steps(sess, valid_data[id_valid], step_type='train')
                 eval_losses += eval_loss
 
@@ -207,23 +212,20 @@ def main(_):
         'concat_history': True,
         'max_sequence_length': config.sentence_size,
         'vocab_min_count': 5}
-    # sess = tf.Session()
+    sess = tf.Session()
     if config.is_training:
         train_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_train.json',
                                        dense_annotations_jsonpath=None, overfit=False, in_memory=True,
                                        return_options=True, add_boundary_toks=True)
         print('train dataset length :', len(train_dataset.dialogs_reader))
-        keys_train = train_dataset.image_ids
-        get_batch_data(train_dataset, keys_train)
-
-        # valid_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_val.json', None, True, True, True, True)
-
+        valid_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_val.json', None, True, True, True, True)
+        print('valid dataset length :', len(valid_dataset.dialogs_reader))
         # pdb.set_trace()
 
-        # print('establish the model...')
-        # model = Model.seq_pic2seq_pic(config, train_dataset.vocabulary)
-        # sess.run(tf.global_variables_initializer())
-        # train_model(sess, model, train_dataset, valid_dataset, config.batch_size)
+        print('establish the model...')
+        model = Model.seq_pic2seq_pic(config, train_dataset.vocabulary)
+        sess.run(tf.global_variables_initializer())
+        train_model(sess, model, train_dataset, valid_dataset, config.batch_size)
 
 
 
@@ -232,13 +234,13 @@ def main(_):
 
         print('Test model.......')
         print('establish the model...')
-        # config.batch_size = len(test_data)
+        config.batch_size = len(test_dataset)
 
-        # model = Model.seq_pic2seq_pic(config, test_dataset.vocabulary)
-        # print('Reload model from checkpoints.....')
-        # ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
-        # model.saver.restore(sess, ckpt.model_checkpoint_path)
-        # test_model(sess, model, test_dataset, test_dataset.vocabulary)
+        model = Model.seq_pic2seq_pic(config, test_dataset.vocabulary)
+        print('Reload model from checkpoints.....')
+        ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
+        model.saver.restore(sess, ckpt.model_checkpoint_path)
+        test_model(sess, model, test_dataset, test_dataset.vocabulary)
 
 
 if __name__ == "__main__":
