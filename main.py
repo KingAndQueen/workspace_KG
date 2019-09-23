@@ -82,6 +82,8 @@ def get_batch_data(data_class,valid_ids,i_starter,batch_size):
             batch_txt_ans_output.extend(sample["ans_out"])
             batch_txt_query.extend(sample["ques"])
             batch_pic_input.extend(10*[sample['img_feat']])
+        else:
+            pdb.set_trace()
     return [batch_txt_query, batch_txt_ans_input, batch_txt_ans_output, batch_pic_input]
 
 def train_model(sess, model, train_data, valid_data, batch_size):
