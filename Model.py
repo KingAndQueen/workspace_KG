@@ -331,10 +331,9 @@ class seq_pic2seq_pic():
                          # self._candidates_pool:candidates_pool
                          }
             output_list = [self.losses, self.train_ops, self.merged]
-            try:
-                loss, _, summary = sess.run(output_list, feed_dict=feed_dict)
-            except:
-                pdb.set_trace()
+
+            loss, _, summary = sess.run(output_list, feed_dict=feed_dict)
+
 
             if qa_transpose:
                 feed_dict = {self._response_in: input_batch_txt,
