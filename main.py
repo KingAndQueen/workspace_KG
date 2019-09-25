@@ -89,7 +89,7 @@ def get_batch_data(data_class,valid_ids,i_starter,batch_size):
                 batch_txt_ans_input.extend(config.sentence_size*[0])
                 batch_txt_ans_output.extend(config.sentence_size*[0])
                 batch_txt_query.extend(config.sentence_size*[0])
-                batch_pic_input.extend(10 * [np.zeros([config.img_feature_layer,config.img_feature_vector]]))
+                batch_pic_input.extend(10 * [np.zeros((config.img_feature_layer,config.img_feature_vector))])
         else:
             pdb.set_trace()
     return [batch_txt_query, batch_txt_ans_input, batch_txt_ans_output, batch_pic_input]
