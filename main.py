@@ -76,6 +76,7 @@ def get_batch_data(data_class,valid_ids,i_starter,batch_size):
     batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
 
     for id in range(batch_size):
+        # pdb.set_trace()
         if i_starter * batch_size + id<len(valid_ids):
             ture_id=valid_ids[i_starter * batch_size + id]
             sample = data_class[ture_id]
@@ -86,9 +87,9 @@ def get_batch_data(data_class,valid_ids,i_starter,batch_size):
                 batch_pic_input.extend(10*[sample['img_feat']])
             else:
                 print('data structure is error, id :', ture_id)
-                batch_txt_ans_input.extend(config.sentence_size*[0])
-                batch_txt_ans_output.extend(config.sentence_size*[0])
-                batch_txt_query.extend(config.sentence_size*[0])
+                batch_txt_ans_input.extend(10*[config.sentence_size*[0]])
+                batch_txt_ans_output.extend(10*[config.sentence_size*[0]])
+                batch_txt_query.extend(10*[config.sentence_size*[0]])
                 batch_pic_input.extend(10 * [np.zeros((config.img_feature_layer,config.img_feature_vector))])
         else:
             pdb.set_trace()
