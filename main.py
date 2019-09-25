@@ -23,7 +23,7 @@ tf.flags.DEFINE_float("max_grad_norm", 5.0, "Clip gradients to this norm.")
 tf.flags.DEFINE_integer("evaluation_interval", 10, "Evaluate and print results every x epochs")
 tf.flags.DEFINE_integer("batch_size",10*10, "Batch size for training.")  # should consider the size of validation set
 tf.flags.DEFINE_integer("head", 8, "head number of attention")
-tf.flags.DEFINE_integer("epochs", 2000, "Number of epochs to train for.")
+tf.flags.DEFINE_integer("epochs", 200, "Number of epochs to train for.")
 tf.flags.DEFINE_integer('check_epoch', 10, 'evaluation times')
 tf.flags.DEFINE_integer("layers", 3, "the num layers of RNN.")
 tf.flags.DEFINE_integer("recurrent_dim", 64, "Embedding size for neural networks.")
@@ -49,15 +49,16 @@ config = tf.flags.FLAGS
 def clean_data(data_class, keys,name='valid_idx.pkl'):
 
     if not os.path.exists('data/vds/'+name):
-        pdb.set_trace()
-        f = open('data/vds/'+name, 'wb')
+        # pdb.set_trace()
+        print('cleaning dataset ............')
+        f = open('data/vds/'+name, 'w')
         valid_ids, error_ids = [], []
 
         # id_image = random.choice(keys)
         for i in tqdm(range(len(keys))):
             id_image = keys[i]
             sample = data_class[id_image]
-            if 'data_error' not in sample.keys():
+            if 'ans_in' in sample.keys() and "ans_out" in sample.keys() and "ques" in sample.keys() and 'img_feat'in sample.keys():
                 valid_ids.append(id_image)
             else:
                 print('error data_ids:', id_image)
@@ -65,7 +66,7 @@ def clean_data(data_class, keys,name='valid_idx.pkl'):
             del sample
         pkl.dump(valid_ids, f)
     else:
-        f = open('data/vds/'+name, 'rb')
+        f = open('data/vds/'+name, 'r')
         valid_ids = pkl.load(f)
     f.close()
     print('valid training data: ',len(valid_ids))
@@ -220,9 +221,9 @@ def main(_):
         train_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_train.json',
                                        dense_annotations_jsonpath=None, overfit=False, in_memory=True,
                                        return_options=True, add_boundary_toks=True)
-        print('train dataset length :', len(train_dataset.dialogs_reader))
+        print('original train dataset length :', len(train_dataset.dialogs_reader))
         valid_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_val.json', None, True, True, True, True)
-        print('valid dataset length :', len(valid_dataset.dialogs_reader))
+        print('original valid dataset length :', len(valid_dataset.dialogs_reader))
         # pdb.set_trace()
 
         print('establish the model...')
