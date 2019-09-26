@@ -65,6 +65,7 @@ def clean_data(data_class, keys,name='valid_idx.pkl'):
                 error_ids.append(id_image)
             del sample
         pkl.dump(valid_ids, f)
+        print('total error ids:',error_ids)
     else:
         f = open('data/vds/'+name, 'rb')
         valid_ids = pkl.load(f)
@@ -106,9 +107,9 @@ def train_model(sess, model, train_data, valid_data, batch_size):
     train_summary_writer = tf.summary.FileWriter(config.summary_path, sess.graph)
     global_steps = 0
     keys_train = train_data.image_ids
-    # keys_train=clean_data(train_data,keys_train,name='train_idx.pkl')
+    keys_train=clean_data(train_data,keys_train,name='train_idx.pkl')
     # keys_valid=valid_data.image_ids
-    # valid_data_ids = clean_data(valid_data, keys_valid,name='valid_idx.pkl')
+    # keys_valid = clean_data(valid_data, keys_valid,name='valid_idx.pkl')
     while current_step <= epoch:
         print('current_step:', current_step)
         for i in range(int(len(keys_train)/batch_size)):
