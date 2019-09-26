@@ -13,6 +13,8 @@ from dataset import VisDialDataset
 import scipy.io
 import pickle as pkl
 from tqdm import tqdm
+import copy
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 # from math import exp
 tf.flags.DEFINE_float("learn_rate", 0.0001, "Learning rate for adam.")
@@ -21,7 +23,7 @@ tf.flags.DEFINE_float("learn_rate", 0.0001, "Learning rate for adam.")
 # tf.flags.DEFINE_float("learning_rate_decay_factor", 0.5, 'if loss not decrease, multiple the lr with factor')
 tf.flags.DEFINE_float("max_grad_norm", 5.0, "Clip gradients to this norm.")
 tf.flags.DEFINE_integer("evaluation_interval", 10, "Evaluate and print results every x epochs")
-tf.flags.DEFINE_integer("batch_size",10*10, "Batch size for training.")  # should consider the size of validation set
+tf.flags.DEFINE_integer("batch_size", 10 * 10, "Batch size for training.")  # should consider the size of validation set
 tf.flags.DEFINE_integer("head", 8, "head number of attention")
 tf.flags.DEFINE_integer("epochs", 200, "Number of epochs to train for.")
 tf.flags.DEFINE_integer('check_epoch', 10, 'evaluation times')
@@ -46,55 +48,60 @@ tf.flags.DEFINE_integer('round', 10, 'dialogue round in a image')
 config = tf.flags.FLAGS
 
 
-def clean_data(data_class, keys,name='valid_idx.pkl'):
-
-    if not os.path.exists('data/vds/'+name):
+def clean_data(data_class, keys, name='valid_idx.pkl'):
+    if not os.path.exists('data/vds/' + name):
         # pdb.set_trace()
         print('cleaning dataset ............')
-        f = open('data/vds/'+name, 'wb')
+        f = open('data/vds/' + name, 'wb')
         valid_ids, error_ids = [], []
 
         # id_image = random.choice(keys)
         for i in tqdm(range(len(keys))):
             id_image = keys[i]
             sample = data_class[id_image]
-            if 'ans_in' in sample.keys() and "ans_out" in sample.keys() and "ques" in sample.keys() and 'img_feat'in sample.keys():
+            if 'ans_in' in sample.keys() and "ans_out" in sample.keys() and "ques" in sample.keys() and 'img_feat' in sample.keys():
                 valid_ids.append(id_image)
             else:
                 print('error data_ids:', id_image)
                 error_ids.append(id_image)
             del sample
         pkl.dump(valid_ids, f)
-        print('total error ids:',error_ids)
+        print('total error ids:', error_ids)
     else:
-        f = open('data/vds/'+name, 'rb')
+        f = open('data/vds/' + name, 'rb')
         valid_ids = pkl.load(f)
     f.close()
-    print('valid training data: ',len(valid_ids))
+    print('valid training data: ', len(valid_ids))
     return valid_ids
 
-def get_batch_data(data_class,valid_ids,i_starter,batch_size):
-    batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
 
-    for id in range(batch_size):
-        # pdb.set_trace()
-        if i_starter * batch_size + id<len(valid_ids):
-            ture_id=valid_ids[i_starter * batch_size + id]
-            sample = data_class[ture_id]
-            if 'ans_in' in sample.keys() and "ans_out" in sample.keys() and "ques" in sample.keys() and 'img_feat'in sample.keys():
-                batch_txt_ans_input.extend(sample["ans_in"])
-                batch_txt_ans_output.extend(sample["ans_out"])
-                batch_txt_query.extend(sample["ques"])
-                batch_pic_input.extend(10*[sample['img_feat']])
+def get_batch_data(data_class, valid_ids, batch_size):
+    batch_size=batch_size/10
+    batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
+    data_batch = []
+    for idx in range(int(len(valid_ids) / batch_size)):
+        for i in range(batch_size):
+            if idx * batch_size + i < len(valid_ids):
+                ture_id = valid_ids[idx * batch_size + i]
+                sample = data_class[ture_id]
+                if 'ans_in' in sample.keys() and "ans_out" in sample.keys() and "ques" in sample.keys() and 'img_feat' in sample.keys():
+                    batch_txt_ans_input.extend(sample["ans_in"])
+                    batch_txt_ans_output.extend(sample["ans_out"])
+                    batch_txt_query.extend(sample["ques"])
+                    batch_pic_input.extend(10 * [sample['img_feat']])
+                    del sample
+                else:
+                    pdb.set_trace()
+                    print('data structure is error, id :', ture_id)
+                    # batch_txt_ans_input.extend(10 * [config.sentence_size * [0]])
+                    # batch_txt_ans_output.extend(10 * [config.sentence_size * [0]])
+                    # batch_txt_query.extend(10 * [config.sentence_size * [0]])
+                    # batch_pic_input.extend(10 * [np.zeros((config.img_feature_layer, config.img_feature_vector))])
             else:
-                print('data structure is error, id :', ture_id)
-                batch_txt_ans_input.extend(10*[config.sentence_size*[0]])
-                batch_txt_ans_output.extend(10*[config.sentence_size*[0]])
-                batch_txt_query.extend(10*[config.sentence_size*[0]])
-                batch_pic_input.extend(10 * [np.zeros((config.img_feature_layer,config.img_feature_vector))])
-        else:
-            pdb.set_trace()
-    return [batch_txt_query, batch_txt_ans_input, batch_txt_ans_output, batch_pic_input]
+                break
+        data_batch.append([batch_txt_query, batch_txt_ans_input, batch_txt_ans_output, batch_pic_input])
+    return data_batch
+
 
 def train_model(sess, model, train_data, valid_data, batch_size):
     # train_data, eval_data = model_selection.train_test_split(train_data, test_size=0.2)
@@ -106,18 +113,18 @@ def train_model(sess, model, train_data, valid_data, batch_size):
     checkpoint_path = os.path.join(config.checkpoint_path, 'visual_dialog.ckpt')
     train_summary_writer = tf.summary.FileWriter(config.summary_path, sess.graph)
     global_steps = 0
-    keys_train = train_data.image_ids
-    keys_train=clean_data(train_data,keys_train,name='train_idx.pkl')
+
+    # keys_train=clean_data(train_data,keys_train,name='train_idx.pkl')
     # keys_valid=valid_data.image_ids
     # keys_valid = clean_data(valid_data, keys_valid,name='valid_idx.pkl')
     while current_step <= epoch:
         print('current_step:', current_step)
-        for i in range(int(len(keys_train)/batch_size)):
+        for i, train_data_batch in train_data:
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
             # train_data_batch_id = []
             # pdb.set_trace()
-            train_data_batch = get_batch_data(train_data, keys_train,i,batch_size)
+
             train_loss_, summary = model.steps(sess, train_data_batch, step_type='train',
                                                qa_transpose=config.qa_transpose)
             global_steps += 1
@@ -234,11 +241,13 @@ def main(_):
         valid_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_val.json', None, True, True, True, True)
         print('original valid dataset length :', len(valid_dataset.dialogs_reader))
         # pdb.set_trace()
+        keys_train = train_dataset.image_ids
+        train_dataset_batch = get_batch_data(train_dataset, keys_train, config.batch_size)
 
         print('establish the model...')
         model = Model.seq_pic2seq_pic(config, train_dataset.vocabulary)
         sess.run(tf.global_variables_initializer())
-        train_model(sess, model, train_dataset, valid_dataset, config.batch_size)
+        train_model(sess, model, train_dataset_batch, valid_dataset, config.batch_size)
 
 
 
