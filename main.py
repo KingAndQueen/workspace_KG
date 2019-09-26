@@ -76,7 +76,7 @@ def clean_data(data_class, keys, name='valid_idx.pkl'):
 
 
 def get_batch_data(data_class, valid_ids, batch_size):
-    batch_size=batch_size/10
+    batch_size=int(batch_size/10)
     batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
     data_batch = []
     for idx in range(int(len(valid_ids) / batch_size)):
