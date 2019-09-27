@@ -81,6 +81,7 @@ def get_batch_data(data_class, valid_ids, batch_size):
     data_batch = []
     print('batch the data....')
     for idx in tqdm(range(int(len(valid_ids) / batch_size))):
+        batch_txt_ans_input,batch_txt_ans_output,batch_txt_query,batch_pic_input=[],[],[],[]
         for i in range(batch_size):
             if idx * batch_size + i < len(valid_ids):
                 ture_id = valid_ids[idx * batch_size + i]
@@ -100,7 +101,8 @@ def get_batch_data(data_class, valid_ids, batch_size):
                     # batch_pic_input.extend(10 * [np.zeros((config.img_feature_layer, config.img_feature_vector))])
             else:
                 break
-        data_batch.append([batch_txt_query, batch_txt_ans_input, batch_txt_ans_output, batch_pic_input])
+        data_batch.append([copy.copy(batch_txt_query), copy.copy(batch_txt_ans_input), copy.copy(batch_txt_ans_output), copy.copy(batch_pic_input)])
+
     return data_batch
 
 
