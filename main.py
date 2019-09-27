@@ -119,7 +119,7 @@ def train_model(sess, model, train_data, valid_data, batch_size):
     # keys_valid = clean_data(valid_data, keys_valid,name='valid_idx.pkl')
     while current_step <= epoch:
         print('current_step:', current_step)
-        for i, train_data_batch in train_data:
+        for i, train_data_batch in enumerate(train_data):
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
             # train_data_batch_id = []
