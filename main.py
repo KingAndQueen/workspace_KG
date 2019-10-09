@@ -76,6 +76,9 @@ def clean_data(data_class, keys, name='valid_idx.pkl'):
 
 
 def get_batch_data(data_class, valid_ids, batch_size):
+    if len(valid_ids)<int(batch_size/10):
+        print('datset is not long enough for one batch')
+        return None
     batch_size=int(batch_size/10)
     batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
     data_batch = []
@@ -143,8 +146,8 @@ def train_model(sess, model, train_data, valid_data, batch_size):
             print('training loss:', train_loss_)
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
 
-            for id_valid in valid_data:
-                eval_loss, _, = model.steps(sess, valid_data[id_valid], step_type='train')
+            for in_valid in valid_data:
+                eval_loss, _, = model.steps(sess, in_valid, step_type='train')
                 eval_losses += eval_loss
 
             print('evaluation loss:', eval_losses / len(valid_data))
@@ -245,12 +248,15 @@ def main(_):
         print('original valid dataset length :', len(valid_dataset.dialogs_reader))
         # pdb.set_trace()
         keys_train = train_dataset.image_ids
+        print('training dataset length :',len(keys_train))
         train_dataset_batch = get_batch_data(train_dataset, keys_train, config.batch_size)
-
+        keys_valid=valid_dataset.image_ids
+        print('valid dataset length :', len(keys_valid))
+        valid_dataset_batch=get_batch_data(valid_dataset,keys_valid,config.batch_size)
         print('establish the model...')
         model = Model.seq_pic2seq_pic(config, train_dataset.vocabulary)
         sess.run(tf.global_variables_initializer())
-        train_model(sess, model, train_dataset_batch, valid_dataset, config.batch_size)
+        train_model(sess, model, train_dataset_batch, valid_dataset_batch, config.batch_size)
 
 
 
