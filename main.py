@@ -23,7 +23,7 @@ tf.flags.DEFINE_float("learn_rate", 0.0001, "Learning rate for adam.")
 # tf.flags.DEFINE_float("learning_rate_decay_factor", 0.5, 'if loss not decrease, multiple the lr with factor')
 tf.flags.DEFINE_float("max_grad_norm", 5.0, "Clip gradients to this norm.")
 tf.flags.DEFINE_integer("evaluation_interval", 10, "Evaluate and print results every x epochs")
-tf.flags.DEFINE_integer("batch_size", 10 * 10, "Batch size for training.")  # should consider the size of validation set
+tf.flags.DEFINE_integer("batch_size", 10 * 5, "Batch size for training.")  # should consider the size of validation set
 tf.flags.DEFINE_integer("head", 8, "head number of attention")
 tf.flags.DEFINE_integer("epochs", 200, "Number of epochs to train for.")
 tf.flags.DEFINE_integer('check_epoch', 10, 'evaluation times')
@@ -75,11 +75,11 @@ def clean_data(data_class, keys, name='valid_idx.pkl'):
     return valid_ids
 
 
-def get_batch_data(data_class, valid_ids, batch_size):
-    if len(valid_ids)<int(batch_size/10):
+def get_batch_data(data_class, valid_ids, batch_size,real_batch_factor=10):
+    if len(valid_ids)<int(batch_size/real_batch_factor):
         print('datset is not long enough for one batch')
         return None
-    batch_size=int(batch_size/10)
+    batch_size=int(batch_size/real_batch_factor)
     batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
     data_batch = []
     print('batch the data....')
@@ -109,11 +109,11 @@ def get_batch_data(data_class, valid_ids, batch_size):
     return data_batch
 
 
-def train_model(sess, model, train_data, valid_data, batch_size):
+def train_model(sess, model, train_data, valid_data):
     # train_data, eval_data = model_selection.train_test_split(train_data, test_size=0.2)
     current_step = 1
     train_losses = []
-    batch_size = int(batch_size / 10)
+
     epoch = config.epochs
     print('training....')
     checkpoint_path = os.path.join(config.checkpoint_path, 'visual_dialog.ckpt')
