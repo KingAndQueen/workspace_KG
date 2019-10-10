@@ -23,7 +23,7 @@ tf.flags.DEFINE_float("learn_rate", 0.0001, "Learning rate for adam.")
 # tf.flags.DEFINE_float("learning_rate_decay_factor", 0.5, 'if loss not decrease, multiple the lr with factor')
 tf.flags.DEFINE_float("max_grad_norm", 5.0, "Clip gradients to this norm.")
 tf.flags.DEFINE_integer("evaluation_interval", 10, "Evaluate and print results every x epochs")
-tf.flags.DEFINE_integer("batch_size", 10 * 5, "Batch size for training.")  # should consider the size of validation set
+tf.flags.DEFINE_integer("batch_size", 10 * 10, "Batch size for training.")  # should consider the size of validation set
 tf.flags.DEFINE_integer("head", 8, "head number of attention")
 tf.flags.DEFINE_integer("epochs", 200, "Number of epochs to train for.")
 tf.flags.DEFINE_integer('check_epoch', 10, 'evaluation times')
@@ -124,7 +124,7 @@ def train_model(sess, model, train_data, valid_data):
     # keys_valid=valid_data.image_ids
     # keys_valid = clean_data(valid_data, keys_valid,name='valid_idx.pkl')
     while current_step <= epoch:
-        print('current_step:', current_step)
+        # print('current_step:', current_step)
         for i, train_data_batch in enumerate(train_data):
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
@@ -244,7 +244,7 @@ def main(_):
                                        dense_annotations_jsonpath=None, overfit=False, in_memory=True,
                                        return_options=True, add_boundary_toks=True)
         print('original train dataset length :', len(train_dataset.dialogs_reader))
-        valid_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_val.json', None, True, True, True, True)
+        valid_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_val.json', None, False, True, True, True)
         print('original valid dataset length :', len(valid_dataset.dialogs_reader))
         # pdb.set_trace()
         keys_train = train_dataset.image_ids
