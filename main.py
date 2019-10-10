@@ -88,6 +88,7 @@ def get_batch_data(data_class, valid_ids, batch_size,real_batch_factor=10):
         for i in range(batch_size):
             if idx * batch_size + i < len(valid_ids):
                 ture_id = valid_ids[idx * batch_size + i]
+                # print(ture_id)
                 sample = data_class[ture_id]
                 if 'ans_in' in sample.keys() and "ans_out" in sample.keys() and "ques" in sample.keys() and 'img_feat' in sample.keys():
                     batch_txt_ans_input.extend(sample["ans_in"])
@@ -244,9 +245,8 @@ def main(_):
                                        dense_annotations_jsonpath=None, overfit=False, in_memory=True,
                                        return_options=True, add_boundary_toks=True)
         print('original train dataset length :', len(train_dataset.dialogs_reader))
-        valid_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_val.json', None, False, True, True, True)
+        valid_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_val.json', 'data/vds/visdial_1.0_val_dense_annotations.json', False, True, True, True)
         print('original valid dataset length :', len(valid_dataset.dialogs_reader))
-        # pdb.set_trace()
         keys_train = train_dataset.image_ids
         print('training dataset length :',len(keys_train))
         train_dataset_batch = get_batch_data(train_dataset, keys_train, config.batch_size)
