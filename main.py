@@ -256,7 +256,7 @@ def main(_):
         print('establish the model...')
         model = Model.seq_pic2seq_pic(config, train_dataset.vocabulary)
         sess.run(tf.global_variables_initializer())
-        train_model(sess, model, train_dataset_batch, valid_dataset_batch, config.batch_size)
+        train_model(sess, model, train_dataset_batch, valid_dataset_batch)
 
 
 
