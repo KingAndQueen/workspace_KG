@@ -34,7 +34,7 @@ tf.flags.DEFINE_integer('sentence_size', 30, 'length of word in a sentence')
 tf.flags.DEFINE_integer('stop_limit', 5, 'number of evaluation loss is greater than train loss  ')
 tf.flags.DEFINE_string("checkpoint_path", "./checkpoints/", "Directory to save checkpoints")
 tf.flags.DEFINE_string("summary_path", "./summary/", "Directory to save summary")
-tf.flags.DEFINE_bool("is_training", True, "whether to train or test model")
+tf.flags.DEFINE_bool("is_training", False, "whether to train or test model")
 tf.flags.DEFINE_integer('img_feature_layer', 36, 'generate pic size in X')
 tf.flags.DEFINE_integer('img_feature_vector', 2048, 'generate pic size in Y')
 tf.flags.DEFINE_integer('noise_dim', 64, 'dim in noise')
@@ -261,8 +261,9 @@ def main(_):
 
 
     else:
-        test_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_test.json', None, True, True, True, False)
-
+        test_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_test.json', None, False, True, True, False)
+        keys_test=test_dataset.image_ids
+        test_dataset_batch = get_batch_data(test_dataset, keys_test, config.batch_size)
         print('Test model.......')
         print('establish the model...')
         config.batch_size = len(test_dataset)
@@ -271,7 +272,7 @@ def main(_):
         print('Reload model from checkpoints.....')
         ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
         model.saver.restore(sess, ckpt.model_checkpoint_path)
-        test_model(sess, model, test_dataset, test_dataset.vocabulary)
+        test_model(sess, model, test_dataset_batch, test_dataset.vocabulary)
 
 
 if __name__ == "__main__":
