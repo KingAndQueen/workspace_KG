@@ -80,7 +80,7 @@ def get_batch_data(data_class, valid_ids, batch_size,real_batch_factor=10):
         print('datset is not long enough for one batch')
         return None
     batch_size=int(batch_size/real_batch_factor)
-    batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
+    # batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
     data_batch = []
     print('batch the data....')
     for idx in tqdm(range(int(len(valid_ids) / batch_size))):
@@ -89,6 +89,7 @@ def get_batch_data(data_class, valid_ids, batch_size,real_batch_factor=10):
             if idx * batch_size + i < len(valid_ids):
                 ture_id = valid_ids[idx * batch_size + i]
                 # print(ture_id)
+                # pdb.set_trace()
                 sample = data_class[ture_id]
                 if 'ans_in' in sample.keys() and "ans_out" in sample.keys() and "ques" in sample.keys() and 'img_feat' in sample.keys():
                     batch_txt_ans_input.extend(sample["ans_in"])
@@ -148,7 +149,7 @@ def train_model(sess, model, train_data, valid_data):
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
 
             for in_valid in valid_data:
-                eval_loss, _, = model.steps(sess, in_valid, step_type='train')
+                eval_loss, _, = model.steps(sess, in_valid, step_type='test')
                 eval_losses += eval_loss
 
             print('evaluation loss:', eval_losses / len(valid_data))
@@ -166,33 +167,36 @@ def train_model(sess, model, train_data, valid_data):
     print(' current step %d finished' % current_step)
 
 
-def test_model(sess, model, test_data, vocab, times):
+def test_model(sess, model, test_data, vocab):
     # test_loss = 0.0
     print('begin testing...')
     encoding_pics, pred_txts, target_txt, processing_data, acc_pics = [], [], [], [], []
     # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
-    current_step = 0
-    for batch_id, data_test in enumerate(test_data):
+    # current_step = 0
+    for batch_id in tqdm(range(len(test_data))):
+        data_test=test_data[batch_id]
+    # for batch_id, data_test in enumerate(test_data):
         # pred_txt, encoding_pic, word_defined_image, acc_img = model.steps(sess, data_test,
         #                                                                   step_type='test')
-        pred_txt, encoding_pic, word_defined_image, acc_img = model.steps(sess, data_test,
-                                                                          step_type='test')
+        # pred_txt, encoding_pic, word_defined_image, acc_img = model.steps(sess, data_test,
+        #                                                                   step_type='test')
+        pred_txt=model.steps(sess, data_test, step_type='test')
         # test_loss += loss
 
         # pred_pics.append(pred_pic)
         pred_txts.append(pred_txt)
-        target_txt.append(data_test[1])
-        encoding_pics.append(encoding_pic)
+        target_txt.append(data_test[2])
+        # encoding_pics.append(encoding_pic)
         # processing_data.append(word_defined_image)
-        acc_pics.append(acc_img)
-        if current_step % 100 == 0:
-            print("current_step", current_step)
-            print("pred_txt", pred_txt)
-            print("target_txt", data_test[1])
-        current_step += 1
+        # acc_pics.append(acc_img)
+        # if current_step % 1 == 0:
+        #     print("current_step", current_step)
+        #     print("pred_txt", pred_txt)
+        #     print("target_txt", data_test[1])
+        # current_step += 1
     # print('img choosing accuracy:', np.mean(acc_pics))
     # Analysis.drew_seq(times, encoding_pics, './result/', config.gray)
-    Analysis.write_sents(times, pred_txts, target_txt, './result/', vocab, show_matric=False)
+    Analysis.write_sents_viDial(pred_txts, target_txt, './result/', vocab, show_matric=False)
     # Analysis.write_process(times,processing_data,'./result/process/',vocab,batch_size=config.batch_size)
     # test_loss=test_loss / len(test_data)
     # print('test total loss:', test_loss)
@@ -244,9 +248,9 @@ def main(_):
         train_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_train.json',
                                        dense_annotations_jsonpath=None, overfit=False, in_memory=True,
                                        return_options=True, add_boundary_toks=True)
-        print('original train dataset length :', len(train_dataset.dialogs_reader))
+        # print('original train dataset length :', len(train_dataset.dialogs_reader))
         valid_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_val.json', 'data/vds/visdial_1.0_val_dense_annotations.json', False, True, True, True)
-        print('original valid dataset length :', len(valid_dataset.dialogs_reader))
+        # print('original valid dataset length :', len(valid_dataset.dialogs_reader))
         keys_train = train_dataset.image_ids
         print('training dataset length :',len(keys_train))
         train_dataset_batch = get_batch_data(train_dataset, keys_train, config.batch_size)
@@ -261,18 +265,32 @@ def main(_):
 
 
     else:
-        test_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_test.json', None, False, True, True, False)
-        keys_test=test_dataset.image_ids
-        test_dataset_batch = get_batch_data(test_dataset, keys_test, config.batch_size)
-        print('Test model.......')
-        print('establish the model...')
-        config.batch_size = len(test_dataset)
-
-        model = Model.seq_pic2seq_pic(config, test_dataset.vocabulary)
+        valid_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_val.json',
+                                       'data/vds/visdial_1.0_val_dense_annotations.json', False, True, True, True)
+        keys_valid = valid_dataset.image_ids
+        print('valid dataset length :', len(keys_valid))
+        valid_dataset_batch = get_batch_data(valid_dataset, keys_valid, config.batch_size)
+        model = Model.seq_pic2seq_pic(config, valid_dataset.vocabulary)
         print('Reload model from checkpoints.....')
         ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
         model.saver.restore(sess, ckpt.model_checkpoint_path)
-        test_model(sess, model, test_dataset_batch, test_dataset.vocabulary)
+        print('vocabulary len:', len(valid_dataset.vocabulary))
+        test_model(sess, model, valid_dataset_batch, valid_dataset.vocabulary)
+        # pdb.set_trace()
+
+        # test dataset has no target to count result currently
+        # test_dataset = VisDialDataset(data_config, 'data/vds/visdial_1.0_test.json', None, False, True, True, False)
+        # keys_test=test_dataset.image_ids
+        # test_dataset_batch = get_batch_data(test_dataset, keys_test, config.batch_size)
+        # print('Test model.......')
+        # print('establish the model...')
+
+        # model = Model.seq_pic2seq_pic(config, test_dataset.vocabulary)
+        # print('Reload model from checkpoints.....')
+        # ckpt = tf.train.get_checkpoint_state(config.checkpoint_path)
+        # model.saver.restore(sess, ckpt.model_checkpoint_path)
+        # print('vocabulary len:',len(test_dataset.vocabulary))
+        # test_model(sess, model, test_dataset_batch, test_dataset.vocabulary)
 
 
 if __name__ == "__main__":

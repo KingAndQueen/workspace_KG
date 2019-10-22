@@ -114,6 +114,60 @@ def write_sents(times, data_seq_batch, target_sents, save_path, vocab, show_matr
 
         except:
             print('please install nlgeval first')
+def write_sents_viDial(data_seq_batch, target_sents, save_path, vocab, show_matric=False):
+    data_seq_pred, data_seq_target, data_seq_target_bleu = [], [], []
+    # pdb.set_trace()
+    if not len(data_seq_batch) == len(target_sents):
+        pdb.set_trace()
+
+    for idx, txt_batch in enumerate(data_seq_batch):
+        for txt in txt_batch:
+            txt = list(txt)
+            if 1 in txt:
+                txt = txt[:txt.index(1)]
+            data_seq_pred.append(txt)
+        for target_sent in target_sents[idx]:
+            target_sent = list(target_sent)
+            if 1 in target_sent:
+                target_sent = target_sent[:target_sent.index(1)]
+            data_seq_target_bleu.append([target_sent])
+            data_seq_target.append(target_sent)
+
+    score = corpus_bleu(data_seq_target_bleu, data_seq_pred)
+    rouge = Rouge()
+    cider = Cider()
+    #rouge_socre,arr = rouge.compute_score(data_seq_target,data_seq_pred)
+    print("Bleu Score = " + str(score))
+
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    f = open(save_path + 'test_output.txt', 'w')
+    rouge_res = []
+    cider_res = []
+    for idx, txt2 in enumerate(data_seq_pred):
+        # for txt in txt2:
+        sent_pred = [vocab.index2word(word) + ' ' for word in txt2]
+        sent_target = [vocab.index2word(word) + ' ' for word in data_seq_target[idx]]
+        f.writelines(sent_target)
+        f.write('\n')
+        if '<eos>' in sent_pred:
+            sent_pred = sent_pred[:sent_pred.index('<eos>') + 1]
+        f.writelines(sent_pred)
+        f.write('\n\n')
+        rouge_score = rouge.calc_score(sent_target,sent_pred)
+        rouge_res.append(rouge_score)
+        cider_score,_ = cider.compute_score(sent_target,sent_pred)
+        cider_res.append(cider_score)
+
+    avg_rouge_res = np.mean(np.array(rouge_res))
+    avg_cider_res = np.mean(np.array(cider_res))
+    print("Rouge Score = "+str(avg_rouge_res))
+    print("cider Score= "+str(avg_cider_res))
+    f.write("Bleu Score = " + str(score)+"\n")
+    f.write("Rouge Score = "+str(avg_rouge_res))
+    f.write("Bleu Score = " + str(score)+"\n")
+    f.write("cider Score= "+str(avg_cider_res))
+    f.close()
 
 
 def write_sents_1(batch_id,sents_id, data_seq_batch, save_path, vocab,times,batch_size):

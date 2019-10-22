@@ -196,10 +196,10 @@ class VisDialDataset():
                     )
                     answer_options.append(options)
                     answer_option_lengths.append(option_lengths)
-                answer_options = tf.stack(answer_options, 0)
+                answer_options = np.stack(answer_options, 0)
 
-                item["opt"] = answer_options.long()
-                item["opt_len"] = tf.convert_to_tensor(answer_option_lengths).long()
+                item["opt"] = answer_options
+                item["opt_len"] = answer_option_lengths
 
             if "test" not in self.split:
                 answer_indices = [
@@ -213,7 +213,7 @@ class VisDialDataset():
             item["gt_relevance"] = dense_annotations["gt_relevance"]
 
             item["round_id"] = dense_annotations["round_id"]
-
+        # pdb.set_trace()
         return item
 
     def _pad_sequences(self, sequences: List[List[int]]):
