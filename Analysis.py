@@ -124,12 +124,12 @@ def write_sents_viDial(data_seq_batch, target_sents, save_path, vocab, show_matr
         for txt in txt_batch:
             txt = list(txt)
             if 1 in txt:
-                txt = txt[:txt.index(1)]
+                txt = txt[:txt.index(2)]
             data_seq_pred.append(txt)
         for target_sent in target_sents[idx]:
             target_sent = list(target_sent)
             if 1 in target_sent:
-                target_sent = target_sent[:target_sent.index(1)]
+                target_sent = target_sent[:target_sent.index(2)]
             data_seq_target_bleu.append([target_sent])
             data_seq_target.append(target_sent)
 
@@ -138,7 +138,7 @@ def write_sents_viDial(data_seq_batch, target_sents, save_path, vocab, show_matr
     cider = Cider()
     #rouge_socre,arr = rouge.compute_score(data_seq_target,data_seq_pred)
     print("Bleu Score = " + str(score))
-
+    pdb.set_trace()
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     f = open(save_path + 'test_output.txt', 'w')
