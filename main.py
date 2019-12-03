@@ -168,7 +168,7 @@ def train_model(sess, model, train_data, valid_data):
 
 
 def test_model(sess, model, test_data, vocab):
-    # test_loss = 0.0
+    test_loss = 0.0
     print('begin testing...')
     encoding_pics, pred_txts, target_txt, processing_data, acc_pics = [], [], [], [], []
     # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
@@ -180,8 +180,8 @@ def test_model(sess, model, test_data, vocab):
         #                                                                   step_type='test')
         # pred_txt, encoding_pic, word_defined_image, acc_img = model.steps(sess, data_test,
         #                                                                   step_type='test')
-        pred_txt=model.steps(sess, data_test, step_type='test')
-        # test_loss += loss
+        loss,pred_txt=model.steps(sess, data_test, step_type='test')
+        test_loss += loss
 
         # pred_pics.append(pred_pic)
         pred_txts.append(pred_txt)
@@ -198,8 +198,8 @@ def test_model(sess, model, test_data, vocab):
     # Analysis.drew_seq(times, encoding_pics, './result/', config.gray)
     Analysis.write_sents_viDial(pred_txts, target_txt, './result/', vocab, show_matric=False)
     # Analysis.write_process(times,processing_data,'./result/process/',vocab,batch_size=config.batch_size)
-    # test_loss=test_loss / len(test_data)
-    # print('test total loss:', test_loss)
+    test_loss=test_loss / len(test_data)
+    print('test perplexity:', np.exp(test_loss))
     print('test is finished!')
 
 
