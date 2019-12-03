@@ -15,9 +15,9 @@ import pickle as pkl
 from tqdm import tqdm
 import copy
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 # from math import exp
-tf.flags.DEFINE_float("learn_rate", 0.0001, "Learning rate for adam.")
+tf.flags.DEFINE_float("learn_rate", 0.001, "Learning rate for adam.")
 # tf.flags.DEFINE_float("anneal_rate", 25, "Number of epochs between halving the learnign rate.")
 # tf.flags.DEFINE_float("anneal_stop_epoch", 50, "Epoch number to end annealed lr schedule.")
 # tf.flags.DEFINE_float("learning_rate_decay_factor", 0.5, 'if loss not decrease, multiple the lr with factor')
@@ -25,7 +25,7 @@ tf.flags.DEFINE_float("max_grad_norm", 5.0, "Clip gradients to this norm.")
 tf.flags.DEFINE_integer("evaluation_interval", 10, "Evaluate and print results every x epochs")
 tf.flags.DEFINE_integer("batch_size", 10 * 10, "Batch size for training.")  # should consider the size of validation set
 tf.flags.DEFINE_integer("head", 8, "head number of attention")
-tf.flags.DEFINE_integer("epochs", 200, "Number of epochs to train for.")
+tf.flags.DEFINE_integer("epochs", 500, "Number of epochs to train for.")
 tf.flags.DEFINE_integer('check_epoch', 10, 'evaluation times')
 tf.flags.DEFINE_integer("layers", 3, "the num layers of RNN.")
 tf.flags.DEFINE_integer("recurrent_dim", 64, "Embedding size for neural networks.")
