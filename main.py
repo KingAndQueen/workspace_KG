@@ -253,7 +253,13 @@ def main(_):
         # print('original valid dataset length :', len(valid_dataset.dialogs_reader))
         keys_train = train_dataset.image_ids
         print('training dataset length :',len(keys_train))
-        train_dataset_batch = get_batch_data(train_dataset, keys_train, config.batch_size)
+        if os.path.exists('./data/train_dataset_batch.pkl'):
+            with open('./data/train_dataset_batch.pkl','r') as f:
+                train_dataset_batch =pkl.load(f)
+        else:
+            train_dataset_batch = get_batch_data(train_dataset, keys_train, config.batch_size)
+            with open('./data/train_dataset_batch.pkl', 'w') as f:
+                pkl.dump(train_dataset_batch,f)
         keys_valid=valid_dataset.image_ids
         print('valid dataset length :', len(keys_valid))
         valid_dataset_batch=get_batch_data(valid_dataset,keys_valid,config.batch_size)
