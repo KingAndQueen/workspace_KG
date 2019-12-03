@@ -361,19 +361,20 @@ class seq_pic2seq_pic():
         #     return loss, summary
 
         if step_type == 'test':
-            output_batch_txt = np.zeros((self._batch_size, self._sentence_size), dtype=np.int32)
+            output_batch_txt_in = np.zeros((self._batch_size, self._sentence_size), dtype=np.int32)
             # pic_encoding, acc_img = None, None
             word_defined_image = []
             for j in range(self._sentence_size):
                 # txt_preds,pic_encoding,acc_img = sess.run([self.predict_txt,self.encoder_pic,self.acc_img],
-                txt_preds = sess.run([self.predict_txt],
+                loss,txt_preds = sess.run([self.losses,self.predict_txt],
                                      feed_dict={self._question: input_batch_txt,
                                                 self._response_in: output_batch_txt_in,
                                                 self._response_out: output_batch_txt_out,
                                                 self._input_pic: input_batch_pic, })
                 # self._real_pic: output_batch_pic})
                 # output_batch_txt[:, j] = txt_preds[:, j]
-                output_batch_txt = txt_preds[0]
+                output_batch_txt_in[:, j] = txt_preds[:, j]
+
                 # feed_dict = {self._response: output_batch_txt,
                 #              self._question: input_batch_txt,
                 #              # self._weight: weight_batch_txt,
@@ -385,6 +386,6 @@ class seq_pic2seq_pic():
                 #     pdb.set_trace()
                 # word_defined_image.append([copy.copy(output_batch_txt), copy.copy(pic_encoding)])
             # return output_batch_txt,pic_encoding,word_defined_image,acc_img
-            return output_batch_txt #, pic_encoding, word_defined_image, acc_img
+            return loss,txt_preds #, pic_encoding, word_defined_image, acc_img
         print('step_type is wrong!>>>')
         return None

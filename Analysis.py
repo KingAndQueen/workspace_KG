@@ -164,8 +164,7 @@ def write_sents_viDial(data_seq_batch, target_sents, save_path, vocab, show_matr
     print("Rouge Score = "+str(avg_rouge_res))
     print("cider Score= "+str(avg_cider_res))
     f.write("Bleu Score = " + str(score)+"\n")
-    f.write("Rouge Score = "+str(avg_rouge_res))
-    f.write("Bleu Score = " + str(score)+"\n")
+    f.write("Rouge Score = "+str(avg_rouge_res)+"\n")
     f.write("cider Score= "+str(avg_cider_res))
     f.close()
 
