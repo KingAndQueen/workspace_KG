@@ -34,7 +34,7 @@ tf.flags.DEFINE_integer('sentence_size', 30, 'length of word in a sentence')
 tf.flags.DEFINE_integer('stop_limit', 5, 'number of evaluation loss is greater than train loss  ')
 tf.flags.DEFINE_string("checkpoint_path", "./checkpoints/", "Directory to save checkpoints")
 tf.flags.DEFINE_string("summary_path", "./summary/", "Directory to save summary")
-tf.flags.DEFINE_bool("is_training", False, "whether to train or test model")
+tf.flags.DEFINE_bool("is_training", True, "whether to train or test model")
 tf.flags.DEFINE_integer('img_feature_layer', 36, 'generate pic size in X')
 tf.flags.DEFINE_integer('img_feature_vector', 2048, 'generate pic size in Y')
 tf.flags.DEFINE_integer('noise_dim', 64, 'dim in noise')
@@ -81,16 +81,16 @@ def get_batch_data(data_class, valid_ids, batch_size,real_batch_factor=10):
         return None
     batch_size=int(batch_size/real_batch_factor)
     # batch_txt_ans_input, batch_txt_ans_output, batch_pic_input, batch_txt_query = [], [], [], []
-    data_batch = []
-    print('batch the data....')
-    for idx in tqdm(range(int(len(valid_ids) / batch_size))):
-        batch_txt_ans_input,batch_txt_ans_output,batch_txt_query,batch_pic_input=[],[],[],[]
-        for i in range(batch_size):
-            if idx * batch_size + i < len(valid_ids):
-                ture_id = valid_ids[idx * batch_size + i]
-                # print(ture_id)
-                # pdb.set_trace()
-                sample = data_class[ture_id]
+    # data_batch = []
+    # print('batch the data....')
+    # tf_writer=tf.python_io.TFRecordWriter('./data/train_dataset_batch.tf')
+    idxs=iter(range(len(data_class.image_ids)))
+    # pdb.set_trace()
+    try:
+        while True:
+            batch_txt_ans_input, batch_txt_ans_output, batch_txt_query, batch_pic_input = [], [], [], []
+            for i in range(batch_size):
+                sample=data_class[data_class.image_ids[idxs.__next__()]]
                 if 'ans_in' in sample.keys() and "ans_out" in sample.keys() and "ques" in sample.keys() and 'img_feat' in sample.keys():
                     batch_txt_ans_input.extend(sample["ans_in"])
                     batch_txt_ans_output.extend(sample["ans_out"])
@@ -99,16 +99,47 @@ def get_batch_data(data_class, valid_ids, batch_size,real_batch_factor=10):
                     del sample
                 else:
                     pdb.set_trace()
-                    print('data structure is error, id :', ture_id)
-                    # batch_txt_ans_input.extend(10 * [config.sentence_size * [0]])
-                    # batch_txt_ans_output.extend(10 * [config.sentence_size * [0]])
-                    # batch_txt_query.extend(10 * [config.sentence_size * [0]])
-                    # batch_pic_input.extend(10 * [np.zeros((config.img_feature_layer, config.img_feature_vector))])
-            else:
-                break
-        data_batch.append([copy.copy(batch_txt_query), copy.copy(batch_txt_ans_input), copy.copy(batch_txt_ans_output), copy.copy(batch_pic_input)])
+                    print('data structure is error, id :', data_class.image_ids[idxs])
+            data_batch = [batch_txt_query,batch_txt_ans_input, batch_txt_ans_output,batch_pic_input]
+            yield data_batch
+    except StopIteration:
+        return None
 
-    return data_batch
+    # for idx in tqdm(range(int(len(valid_ids) / batch_size))):
+    #     batch_txt_ans_input,batch_txt_ans_output,batch_txt_query,batch_pic_input=[],[],[],[]
+    #     for i in range(batch_size):
+    #         if idx * batch_size + i < len(valid_ids):
+    #             ture_id = valid_ids[idx * batch_size + i]
+    #             # print(ture_id)
+    #             # pdb.set_trace()
+    #             sample = data_class[ture_id]
+    #             if 'ans_in' in sample.keys() and "ans_out" in sample.keys() and "ques" in sample.keys() and 'img_feat' in sample.keys():
+    #                 batch_txt_ans_input.extend(sample["ans_in"])
+    #                 batch_txt_ans_output.extend(sample["ans_out"])
+    #                 batch_txt_query.extend(sample["ques"])
+    #                 batch_pic_input.extend(10 * [sample['img_feat']])
+    #                 del sample
+    #             else:
+    #                 pdb.set_trace()
+    #                 print('data structure is error, id :', ture_id)
+    #                 # batch_txt_ans_input.extend(10 * [config.sentence_size * [0]])
+    #                 # batch_txt_ans_output.extend(10 * [config.sentence_size * [0]])
+    #                 # batch_txt_query.extend(10 * [config.sentence_size * [0]])
+    #                 # batch_pic_input.extend(10 * [np.zeros((config.img_feature_layer, config.img_feature_vector))])
+    #         else:
+    #             break
+    #     # data_batch.append([copy.copy(batch_txt_query), copy.copy(batch_txt_ans_input), copy.copy(batch_txt_ans_output), copy.copy(batch_pic_input)])
+    #     # pdb.set_trace()
+    #     # example=tf.train.Example()
+    #     # feature=example.features.feature
+    #     # feature['batch_txt_query'].int64_list.value.append(batch_txt_query)
+    #     # feature['batch_txt_ans_input'].int64_list.value.append(batch_txt_ans_input)
+    #     # feature['batch_txt_ans_output'].int64_list.value.append(batch_txt_ans_output)
+    #     # feature['batch_pic_input'].float_list.value.append(batch_pic_input) #100*36*2048 float
+    #     # tf_writer.write(example.SerializeToString())
+    # # tf_writer.close()
+
+    # return data_batch
 
 
 def train_model(sess, model, train_data, valid_data):
@@ -125,21 +156,34 @@ def train_model(sess, model, train_data, valid_data):
     # keys_train=clean_data(train_data,keys_train,name='train_idx.pkl')
     # keys_valid=valid_data.image_ids
     # keys_valid = clean_data(valid_data, keys_valid,name='valid_idx.pkl')
+    first_sign=True
+    first_sign_valid = True
+    train_data_batches,in_valides=[],[]
     while current_step <= epoch:
         # print('current_step:', current_step)
-        for i, train_data_batch in enumerate(train_data):
+        for train_data_batch in train_data:
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
             # pdb.set_trace()
             # train_data_batch_id = []
             # pdb.set_trace()
 
+            if train_data_batch is None:
+                train_summary_writer.add_summary(summary, global_steps)
+                break
             train_loss_, summary = model.steps(sess, train_data_batch, step_type='train',
                                                qa_transpose=config.qa_transpose)
             global_steps += 1
 
+            if first_sign:
+                train_data_batches.append(train_data_batch)
             # g_step = sess.run(model.global_step)
-            if global_steps % len(train_data) == 0:
-                train_summary_writer.add_summary(summary, global_steps)
+            # if global_steps % len(train_data) == 0:
+            #     train_summary_writer.add_summary(summary, global_steps)
+        if first_sign:
+            train_data=train_data_batches
+            del train_data_batches
+            first_sign = False
+
         if current_step % config.check_epoch == 0:
             eval_losses = 0
             train_losses.append(train_loss_)
@@ -149,10 +193,13 @@ def train_model(sess, model, train_data, valid_data):
             # z_noise = np.random.uniform(-1, 1, [config.batch_size, config.noise_dim])
 
             for in_valid in valid_data:
+                if in_valid is None:
+                    break
                 eval_loss, _, = model.steps(sess, in_valid, step_type='test')
                 eval_losses += eval_loss
-
-            print('evaluation loss:', eval_losses / len(valid_data))
+                if first_sign_valid:
+                    in_valides.append(in_valid)
+            print('evaluation ap:', eval_losses / len(valid_data))
 
             model.saver.save(sess, checkpoint_path, global_step=current_step)
             # if len(eval_losses_all) > 0 and eval_loss > eval_losses_all[-1]:
@@ -162,7 +209,10 @@ def train_model(sess, model, train_data, valid_data):
             # if len(eval_losses_all) > config.stop_limit and eval_loss > sum(eval_losses_all[-1 * config.stop_limit:])/float(config.stop_limit):
             #     print('----End training for evaluation increase----')
             #     break
-
+        if first_sign_valid:
+            valid_data=in_valides
+            del in_valides
+            first_sign_valid=False
         current_step += 1
     print(' current step %d finished' % current_step)
 
@@ -201,7 +251,7 @@ def test_model(sess, model, test_data, vocab):
     test_loss=test_loss / len(test_data)
     print('test perplexity:', np.exp(test_loss))
     print('test is finished!')
-
+    return None
 
 # def pretrain_model(sess, model, train_data):
 #     current_step = 1
@@ -253,13 +303,14 @@ def main(_):
         # print('original valid dataset length :', len(valid_dataset.dialogs_reader))
         keys_train = train_dataset.image_ids
         print('training dataset length :',len(keys_train))
-        if os.path.exists('./data/train_dataset_batch.pkl'):
-            with open('./data/train_dataset_batch.pkl','r') as f:
-                train_dataset_batch =pkl.load(f)
-        else:
-            train_dataset_batch = get_batch_data(train_dataset, keys_train, config.batch_size)
-            with open('./data/train_dataset_batch.pkl', 'w') as f:
-                pkl.dump(train_dataset_batch,f)
+        train_dataset_batch = get_batch_data(train_dataset, keys_train, config.batch_size)
+        # if os.path.exists('./data/train_dataset_batch.pkl'):
+        #     with open('./data/train_dataset_batch.pkl','r') as f:
+        #         train_dataset_batch =pkl.load(f)
+        # else:
+        #     train_dataset_batch = get_batch_data(train_dataset, keys_train, config.batch_size)
+        #     with open('./data/train_dataset_batch.pkl', 'w') as f:
+        #         pkl.dump(train_dataset_batch,f)
         keys_valid=valid_dataset.image_ids
         print('valid dataset length :', len(keys_valid))
         valid_dataset_batch=get_batch_data(valid_dataset,keys_valid,config.batch_size)
