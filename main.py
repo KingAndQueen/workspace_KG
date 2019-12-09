@@ -174,8 +174,8 @@ def train_model(sess, model, train_data, valid_data):
                                                qa_transpose=config.qa_transpose)
             global_steps += 1
             print('training step', global_steps)
-            if first_sign:
-                train_data_batches.append(train_data_batch)
+            # if first_sign:
+            #     train_data_batches.append(train_data_batch)
             # g_step = sess.run(model.global_step)
             # if global_steps % len(train_data) == 0:
             #     train_summary_writer.add_summary(summary, global_steps)
