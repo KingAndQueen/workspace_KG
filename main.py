@@ -173,7 +173,7 @@ def train_model(sess, model, train_data, valid_data):
             train_loss_, summary = model.steps(sess, train_data_batch, step_type='train',
                                                qa_transpose=config.qa_transpose)
             global_steps += 1
-
+            print('training step', global_steps)
             if first_sign:
                 train_data_batches.append(train_data_batch)
             # g_step = sess.run(model.global_step)
@@ -304,6 +304,7 @@ def main(_):
         keys_train = train_dataset.image_ids
         print('training dataset length :',len(keys_train))
         train_dataset_batch = get_batch_data(train_dataset, keys_train, config.batch_size)
+        # pdb.set_trace()
         # if os.path.exists('./data/train_dataset_batch.pkl'):
         #     with open('./data/train_dataset_batch.pkl','r') as f:
         #         train_dataset_batch =pkl.load(f)
