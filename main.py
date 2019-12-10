@@ -156,9 +156,9 @@ def train_model(sess, model, train_data, valid_data):
     # keys_train=clean_data(train_data,keys_train,name='train_idx.pkl')
     # keys_valid=valid_data.image_ids
     # keys_valid = clean_data(valid_data, keys_valid,name='valid_idx.pkl')
-    first_sign=True
-    first_sign_valid = True
-    train_data_batches,in_valides=[],[]
+    iter_copy_train=copy.deepcopy(train_data)
+
+    iter_copy_valid = copy.deepcopy(valid_data)
     while current_step <= epoch:
         # print('current_step:', current_step)
         for train_data_batch in train_data:
@@ -169,20 +169,17 @@ def train_model(sess, model, train_data, valid_data):
 
             if train_data_batch is None:
                 train_summary_writer.add_summary(summary, global_steps)
+                train_data=iter_copy_train
                 break
             train_loss_, summary = model.steps(sess, train_data_batch, step_type='train',
                                                qa_transpose=config.qa_transpose)
             global_steps += 1
             print('training step', global_steps)
-            # if first_sign:
-            #     train_data_batches.append(train_data_batch)
+
             # g_step = sess.run(model.global_step)
             # if global_steps % len(train_data) == 0:
             #     train_summary_writer.add_summary(summary, global_steps)
-        if first_sign:
-            train_data=train_data_batches
-            del train_data_batches
-            first_sign = False
+
 
         if current_step % config.check_epoch == 0:
             eval_losses = 0
@@ -194,11 +191,11 @@ def train_model(sess, model, train_data, valid_data):
 
             for in_valid in valid_data:
                 if in_valid is None:
+                    valid_data=iter_copy_valid
                     break
                 eval_loss, _, = model.steps(sess, in_valid, step_type='test')
                 eval_losses += eval_loss
-                if first_sign_valid:
-                    in_valides.append(in_valid)
+
             print('evaluation ap:', eval_losses / len(valid_data))
 
             model.saver.save(sess, checkpoint_path, global_step=current_step)
@@ -209,10 +206,7 @@ def train_model(sess, model, train_data, valid_data):
             # if len(eval_losses_all) > config.stop_limit and eval_loss > sum(eval_losses_all[-1 * config.stop_limit:])/float(config.stop_limit):
             #     print('----End training for evaluation increase----')
             #     break
-        if first_sign_valid:
-            valid_data=in_valides
-            del in_valides
-            first_sign_valid=False
+
         current_step += 1
     print(' current step %d finished' % current_step)
 
