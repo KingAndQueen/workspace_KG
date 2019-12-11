@@ -14,6 +14,7 @@ import scipy.io
 import pickle as pkl
 from tqdm import tqdm
 import copy
+from itertools import tee
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 # from math import exp
@@ -156,9 +157,9 @@ def train_model(sess, model, train_data, valid_data):
     # keys_train=clean_data(train_data,keys_train,name='train_idx.pkl')
     # keys_valid=valid_data.image_ids
     # keys_valid = clean_data(valid_data, keys_valid,name='valid_idx.pkl')
-    iter_copy_train=copy.deepcopy(train_data)
+    train_data,iter_copy_train = tee(train_data)
 
-    iter_copy_valid = copy.deepcopy(valid_data)
+    valid_data,iter_copy_valid = tee(valid_data)
     while current_step <= epoch:
         # print('current_step:', current_step)
         for train_data_batch in train_data:
